@@ -1,0 +1,40 @@
+{
+  "name": "Docucod",
+  "favicon": "./favicon.svg",
+  "fonts": {
+    "family": "Montserrat",
+    "source": "https://fonts.gstatic.com/s/googlesansflex/v5/t5sJIQcYNIWbFgDgAAzZ34auoVyXkJCOvp3SFWJbN5hF8Ju1x6sKCyp0l9sI40swNJwGpVd4AZzz0v6lJ4qFXNZhGjLvDSkV4USKMo6qQzwliVdHAy9jxTDHg_ugnAakpwGc-cxgUqDCIUI.woff2",
+    "format": "woff2"
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "introduction"
+            ]
+          },
+          {
+            "group": "Features",
+            "pages": [
+            
+            ]
+          },
+          {
+            "group": "API Reference",
+            "pages": [
+             
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "logo": {
+    "light": "./logo/logo.png",
+    "dark": "./logo/logo.png"
+  }
+}

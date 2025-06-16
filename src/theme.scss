@@ -1,0 +1,121 @@
+
+html {
+  background-color: #ffffff !important;
+}
+
+h1, h2, h3, h4, h5, h6, p, li {
+  color: #000000 !important;
+}
+
+.mermaid {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  font-size: 12px !important;
+}
+
+/* Nodes */
+.mermaid .node rect {
+  fill: #f0f0f0 !important;
+  stroke: #333333 !important;
+  stroke-width: 1px !important;
+}
+.mermaid .nodes p {
+  color: #000000 !important;
+}
+
+/* Edges */
+.mermaid .edgePaths path {
+  stroke: #555555 !important;
+  stroke-width: 1.5px !important;
+}
+.mermaid .edgeLabel {
+  color: unset !important;
+}
+
+/* Clusters */
+.mermaid .cluster rect {
+  fill: #f8f8f8 !important;
+  stroke: #999999 !important;
+  stroke-width: 0px !important;
+}
+
+.mermaid .cluster p {
+  fill: #000000 !important;
+}
+
+/* Notes */
+.mermaid .note {
+  fill: #ffffcc !important;
+  stroke: #999999 !important;
+  color: #000000 !important;
+}
+
+.docucod-mdx-code {
+    background-color: #f8f8f8 !important;
+}
+
+body.dark {
+    background-color: #1e1e1e !important;
+
+  #container {
+    background-color: #1e1e1e !important;
+  }
+
+  h1, h2, h3, h4, h5, h6, p, li, th, td {
+    color: #ffffff !important;
+  }
+
+  .mermaid {
+    background-color: #1e1e1e !important; 
+    color: #ffffff !important;
+  }
+  
+  .mermaid .node rect {
+    fill: #333333 !important;
+    stroke: #aaaaaa !important;
+  }
+  
+  .mermaid .nodeLabel p {
+    color: #ffffff !important;
+  }
+  
+  .mermaid .edgePaths path {
+    stroke: #cccccc !important;
+  }
+  
+  .mermaid .edgeLabel p {
+    background-color: #2a2a2a !important;
+    color: #ffffff !important;
+  }
+  
+  .mermaid .cluster rect {
+    fill: #2a2a2a !important;
+    stroke: #444444 !important;
+  }
+
+  .mermaid .cluster p {
+    color: #ffffff !important;
+  }
+  
+  .mermaid .note {
+    fill: #2a2a2a !important;
+    stroke: #444444 !important;
+    color: #ffffff !important;
+  }
+  
+  .docucod-mdx-code {
+      background-color: #2a2a2a !important;
+  }
+
+  .docucod-mdx-code-group {
+    background-color: #2a2a2a !important;
+  }
+
+  .docucod-mdx-code-group-header {
+      background-color: #2a2a2a !important;
+  }
+
+  .prism-code {
+    background-color: transparent !important;
+  }
+}

@@ -1,0 +1,114 @@
+import type { ComponentChildren } from 'preact';
+import { useEffect, useMemo, useState } from 'preact/hooks';
+import { useLocation } from 'wouter-preact';
+import { Navigation } from '../components/navigation';
+import { ALL_NAVIGATION, ALL_OPENAPI, completeFrontMatter, loadMDXFrontMatterForPath, loadAllMDXFrontMatter } from '../components/store';
+import { OpenAPI } from '../mdx/open-api';
+import { Header } from './header';
+import { PrevNextLinks } from './prev-next-link';
+import { TableOfContents } from './table-of-content';
+import { Loading } from '../components/loading';
+
+
+interface LayoutProps {
+  children: ComponentChildren;
+}
+
+export default function Layout({ children }: LayoutProps) {
+  const [loading, setLoading] = useState(true);
+  const [pathname] = useLocation();
+
+  useEffect(() => {
+    loadMDXFrontMatterForPath(pathname).then(() => {
+      loadAllMDXFrontMatter(pathname).then(() => {
+        setLoading(false);
+      }).catch(() => {
+        setLoading(false);
+      });
+    }).catch(() => {
+      setLoading(false);
+    });
+  }, [pathname]);
+
+  const { title: group, group: title } = useMemo(() => {
+    const group = ALL_NAVIGATION.flatMap((tab) => 
+      tab.groups.find((group) => 
+        group.pages.some((page) => page.href === pathname)
+      )
+    );
+    const page = completeFrontMatter.find((page) => page.path === pathname);
+
+    useEffect(() => {
+      if (page?.title) {
+        document.title = page.title;
+      }
+      if (page?.description) {
+        const metaDescription = document.querySelector('meta[name="description"]');
+        if (metaDescription) {
+          metaDescription.setAttribute('content', page.description);
+        }
+      }
+    }, [page]);
+
+    return { group: group[0]?.title, title: page?.title,  };
+  }, [pathname, loading]);
+
+  const tab = useMemo(() => {
+    return completeFrontMatter.find((page) => page.path === pathname);
+  }, [pathname, loading]);
+
+  const openAPIJSON = useMemo(() => {
+    if (tab == null || tab.openapi == null) {
+      return null;
+    }
+    const firstDirectory = `/${tab.path.split('/')[1]}`;
+    return ALL_OPENAPI[`${firstDirectory}/openapi.json`].default;
+  }, [tab, loading]);
+
+  const { method, path } = useMemo(() => {
+    if (tab == null || tab.openapi == null) {
+      return { method: '', path: '' };
+    }
+    return { method: tab.openapi.split(' ')[0], path: tab.openapi.split(' ')[1] };
+  }, [tab, loading]);
+
+  if (loading) return <div className="h-[25vh] flex grow"><Loading /></div>;
+
+  return (
+    <div className="flex w-full flex-col">
+      <Header />
+      <div id="container" className="relative mx-auto flex w-full max-w-8xl flex-auto justify-center sm:px-2 lg:px-8 xl:px-32">
+        <div className="hidden lg:relative lg:block lg:flex-none">
+          <div className="sticky top-[4.75rem] -ml-0.5 h-[calc(100vh-4.75rem)] w-64 overflow-x-hidden overflow-y-auto py-16 pr-8 pl-0.5 xl:w-72 xl:pr-16">
+            <Navigation />
+          </div>
+        </div>
+        <main className="flex px-4 py-16 sm:px-6 lg:px-8 grow">
+          <div className="max-w-[calc(100vw-16px)] xl:max-w-[70vw] min-w-0 px-4 lg:pr-0 lg:pl-8 xl:px-16 w-full">
+            <article className="h-full flex flex-1 flex-col">
+              <header className="mb-8">
+                {title && (
+                  <h1 className="font-display text-lg tracking-tight">
+                    {title}
+                  </h1>
+                )}
+                {group && (
+                  <p className="text-4xl tracking-tight">
+                    {group}
+                  </p>
+                )}
+              </header>
+              <div className="flex-1 min-h-[calc(100vh-2rem)]">
+                {openAPIJSON && tab && "openapi" in tab && method && path ? 
+                  <OpenAPI openAPIJson={JSON.parse(openAPIJSON)} method={method} path={path} />
+                 : children}
+              </div>
+              <PrevNextLinks />
+            </article>
+          </div>
+          <TableOfContents />
+        </main>
+      </div>
+    </div>
+  );
+}

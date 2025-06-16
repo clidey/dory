@@ -1,0 +1,48 @@
+{
+  "name": "doc-engine-v2",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@algolia/autocomplete-core": "^1.19.2",
+    "@fortawesome/fontawesome-svg-core": "^6.7.2",
+    "@fortawesome/free-brands-svg-icons": "^6.7.2",
+    "@fortawesome/free-regular-svg-icons": "^6.7.2",
+    "@fortawesome/free-solid-svg-icons": "^6.7.2",
+    "@fortawesome/react-fontawesome": "^0.2.2",
+    "@headlessui/react": "^2.2.4",
+    "@heroicons/react": "^2.2.0",
+    "@mdx-js/preact": "^3.1.0",
+    "@mdx-js/rollup": "^3.1.0",
+    "@tailwindcss/vite": "^4.1.8",
+    "classnames": "^2.5.1",
+    "flexsearch": "^0.8.205",
+    "gray-matter": "^4.0.3",
+    "katex": "^0.16.22",
+    "lucide-react": "^0.513.0",
+    "mermaid": "^11.6.0",
+    "motion": "^12.16.0",
+    "preact": "^10.26.5",
+    "prism-react-renderer": "^2.4.1",
+    "react-highlight-words": "^0.21.0",
+    "remark-gfm": "^4.0.1",
+    "saas": "^1.0.0",
+    "tailwindcss": "^4.1.8",
+    "vite-plugin-mdx": "^3.6.1",
+    "wouter-preact": "^3.7.1"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.10.1",
+    "@types/react-highlight-words": "^0.20.0",
+    "gzip-size-cli": "^5.1.0",
+    "sass-embedded": "^1.89.2",
+    "typescript": "~5.8.3",
+    "vite": "^6.3.5"
+  },
+  "packageManager": "pnpm@10.10.0+sha512.d615db246fe70f25dcfea6d8d73dee782ce23e2245e3c4f6f888249fb568149318637dca73c2c5c8ef2a4ca0d5657fb9567188bfab47f566d1ee6ce987815c39"
+}
