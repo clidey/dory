@@ -2,7 +2,7 @@ import classNames from 'classnames';
 import { useEffect, useMemo, useState } from 'preact/hooks';
 import { Link } from 'wouter-preact';
 import { usePathname } from 'wouter-preact/use-browser-location';
-import docsConfig from '../../docs/docs.json';
+import docsConfig from '../../docs/dory.json';
 import { DarkModeToggle } from '../components/dark-mode-toggle';
 import { MobileSearch, Search } from '../components/search';
 import { ALL_NAVIGATION } from '../components/store';

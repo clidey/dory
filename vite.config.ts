@@ -19,7 +19,7 @@ export default defineConfig({
       'react-dom': 'preact/compat'
     }
   },
-  publicDir: "./docs",
+  publicDir: "docs",
   server: {
     allowedHosts: true,
   },
