@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="./assets/dory_logo.png" alt="Dory Logo" width="200" />
+</div>
+
 # Dory
 
 > 🐟 A lightweight static site generator for technical documentation.
