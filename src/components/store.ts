@@ -3,7 +3,10 @@ import { type RouteComponentProps } from 'wouter-preact';
 import docsConfig from '../../docs/dory.json';
 import { searchIndex } from './search-index';
 
-export const ALL_PAGES = import.meta.glob<{ default: ComponentType; }>('../../docs/**/*.mdx');
+export const ALL_PAGES = Object.fromEntries(
+  Object.entries(import.meta.glob<{ default: ComponentType; }>('../../docs/**/*.mdx'))
+    .map(([path, loader]) => [pathFromFilename(path), loader])
+);
 export const ALL_OPENAPI = Object.fromEntries(
   Object.entries(import.meta.glob<{ default: string }>('../../docs/**/openapi.json', { query: 'raw', eager: true }))
     .map(([path, loader]) => [pathFromFilename(path), loader])

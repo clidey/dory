@@ -1,22 +1,66 @@
 import type { ComponentChildren } from 'preact';
-import { useEffect, useMemo, useState } from 'preact/hooks';
+import { useCallback, useEffect, useMemo, useState } from 'preact/hooks';
 import { useLocation } from 'wouter-preact';
 import { Navigation } from '../components/navigation';
-import { ALL_NAVIGATION, ALL_OPENAPI, completeFrontMatter, loadMDXFrontMatterForPath, loadAllMDXFrontMatter } from '../components/store';
+import { ALL_NAVIGATION, ALL_OPENAPI, completeFrontMatter, loadMDXFrontMatterForPath, loadAllMDXFrontMatter, ALL_PAGES, pathFromFilename } from '../components/store';
 import { OpenAPI } from '../mdx/open-api';
 import { Header } from './header';
 import { PrevNextLinks } from './prev-next-link';
 import { TableOfContents } from './table-of-content';
 import { Loading } from '../components/loading';
-
+import Dropdown from '../components/dropdown';
+import { useNotification } from '../components/notification';
 
 interface LayoutProps {
   children: ComponentChildren;
 }
 
+const prompt = (pathname: string) => `Please read and analyze the content from this documentation page: ${window.location.origin}${pathname}.mdx\n\n` +
+  `Then, help me understand and answer any questions I have about it. ` +
+  `Please provide clear, detailed explanations and examples where relevant.`;
+
 export default function Layout({ children }: LayoutProps) {
   const [loading, setLoading] = useState(true);
   const [pathname] = useLocation();
+  const { showNotification } = useNotification();
+
+  const handleOpenMDX = useCallback(() => {
+    window.open(`${window.location.origin}${pathname}.mdx`, '_blank');
+  }, [pathname]);
+
+  const handleCopyMDX = useCallback(() => {
+    ALL_PAGES[pathFromFilename(pathname)]().then((mdx) => {
+      navigator.clipboard.writeText(mdx.default.toString());
+    });
+    showNotification('Copied to clipboard');
+  }, []);
+  const handleOpenChatGPT = useCallback(() => {
+    const url = `https://chat.openai.com/?q=${encodeURIComponent(prompt(pathname))}`;
+    window.open(url, '_blank');
+  }, [pathname]);
+  const handleOpenAnthropic = useCallback(() => {
+    const url = `https://claude.ai/new?q=${encodeURIComponent(prompt(pathname))}`;
+    window.open(url, '_blank');
+  }, [pathname]);
+
+  const dropdownItems = useMemo(() => [
+    {
+      label: 'Open MDX',
+      onClick: handleOpenMDX,
+    },
+    {
+      label: 'Copy MDX',
+      onClick: handleCopyMDX
+    },
+    {
+      label: 'Open in ChatGPT',
+      onClick: handleOpenChatGPT
+    },
+    {
+      label: 'Open in Anthropic',
+      onClick: handleOpenAnthropic
+    }
+  ], [handleOpenMDX, handleCopyMDX, handleOpenChatGPT, handleOpenAnthropic]);
 
   useEffect(() => {
     loadMDXFrontMatterForPath(pathname).then(() => {
@@ -86,18 +130,21 @@ export default function Layout({ children }: LayoutProps) {
         <main className="flex px-4 py-16 sm:px-6 lg:px-8 grow">
           <div className="max-w-[calc(100vw-16px)] xl:max-w-[70vw] min-w-0 px-4 lg:pr-0 lg:pl-8 xl:px-16 w-full">
             <article className="h-full flex flex-1 flex-col">
-              <header className="mb-8">
-                {title && (
-                  <h1 className="font-display text-lg tracking-tight">
-                    {title}
-                  </h1>
-                )}
-                {group && (
-                  <p className="text-4xl tracking-tight">
-                    {group}
-                  </p>
-                )}
-              </header>
+              <div className="flex justify-between items-center">
+                <header className="mb-8">
+                  {title && (
+                    <h1 className="font-display text-lg tracking-tight">
+                      {title}
+                    </h1>
+                  )}
+                  {group && (
+                    <p className="text-4xl tracking-tight">
+                      {group}
+                    </p>
+                  )}
+                </header>
+                <Dropdown buttonLabel="AI Actions" items={dropdownItems} />
+              </div>
               <div className="flex-1 min-h-[calc(100vh-2rem)]">
                 {openAPIJSON && tab && "openapi" in tab && method && path ? 
                   <OpenAPI openAPIJson={JSON.parse(openAPIJSON)} method={method} path={path} />

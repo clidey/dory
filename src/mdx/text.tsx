@@ -26,7 +26,7 @@ export const h1 = function H1(props: preact.JSX.HTMLAttributes<HTMLHeadingElemen
   }
   
   export const p = function P(props: preact.JSX.HTMLAttributes<HTMLParagraphElement>) {
-    return <p className="mb-4" {...props} />
+    return <p {...props} />
   }
   
   export function Row({ children }: { children: preact.ComponentChildren }) {

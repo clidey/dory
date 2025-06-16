@@ -21,7 +21,7 @@ export default function Routes() {
       if (!href) return;
   
       const loaderEntry = Object.entries(ALL_PAGES).find(
-        ([path]) => pathFromFilename(path) === href
+        ([path]) => path === href
       );
   
       if (!loaderEntry) return;
@@ -48,7 +48,7 @@ export default function Routes() {
     setLoading(true);
     const loadRoutes = async () => {
       const entries = await Promise.all(
-        Object.entries(ALL_PAGES).filter(([path]) => pathFromFilename(path) === pathname).map(async ([path, loader]) => {
+        Object.entries(ALL_PAGES).filter(([path]) => path === pathname).map(async ([path, loader]) => {
           const module = await loader();
           const routePath = pathFromFilename(path);
           return {
