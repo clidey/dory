@@ -34,6 +34,7 @@ Dory is:
 - 📊 Mermaid support for diagrams and flows
 - 🎨 Customizable via Tailwind and minimal theme overrides
 - 🌍 Deploy to Netlify, Vercel, S3, GitHub Pages — your call
+- 🌐 HTTP client for testing API endpoints (automatic inference from openapi.json)
 
 ---
 
@@ -138,6 +139,5 @@ We’re actively improving Dory. Here’s what’s on deck:
 * [ ] 📚 **Full Documentation** — comprehensive guides, API docs, and examples
 * [ ] 🎨 **Themes** — full theming support with a flexible theme API
 * [ ] 🌐 **Multi-language Support** — internationalization (i18n) & localization (l10n)
-* [ ] 🔌 **HTTP Client** — built-in HTTP client for live API examples
 * [ ] 🚀 **GraphQL Client** — integrated GraphQL playground and client support
 * [ ] 🔄 **WebSocket Client** — built-in WebSocket utilities for real-time API demos
