@@ -20,13 +20,16 @@
           {
             "group": "Features",
             "pages": [
-            
+              "features"
             ]
           },
           {
             "group": "API Reference",
             "pages": [
-             
+              "api-reference/operations/create",
+              "api-reference/operations/get",
+              "api-reference/operations/update",
+              "api-reference/operations/delete"
             ]
           }
         ]

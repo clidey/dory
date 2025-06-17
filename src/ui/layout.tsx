@@ -143,7 +143,10 @@ export default function Layout({ children }: LayoutProps) {
                     </p>
                   )}
                 </header>
-                <Dropdown buttonLabel="AI Actions" items={dropdownItems} />
+                {
+                  openAPIJSON == null &&
+                  <Dropdown buttonLabel="AI Actions" items={dropdownItems} />
+                }
               </div>
               <div className="flex-1 min-h-[calc(100vh-2rem)]">
                 {openAPIJSON && tab && "openapi" in tab && method && path ? 
@@ -153,7 +156,10 @@ export default function Layout({ children }: LayoutProps) {
               <PrevNextLinks />
             </article>
           </div>
-          <TableOfContents />
+          {
+            openAPIJSON == null &&
+            <TableOfContents />
+          }
         </main>
       </div>
     </div>

@@ -26,9 +26,7 @@ export function Steps({ children }: { children: preact.ComponentChildren }) {
                   </span>
                 </span>
                 <span className="ml-4 flex min-w-0 flex-col">
-                  <span className="text-lg font-medium text-inherit">
-                    {stepElement.props.title}
-                  </span>
+                  <p className="text-lg font-medium text-inherit">{stepElement.props.title}</p>
                 </span>
               </div>
               <div className="ml-12 not-prose">
