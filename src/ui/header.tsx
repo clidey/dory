@@ -4,6 +4,7 @@ import { Link } from 'wouter-preact';
 import { usePathname } from 'wouter-preact/use-browser-location';
 import docsConfig from '../../docs/dory.json';
 import { DarkModeToggle } from '../components/dark-mode-toggle';
+import { ThemeSelector } from '../components/theme-selector';
 import { MobileSearch, Search } from '../components/search';
 import { ALL_NAVIGATION } from '../components/store';
 import { MobileNavigation } from './mobile-navigation';
@@ -79,6 +80,7 @@ export function Header({ className }: { className?: string }) {
         <div className="flex items-center gap-3">
           <MobileSearch />
           <Search />
+          <ThemeSelector />
           <DarkModeToggle />
           <MobileNavigation />
         </div>

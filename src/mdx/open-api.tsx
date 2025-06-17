@@ -169,7 +169,7 @@ export function OpenAPI({ openAPIJson, method: selectedMethod, path: selectedPat
   }
 
   return (
-    <div className="max-w-none w-full">
+    <div className="max-w-none w-full openapi-component">
       {
         showPlayground &&
         <motion.div
@@ -177,14 +177,15 @@ export function OpenAPI({ openAPIJson, method: selectedMethod, path: selectedPat
           animate={{ x: 0 }}
           exit={{ x: "100%" }}
           transition={{ type: "spring", damping: 20 }}
-          className="fixed inset-y-0 right-0 w-full max-w-3xl bg-white dark:bg-[#1e1e1e] shadow-xl z-50 overflow-y-auto border-l border-zinc-200 dark:border-zinc-800"
+          className="fixed inset-y-0 right-0 w-full max-w-3xl shadow-xl z-50 overflow-y-auto openapi-panel"
         >
           <div className="p-6">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-semibold">API Playground</h2>
               <button
                 onClick={() => setShowPlayground(false)}
-                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                className="transition-colors"
+                style={{color: 'var(--theme-text-secondary)'}}
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -295,7 +296,7 @@ export function OpenAPI({ openAPIJson, method: selectedMethod, path: selectedPat
                 <Col sticky>
                   <button
                     onClick={handleShowPlayground}
-                    className='ml-auto mt-3 flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition bg-sky-600 text-white hover:bg-sky-700'>
+                    className='ml-auto mt-3 flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition api-playground-button'>
                       Try
                     <PlayButton className="h-4 w-4" />
                   </button>

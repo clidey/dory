@@ -1,9 +1,18 @@
 import { SunIcon, MoonIcon } from '@heroicons/react/24/outline';
-import { useDarkMode } from '../utils/hooks';
+import { useTheme } from '../utils/hooks';
 import classNames from 'classnames';
 
 export function DarkModeToggle() {
-  const { isDark, toggleDarkMode } = useDarkMode();
+  const { isDark, currentTheme, setTheme } = useTheme();
+  
+  const toggleDarkMode = () => {
+    // Toggle between light and dark variants of current theme family
+    if (isDark) {
+      setTheme('light');
+    } else {
+      setTheme('dark');
+    }
+  };
 
   return (
     <button

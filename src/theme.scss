@@ -1,121 +1,254 @@
 
+/* ========================================
+   Dory Theme System - CSS Custom Properties
+   ======================================== */
+
+/* Apply theme colors using CSS custom properties */
 html {
-  background-color: #ffffff !important;
+  background-color: var(--theme-bg-primary) !important;
 }
 
 h1, h2, h3, h4, h5, h6, p, li {
-  color: #000000 !important;
+  color: var(--theme-text-primary) !important;
 }
 
+/* ========================================
+   Mermaid Diagram Theming
+   ======================================== */
 .mermaid {
-  background-color: #ffffff !important;
-  color: #000000 !important;
+  background-color: var(--theme-mermaid-bg) !important;
+  color: var(--theme-mermaid-text) !important;
   font-size: 12px !important;
 }
 
 /* Nodes */
 .mermaid .node rect {
-  fill: #f0f0f0 !important;
-  stroke: #333333 !important;
+  fill: var(--theme-mermaid-node) !important;
+  stroke: var(--theme-mermaid-node-border) !important;
   stroke-width: 1px !important;
 }
 .mermaid .nodes p {
-  color: #000000 !important;
+  color: var(--theme-mermaid-text) !important;
 }
 
 /* Edges */
 .mermaid .edgePaths path {
-  stroke: #555555 !important;
+  stroke: var(--theme-mermaid-edge) !important;
   stroke-width: 1.5px !important;
 }
 .mermaid .edgeLabel {
-  color: unset !important;
+  color: var(--theme-mermaid-text) !important;
 }
 
 /* Clusters */
 .mermaid .cluster rect {
-  fill: #f8f8f8 !important;
-  stroke: #999999 !important;
+  fill: var(--theme-mermaid-cluster) !important;
+  stroke: var(--theme-border-secondary) !important;
   stroke-width: 0px !important;
 }
 
 .mermaid .cluster p {
-  fill: #000000 !important;
+  fill: var(--theme-mermaid-text) !important;
 }
 
 /* Notes */
 .mermaid .note {
-  fill: #ffffcc !important;
-  stroke: #999999 !important;
-  color: #000000 !important;
+  fill: var(--theme-mermaid-note) !important;
+  stroke: var(--theme-border-secondary) !important;
+  color: var(--theme-mermaid-text) !important;
 }
 
+/* ========================================
+   Code Block Theming
+   ======================================== */
 .docucod-mdx-code {
-    background-color: #f8f8f8 !important;
+  background-color: var(--theme-bg-code) !important;
 }
 
-body.dark {
-    background-color: #1e1e1e !important;
+.docucod-mdx-code-group {
+  background-color: var(--theme-bg-code) !important;
+}
 
-  #container {
-    background-color: #1e1e1e !important;
-  }
+.docucod-mdx-code-group-header {
+  background-color: var(--theme-bg-code) !important;
+}
 
-  h1, h2, h3, h4, h5, h6, p, li, th, td {
-    color: #ffffff !important;
-  }
+.prism-code {
+  background-color: transparent !important;
+}
 
-  .mermaid {
-    background-color: #1e1e1e !important; 
-    color: #ffffff !important;
-  }
-  
-  .mermaid .node rect {
-    fill: #333333 !important;
-    stroke: #aaaaaa !important;
-  }
-  
-  .mermaid .nodeLabel p {
-    color: #ffffff !important;
-  }
-  
-  .mermaid .edgePaths path {
-    stroke: #cccccc !important;
-  }
-  
-  .mermaid .edgeLabel p {
-    background-color: #2a2a2a !important;
-    color: #ffffff !important;
-  }
-  
-  .mermaid .cluster rect {
-    fill: #2a2a2a !important;
-    stroke: #444444 !important;
-  }
+/* ========================================
+   API Playground Theming
+   ======================================== */
+.api-playground {
+  background-color: var(--theme-playground-bg) !important;
+  color: var(--theme-text-primary) !important;
+}
 
-  .mermaid .cluster p {
-    color: #ffffff !important;
-  }
-  
-  .mermaid .note {
-    fill: #2a2a2a !important;
-    stroke: #444444 !important;
-    color: #ffffff !important;
-  }
-  
-  .docucod-mdx-code {
-      background-color: #2a2a2a !important;
-  }
+.api-playground-panel {
+  background-color: var(--theme-playground-panel) !important;
+  border-color: var(--theme-border-primary) !important;
+}
 
-  .docucod-mdx-code-group {
-    background-color: #2a2a2a !important;
-  }
+.api-playground-input {
+  background-color: var(--theme-playground-input) !important;
+  border-color: var(--theme-border-primary) !important;
+  color: var(--theme-text-primary) !important;
+}
 
-  .docucod-mdx-code-group-header {
-      background-color: #2a2a2a !important;
-  }
+.api-playground-input:focus {
+  border-color: var(--theme-border-accent) !important;
+}
 
-  .prism-code {
-    background-color: transparent !important;
-  }
+.api-playground-button {
+  background-color: var(--theme-playground-button) !important;
+  color: var(--theme-text-button) !important;
+}
+
+.api-playground-button:hover {
+  background-color: var(--theme-playground-button-hover) !important;
+}
+
+.api-playground-tab {
+  background-color: var(--theme-playground-tab) !important;
+  color: var(--theme-text-secondary) !important;
+  border-color: var(--theme-border-secondary) !important;
+}
+
+.api-playground-tab:hover {
+  background-color: var(--theme-playground-tab-hover) !important;
+  color: var(--theme-text-primary) !important;
+}
+
+.api-playground-tab.active {
+  background-color: var(--theme-playground-tab-active) !important;
+  color: var(--theme-text-button) !important;
+  border-color: var(--theme-border-accent) !important;
+}
+
+/* ========================================
+   OpenAPI Component Theming
+   ======================================== */
+.openapi-component {
+  background-color: var(--theme-api-bg) !important;
+  color: var(--theme-text-primary) !important;
+}
+
+.openapi-panel {
+  background-color: var(--theme-api-panel) !important;
+  border-color: var(--theme-border-primary) !important;
+}
+
+.openapi-header {
+  background-color: var(--theme-api-header) !important;
+  color: var(--theme-text-primary) !important;
+}
+
+.openapi-method {
+  color: var(--theme-api-method) !important;
+}
+
+.openapi-path {
+  color: var(--theme-api-path) !important;
+}
+
+/* ========================================
+   Generic Component Theming
+   ======================================== */
+.btn-primary {
+  background-color: var(--theme-bg-button) !important;
+  color: var(--theme-text-button) !important;
+  border-color: var(--theme-border-accent) !important;
+}
+
+.btn-primary:hover {
+  background-color: var(--theme-bg-button-hover) !important;
+}
+
+.btn-primary:focus {
+  box-shadow: 0 0 0 3px var(--theme-focus-ring) !important;
+}
+
+.bg-error {
+  background-color: var(--theme-bg-error) !important;
+  color: var(--theme-text-error) !important;
+}
+
+.bg-success {
+  background-color: var(--theme-bg-success) !important;
+  color: var(--theme-text-success) !important;
+}
+
+.bg-warning {
+  background-color: var(--theme-bg-warning) !important;
+  color: var(--theme-text-warning) !important;
+}
+
+.text-error {
+  color: var(--theme-text-error) !important;
+}
+
+.text-success {
+  color: var(--theme-text-success) !important;
+}
+
+.text-warning {
+  color: var(--theme-text-warning) !important;
+}
+
+.border-error {
+  border-color: var(--theme-border-error) !important;
+}
+
+.border-success {
+  border-color: var(--theme-border-success) !important;
+}
+
+.border-warning {
+  border-color: var(--theme-border-warning) !important;
+}
+
+/* ========================================
+   Legacy Dark Mode Support (for compatibility)
+   ======================================== */
+body.dark #container {
+  background-color: var(--theme-bg-primary) !important;
+}
+
+body.dark th, 
+body.dark td {
+  color: var(--theme-text-primary) !important;
+}
+
+/* ========================================
+   Theme-specific Customizations
+   ======================================== */
+
+/* Cyberpunk theme specific glowing effects */
+body.theme-cyberpunk .api-playground-button,
+body.theme-cyberpunk .btn-primary {
+  box-shadow: 0 0 10px var(--theme-bg-button);
+  transition: box-shadow 0.3s ease;
+}
+
+body.theme-cyberpunk .api-playground-button:hover,
+body.theme-cyberpunk .btn-primary:hover {
+  box-shadow: 0 0 20px var(--theme-bg-button-hover);
+}
+
+/* Nord theme specific styles */
+body.theme-nord .mermaid .node rect {
+  border-radius: 4px;
+}
+
+/* Ocean theme specific wave effects */
+body.theme-ocean .api-playground-panel {
+  background: linear-gradient(135deg, var(--theme-playground-panel) 0%, var(--theme-bg-secondary) 100%);
+}
+
+/* Sepia theme specific text shadow for better readability */
+body.theme-sepia h1, 
+body.theme-sepia h2, 
+body.theme-sepia h3 {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
