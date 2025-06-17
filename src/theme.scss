@@ -1,121 +1,427 @@
 
+/* ========================================
+   Dory Theme System - CSS Custom Properties
+   ======================================== */
+
+/* Apply theme colors using CSS custom properties */
 html {
-  background-color: #ffffff !important;
+  background-color: var(--theme-bg-primary) !important;
 }
 
-h1, h2, h3, h4, h5, h6, p, li {
-  color: #000000 !important;
+/* Typography theming */
+body {
+  font-family: var(--theme-font-family-primary) !important;
+  font-size: var(--theme-font-size-md) !important;
+  font-weight: var(--theme-font-weight-normal) !important;
+  line-height: var(--theme-line-height-normal) !important;
+  transition: var(--theme-transition-normal) !important;
 }
 
+h1, h2, h3, h4, h5, h6 {
+  color: var(--theme-text-primary) !important;
+  font-family: var(--theme-font-family-primary) !important;
+  font-weight: var(--theme-font-weight-semibold) !important;
+  line-height: var(--theme-line-height-tight) !important;
+}
+
+h1 {
+  font-size: var(--theme-font-size-3xl) !important;
+  font-weight: var(--theme-font-weight-bold) !important;
+}
+
+h2 {
+  font-size: var(--theme-font-size-2xl) !important;
+}
+
+h3 {
+  font-size: var(--theme-font-size-xl) !important;
+}
+
+h4 {
+  font-size: var(--theme-font-size-lg) !important;
+}
+
+h5, h6 {
+  font-size: var(--theme-font-size-md) !important;
+}
+
+p, li, span {
+  color: var(--theme-text-primary) !important;
+  line-height: var(--theme-line-height-normal) !important;
+}
+
+/* Code and preformatted text */
+code, pre, .code {
+  font-family: var(--theme-font-family-mono) !important;
+  font-size: var(--theme-font-size-sm) !important;
+}
+
+/* Spacing and layout theming */
+.container, .content, .section {
+  padding: var(--theme-space-lg) !important;
+}
+
+.btn, button {
+  padding: var(--theme-space-sm) var(--theme-space-md) !important;
+  border-radius: var(--theme-radius-md) !important;
+  font-weight: var(--theme-font-weight-medium) !important;
+  transition: var(--theme-transition-fast) !important;
+  box-shadow: var(--theme-shadow-sm) !important;
+}
+
+.btn:hover, button:hover {
+  box-shadow: var(--theme-shadow-md) !important;
+}
+
+/* Cards and panels */
+.card, .panel {
+  border-radius: var(--theme-radius-lg) !important;
+  box-shadow: var(--theme-shadow-md) !important;
+  padding: var(--theme-space-lg) !important;
+  margin-bottom: var(--theme-space-md) !important;
+}
+
+/* Input fields */
+input, textarea, select {
+  border-radius: var(--theme-radius-sm) !important;
+  padding: var(--theme-space-sm) var(--theme-space-md) !important;
+  font-family: var(--theme-font-family-primary) !important;
+  font-size: var(--theme-font-size-md) !important;
+  transition: var(--theme-transition-fast) !important;
+}
+
+/* ========================================
+   Mermaid Diagram Theming
+   ======================================== */
 .mermaid {
-  background-color: #ffffff !important;
-  color: #000000 !important;
+  background-color: var(--theme-mermaid-bg) !important;
+  color: var(--theme-mermaid-text) !important;
   font-size: 12px !important;
 }
 
 /* Nodes */
 .mermaid .node rect {
-  fill: #f0f0f0 !important;
-  stroke: #333333 !important;
+  fill: var(--theme-mermaid-node) !important;
+  stroke: var(--theme-mermaid-node-border) !important;
   stroke-width: 1px !important;
 }
 .mermaid .nodes p {
-  color: #000000 !important;
+  color: var(--theme-mermaid-text) !important;
 }
 
 /* Edges */
 .mermaid .edgePaths path {
-  stroke: #555555 !important;
+  stroke: var(--theme-mermaid-edge) !important;
   stroke-width: 1.5px !important;
 }
 .mermaid .edgeLabel {
-  color: unset !important;
+  color: var(--theme-mermaid-text) !important;
 }
 
 /* Clusters */
 .mermaid .cluster rect {
-  fill: #f8f8f8 !important;
-  stroke: #999999 !important;
+  fill: var(--theme-mermaid-cluster) !important;
+  stroke: var(--theme-border-secondary) !important;
   stroke-width: 0px !important;
 }
 
 .mermaid .cluster p {
-  fill: #000000 !important;
+  fill: var(--theme-mermaid-text) !important;
 }
 
 /* Notes */
 .mermaid .note {
-  fill: #ffffcc !important;
-  stroke: #999999 !important;
-  color: #000000 !important;
+  fill: var(--theme-mermaid-note) !important;
+  stroke: var(--theme-border-secondary) !important;
+  color: var(--theme-mermaid-text) !important;
 }
 
+/* ========================================
+   Code Block Theming
+   ======================================== */
 .docucod-mdx-code {
-    background-color: #f8f8f8 !important;
+  background-color: var(--theme-bg-code) !important;
 }
 
-body.dark {
-    background-color: #1e1e1e !important;
+.docucod-mdx-code-group {
+  background-color: var(--theme-bg-code) !important;
+}
 
-  #container {
-    background-color: #1e1e1e !important;
-  }
+.docucod-mdx-code-group-header {
+  background-color: var(--theme-bg-code) !important;
+}
 
-  h1, h2, h3, h4, h5, h6, p, li, th, td {
-    color: #ffffff !important;
-  }
+.prism-code {
+  background-color: transparent !important;
+}
 
-  .mermaid {
-    background-color: #1e1e1e !important; 
-    color: #ffffff !important;
-  }
-  
-  .mermaid .node rect {
-    fill: #333333 !important;
-    stroke: #aaaaaa !important;
-  }
-  
-  .mermaid .nodeLabel p {
-    color: #ffffff !important;
-  }
-  
-  .mermaid .edgePaths path {
-    stroke: #cccccc !important;
-  }
-  
-  .mermaid .edgeLabel p {
-    background-color: #2a2a2a !important;
-    color: #ffffff !important;
-  }
-  
-  .mermaid .cluster rect {
-    fill: #2a2a2a !important;
-    stroke: #444444 !important;
-  }
+/* ========================================
+   API Playground Theming
+   ======================================== */
+.api-playground {
+  background-color: var(--theme-playground-bg) !important;
+  color: var(--theme-text-primary) !important;
+}
 
-  .mermaid .cluster p {
-    color: #ffffff !important;
-  }
-  
-  .mermaid .note {
-    fill: #2a2a2a !important;
-    stroke: #444444 !important;
-    color: #ffffff !important;
-  }
-  
-  .docucod-mdx-code {
-      background-color: #2a2a2a !important;
-  }
+.api-playground-panel {
+  background-color: var(--theme-playground-panel) !important;
+  border-color: var(--theme-border-primary) !important;
+}
 
-  .docucod-mdx-code-group {
-    background-color: #2a2a2a !important;
-  }
+.api-playground-input {
+  background-color: var(--theme-playground-input) !important;
+  border-color: var(--theme-border-primary) !important;
+  color: var(--theme-text-primary) !important;
+}
 
-  .docucod-mdx-code-group-header {
-      background-color: #2a2a2a !important;
-  }
+.api-playground-input:focus {
+  border-color: var(--theme-border-accent) !important;
+}
 
-  .prism-code {
-    background-color: transparent !important;
-  }
+.api-playground-button {
+  background-color: var(--theme-playground-button) !important;
+  color: var(--theme-text-button) !important;
+}
+
+.api-playground-button:hover {
+  background-color: var(--theme-playground-button-hover) !important;
+}
+
+.api-playground-tab {
+  background-color: var(--theme-playground-tab) !important;
+  color: var(--theme-text-secondary) !important;
+  border-color: var(--theme-border-secondary) !important;
+}
+
+.api-playground-tab:hover {
+  background-color: var(--theme-playground-tab-hover) !important;
+  color: var(--theme-text-primary) !important;
+}
+
+.api-playground-tab.active {
+  background-color: var(--theme-playground-tab-active) !important;
+  color: var(--theme-text-button) !important;
+  border-color: var(--theme-border-accent) !important;
+}
+
+/* ========================================
+   OpenAPI Component Theming
+   ======================================== */
+.openapi-component {
+  background-color: var(--theme-api-bg) !important;
+  color: var(--theme-text-primary) !important;
+}
+
+.openapi-panel {
+  background-color: var(--theme-api-panel) !important;
+  border-color: var(--theme-border-primary) !important;
+}
+
+.openapi-header {
+  background-color: var(--theme-api-header) !important;
+  color: var(--theme-text-primary) !important;
+}
+
+.openapi-method {
+  color: var(--theme-api-method) !important;
+}
+
+.openapi-path {
+  color: var(--theme-api-path) !important;
+}
+
+/* ========================================
+   Generic Component Theming
+   ======================================== */
+.btn-primary {
+  background-color: var(--theme-bg-button) !important;
+  color: var(--theme-text-button) !important;
+  border-color: var(--theme-border-accent) !important;
+}
+
+.btn-primary:hover {
+  background-color: var(--theme-bg-button-hover) !important;
+}
+
+.btn-primary:focus {
+  box-shadow: 0 0 0 3px var(--theme-focus-ring) !important;
+}
+
+.bg-error {
+  background-color: var(--theme-bg-error) !important;
+  color: var(--theme-text-error) !important;
+}
+
+.bg-success {
+  background-color: var(--theme-bg-success) !important;
+  color: var(--theme-text-success) !important;
+}
+
+.bg-warning {
+  background-color: var(--theme-bg-warning) !important;
+  color: var(--theme-text-warning) !important;
+}
+
+.text-error {
+  color: var(--theme-text-error) !important;
+}
+
+.text-success {
+  color: var(--theme-text-success) !important;
+}
+
+.text-warning {
+  color: var(--theme-text-warning) !important;
+}
+
+.border-error {
+  border-color: var(--theme-border-error) !important;
+}
+
+.border-success {
+  border-color: var(--theme-border-success) !important;
+}
+
+.border-warning {
+  border-color: var(--theme-border-warning) !important;
+}
+
+/* ========================================
+   Legacy Dark Mode Support (for compatibility)
+   ======================================== */
+body.dark #container {
+  background-color: var(--theme-bg-primary) !important;
+}
+
+body.dark th, 
+body.dark td {
+  color: var(--theme-text-primary) !important;
+}
+
+/* ========================================
+   Theme-specific Customizations
+   ======================================== */
+
+/* Cyberpunk theme specific glowing effects */
+body.theme-cyberpunk .api-playground-button,
+body.theme-cyberpunk .btn-primary,
+body.theme-cyberpunk .btn {
+  box-shadow: var(--theme-shadow-md) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  font-family: var(--theme-font-family-mono) !important;
+}
+
+body.theme-cyberpunk .api-playground-button:hover,
+body.theme-cyberpunk .btn-primary:hover,
+body.theme-cyberpunk .btn:hover {
+  box-shadow: var(--theme-shadow-lg) !important;
+  transform: translateY(-1px) !important;
+}
+
+body.theme-cyberpunk h1,
+body.theme-cyberpunk h2,
+body.theme-cyberpunk h3 {
+  font-family: var(--theme-font-family-mono) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.1em !important;
+}
+
+/* Corporate theme specific professional styling */
+body.theme-corporate {
+  letter-spacing: 0.01em !important;
+}
+
+body.theme-corporate h1,
+body.theme-corporate h2,
+body.theme-corporate h3 {
+  font-weight: var(--theme-font-weight-semibold) !important;
+}
+
+body.theme-corporate .btn,
+body.theme-corporate button {
+  font-weight: var(--theme-font-weight-medium) !important;
+  text-transform: none !important;
+}
+
+/* Minimal theme specific clean styling */
+body.theme-minimal {
+  font-weight: var(--theme-font-weight-normal) !important;
+}
+
+body.theme-minimal h1,
+body.theme-minimal h2,
+body.theme-minimal h3 {
+  font-weight: var(--theme-font-weight-medium) !important;
+}
+
+body.theme-minimal .btn,
+body.theme-minimal button {
+  box-shadow: none !important;
+  border: 1px solid var(--theme-border-primary) !important;
+}
+
+body.theme-minimal .btn:hover,
+body.theme-minimal button:hover {
+  box-shadow: var(--theme-shadow-sm) !important;
+}
+
+/* Sepia theme specific text styling */
+body.theme-sepia {
+  font-family: var(--theme-font-family-primary) !important;
+  line-height: var(--theme-line-height-relaxed) !important;
+}
+
+body.theme-sepia h1, 
+body.theme-sepia h2, 
+body.theme-sepia h3 {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+  font-family: var(--theme-font-family-primary) !important;
+}
+
+body.theme-sepia p,
+body.theme-sepia li {
+  line-height: var(--theme-line-height-relaxed) !important;
+}
+
+/* Nord theme specific styles */
+body.theme-nord .mermaid .node rect {
+  border-radius: var(--theme-radius-sm) !important;
+}
+
+body.theme-nord .card,
+body.theme-nord .panel {
+  border-radius: var(--theme-radius-sm) !important;
+}
+
+/* Ocean theme specific wave effects */
+body.theme-ocean .api-playground-panel {
+  background: linear-gradient(135deg, var(--theme-playground-panel) 0%, var(--theme-bg-secondary) 100%) !important;
+}
+
+body.theme-ocean .card,
+body.theme-ocean .panel {
+  background: linear-gradient(135deg, var(--theme-bg-secondary) 0%, var(--theme-bg-tertiary) 100%) !important;
+}
+
+/* Forest theme specific organic styling */
+body.theme-forest .btn,
+body.theme-forest button {
+  border-radius: var(--theme-radius-lg) !important;
+}
+
+body.theme-forest .card,
+body.theme-forest .panel {
+  border-radius: var(--theme-radius-xl) !important;
+}
+
+/* Sunset theme specific warm styling */
+body.theme-sunset .btn,
+body.theme-sunset button {
+  background: linear-gradient(135deg, var(--theme-bg-button) 0%, var(--theme-bg-button-hover) 100%) !important;
+}
+
+body.theme-sunset .card,
+body.theme-sunset .panel {
+  background: linear-gradient(135deg, var(--theme-bg-secondary) 0%, var(--theme-bg-tertiary) 100%) !important;
 }

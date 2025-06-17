@@ -5,7 +5,7 @@ import { PencilIcon, TrashIcon, XIcon } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks'
 import { Highlight, themes } from 'prism-react-renderer'
 import Dropdown from '../components/dropdown'
-import { useDarkMode } from '../utils/hooks'
+import { useTheme } from '../utils/hooks'
 import { Fence } from './fence'
 import { Tag } from './tag'
 
@@ -154,8 +154,8 @@ export const HeadersTab = ({ requestConfig, setRequestConfig }: HeadersTabProps)
   return (
     <div className="flex flex-col gap-2 px-2 py-4">
       <div className="flex items-center gap-2 px-2">
-        <span className="text-sm font-medium text-zinc-400 w-32">Key</span>
-        <span className="text-sm font-medium text-zinc-400 flex-1">Value</span>
+        <span className="text-sm font-medium w-32" style={{color: 'var(--theme-text-secondary)'}}>Key</span>
+        <span className="text-sm font-medium flex-1" style={{color: 'var(--theme-text-secondary)'}}>Value</span>
       </div>
       {headersList.map((hdr, idx) => (
         <div key={idx} className="flex items-center gap-2">
@@ -166,37 +166,37 @@ export const HeadersTab = ({ requestConfig, setRequestConfig }: HeadersTabProps)
                 value={hdr.key}
                 onChange={e => updateHeader(idx, 'key', (e.target as HTMLInputElement).value)}
                 placeholder="Header name"
-                className="w-32 rounded-lg bg-zinc-800 border border-zinc-600 px-2 py-1 text-sm text-white"
+                className="w-32 rounded-lg api-playground-input px-2 py-1 text-sm"
               />
               <Input
                 type="text"
                 value={hdr.value}
                 onChange={e => updateHeader(idx, 'value', (e.target as HTMLInputElement).value)}
                 placeholder="Header value"
-                className="flex-1 rounded-lg bg-zinc-800 border border-zinc-600 px-2 py-1 text-sm text-white"
+                className="flex-1 rounded-lg api-playground-input px-2 py-1 text-sm"
               />
-              <button onClick={() => saveHeader(idx)} className="text-white">
+              <button onClick={() => saveHeader(idx)} style={{color: 'var(--theme-text-primary)'}}>
                 <CheckIcon className="w-4 h-4" />
               </button>
-              <button onClick={() => cancelEdit(idx)} className="text-white">
+              <button onClick={() => cancelEdit(idx)} style={{color: 'var(--theme-text-primary)'}}>
                 <XIcon className="w-4 h-4" />
               </button>
             </>
           ) : (
             <>
-              <span className="text-sm text-white w-32 truncate">{hdr.key}</span>
-              <span className="text-sm text-white flex-1 truncate">{hdr.value}</span>
-              <button onClick={() => editHeader(idx)} className="text-white">
+              <span className="text-sm w-32 truncate" style={{color: 'var(--theme-text-primary)'}}>{hdr.key}</span>
+              <span className="text-sm flex-1 truncate" style={{color: 'var(--theme-text-primary)'}}>{hdr.value}</span>
+              <button onClick={() => editHeader(idx)} style={{color: 'var(--theme-text-primary)'}}>
                 <PencilIcon className="w-4 h-4" />
               </button>
-              <button onClick={() => removeHeader(idx)} className="text-red-400">
+              <button onClick={() => removeHeader(idx)} style={{color: 'var(--theme-text-error)'}}>
                 <TrashIcon className="w-4 h-4" />
               </button>
             </>
           )}
         </div>
       ))}
-      <button onClick={addEmptyHeaderRow} className="text-sm text-sky-400 hover:text-sky-300 mt-2 w-fit">
+      <button onClick={addEmptyHeaderRow} className="text-sm mt-2 w-fit" style={{color: 'var(--theme-text-accent)'}}>
         + Add Header
       </button>
     </div>
@@ -274,37 +274,37 @@ export const ParamsTab = ({ queryParams, setQueryParams }: ParamsTabProps) => {
   return (
     <div className="flex flex-col gap-2 px-2 py-4">
       <div className="flex items-center gap-2">
-        <span className="text-sm font-medium text-zinc-400 w-32">Name</span>
-        <span className="text-sm font-medium text-zinc-400 flex-1">Value</span>
+        <span className="text-sm font-medium w-32" style={{color: 'var(--theme-text-secondary)'}}>Name</span>
+        <span className="text-sm font-medium flex-1" style={{color: 'var(--theme-text-secondary)'}}>Value</span>
       </div>
       {paramsList.map((p, i) => (
         <div key={i} className="flex items-center gap-2">
           {p.isEditing ? (
             <>
-              <Input value={p.name} onChange={e => updateParam(i, 'name', (e.target as HTMLInputElement).value)} placeholder="Param name" className="w-32 rounded-lg bg-zinc-800 border border-zinc-600 px-2 py-1 text-sm text-white" />
-              <Input value={p.value} onChange={e => updateParam(i, 'value', (e.target as HTMLInputElement).value)} placeholder="Param value" className="flex-1 rounded-lg bg-zinc-800 border border-zinc-600 px-2 py-1 text-sm text-white" />
-              <button onClick={() => saveParam(i)} className="text-white">
+              <Input value={p.name} onChange={e => updateParam(i, 'name', (e.target as HTMLInputElement).value)} placeholder="Param name" className="w-32 rounded-lg api-playground-input px-2 py-1 text-sm" />
+              <Input value={p.value} onChange={e => updateParam(i, 'value', (e.target as HTMLInputElement).value)} placeholder="Param value" className="flex-1 rounded-lg api-playground-input px-2 py-1 text-sm" />
+              <button onClick={() => saveParam(i)} style={{color: 'var(--theme-text-primary)'}}>
                 <CheckIcon className="w-4 h-4" />
               </button>
-              <button onClick={() => cancelEdit(i)} className="text-white">
+              <button onClick={() => cancelEdit(i)} style={{color: 'var(--theme-text-primary)'}}>
                 <XIcon className="w-4 h-4" />
               </button>
             </>
           ) : (
             <>
-              <span className="w-32 truncate text-sm text-white">{p.name}</span>
-              <span className="flex-1 truncate text-sm text-white">{p.value}</span>
-              <button onClick={() => editParam(i)} className="text-white">
+              <span className="w-32 truncate text-sm" style={{color: 'var(--theme-text-primary)'}}>{p.name}</span>
+              <span className="flex-1 truncate text-sm" style={{color: 'var(--theme-text-primary)'}}>{p.value}</span>
+              <button onClick={() => editParam(i)} style={{color: 'var(--theme-text-primary)'}}>
                 <PencilIcon className="w-4 h-4" />
               </button>
-              <button onClick={() => removeParam(i)} className="text-red-400">
+              <button onClick={() => removeParam(i)} style={{color: 'var(--theme-text-error)'}}>
                 <TrashIcon className="w-4 h-4" />
               </button>
             </>
           )}
         </div>
       ))}
-      <button onClick={addParamRow} className="mt-2 text-sm text-sky-400 hover:text-sky-300 self-start">
+      <button onClick={addParamRow} className="mt-2 text-sm self-start" style={{color: 'var(--theme-text-accent)'}}>
         + Add Parameter
       </button>
     </div>
@@ -327,7 +327,7 @@ export function APIPlayground({
   const [isLoading, setIsLoading] = useState(false)
   const [response, setResponse] = useState<ResponseData | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const { isDark } = useDarkMode();
+  const { isDark } = useTheme();
   const [selectedServer, setSelectedServer] = useState<Server | null>(servers?.[0] || null)
   
   // Request configuration state
@@ -428,12 +428,12 @@ export function APIPlayground({
   ]
 
   return (
-    <div className="my-6 overflow-hidden rounded-2xl">
+    <div className="my-6 overflow-hidden rounded-2xl api-playground">
       {/* Header */}
-      <div className="flex min-h-[calc(--spacing(12)+1px)] flex-wrap items-start gap-x-4 border-b border-zinc-700 bg-zinc-800 px-4 dark:border-zinc-800 dark:bg-transparent pb-4">
+      <div className="flex min-h-[calc(--spacing(12)+1px)] flex-wrap items-start gap-x-4 api-playground-panel px-4 pb-4">
         <div className="flex items-center gap-3 pt-3">
           <Tag variant="small">{method.toUpperCase()}</Tag>
-          <span className="font-mono text-sm text-white">{title || url}</span>
+          <span className="font-mono text-sm" style={{color: 'var(--theme-text-primary)'}}>{title || url}</span>
         </div>
         <button
           onClick={executeRequest}
@@ -441,8 +441,8 @@ export function APIPlayground({
           className={classNames(
             'ml-auto mt-3 flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition',
             isLoading
-              ? 'bg-zinc-600 text-zinc-400 cursor-not-allowed'
-              : 'bg-sky-600 text-white hover:bg-sky-700'
+              ? 'opacity-50 cursor-not-allowed api-playground-button'
+              : 'api-playground-button'
           )}
         >
           {isLoading ? (
@@ -455,14 +455,14 @@ export function APIPlayground({
       </div>
 
       {description && (
-        <div className="px-4 py-3 border-b border-zinc-700 dark:border-zinc-800">
-          <p className="text-sm text-zinc-300">{description}</p>
+        <div className="px-4 py-3 api-playground-panel">
+          <p className="text-sm" style={{color: 'var(--theme-text-secondary)'}}>{description}</p>
         </div>
       )}
 
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium text-white">Server</label>
+          <label className="text-sm font-medium" style={{color: 'var(--theme-text-primary)'}}>Server</label>
           <Dropdown
             buttonLabel={selectedServer?.description || 'Select Server'}
             items={servers.map(server => ({ label: server.description || server.url, onClick: () => setSelectedServer(server) }))}
@@ -471,18 +471,18 @@ export function APIPlayground({
         </div>
 
         {/* Request Configuration */}
-        <div className="flex-1 border-r border-zinc-700 dark:border-zinc-800">
+        <div className="flex-1 api-playground-panel">
           <TabGroup selectedIndex={selectedTab} onChange={setSelectedTab}>
-            <TabList className="flex border-b border-zinc-700 dark:border-zinc-800">
+            <TabList className="flex api-playground-panel">
               {tabs.map((tab) => (
                 <Tab
                   key={tab.key}
                   className={({ selected }) =>
                     classNames(
-                      'px-4 py-3 text-sm font-medium transition border-b-2',
+                      'px-4 py-3 text-sm font-medium transition border-b-2 api-playground-tab',
                       selected
-                        ? 'border-sky-500 text-sky-400'
-                        : 'border-transparent text-zinc-400 hover:text-zinc-300'
+                        ? 'active'
+                        : ''
                     )
                   }
                 >
@@ -510,7 +510,7 @@ export function APIPlayground({
               <TabPanel className="p-4">
                 {['POST', 'PUT', 'PATCH'].includes(method.toUpperCase()) ? (
                   <div className="flex flex-col space-y-2">
-                    <label className="text-sm font-medium text-white">Request Body (JSON)</label>
+                    <label className="text-sm font-medium" style={{color: 'var(--theme-text-primary)'}}>Request Body (JSON)</label>
                     <Highlight
                       code={requestConfig.body || ''}
                       language="json"
@@ -521,21 +521,21 @@ export function APIPlayground({
                           onChange={(e) => setRequestConfig(prev => ({ ...prev, body: (e.target as HTMLTextAreaElement).value }))}
                           placeholder="Enter JSON body..."
                           rows={8}
-                          className={`w-full rounded-lg bg-zinc-800 border border-zinc-600 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:border-sky-500 focus:outline-none font-mono ${className}`}
+                          className={`w-full rounded-lg api-playground-input px-3 py-2 text-sm font-mono ${className}`}
                           style={style}
                         />
                       )}
                     </Highlight>
                   </div>
                 ) : (
-                  <p className="text-sm text-zinc-400">Request body not applicable for {method.toUpperCase()} requests.</p>
+                  <p className="text-sm" style={{color: 'var(--theme-text-secondary)'}}>Request body not applicable for {method.toUpperCase()} requests.</p>
                 )}
               </TabPanel>
 
               {/* Auth Tab */}
               <TabPanel className="p-4 space-y-4">
                 <div className="flex flex-col space-y-2">
-                  <label className="text-sm font-medium text-white">Authentication Type</label>
+                  <label className="text-sm font-medium" style={{color: 'var(--theme-text-primary)'}}>Authentication Type</label>
                   <Dropdown
                     buttonLabel={auth.type === 'none' ? 'Select Auth Type' : auth.type.charAt(0).toUpperCase() + auth.type.slice(1)}
                     items={[
@@ -550,26 +550,26 @@ export function APIPlayground({
 
                 {auth.type === 'bearer' && (
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-white">Bearer Token</label>
+                    <label className="text-sm font-medium" style={{color: 'var(--theme-text-primary)'}}>Bearer Token</label>
                     <input
                       type="password"
                       value={auth.token}
                       onChange={(e) => setAuth(prev => ({ ...prev, token: (e.target as HTMLInputElement).value }))}
                       placeholder="Enter bearer token..."
-                      className="w-full rounded-lg bg-zinc-800 border border-zinc-600 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:border-sky-500 focus:outline-none"
+                      className="w-full rounded-lg api-playground-input px-3 py-2 text-sm"
                     />
                   </div>
                 )}
 
                 {auth.type === 'apiKey' && (
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-white">API Key</label>
+                    <label className="text-sm font-medium" style={{color: 'var(--theme-text-primary)'}}>API Key</label>
                     <input
                       type="password"
                       value={auth.apiKey}
                       onChange={(e) => setAuth(prev => ({ ...prev, apiKey: (e.target as HTMLInputElement).value }))}
                       placeholder="Enter API key..."
-                      className="w-full rounded-lg bg-zinc-800 border border-zinc-600 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:border-sky-500 focus:outline-none"
+                      className="w-full rounded-lg api-playground-input px-3 py-2 text-sm"
                     />
                   </div>
                 )}
@@ -577,23 +577,23 @@ export function APIPlayground({
                 {auth.type === 'basic' && (
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-white">Username</label>
+                      <label className="text-sm font-medium" style={{color: 'var(--theme-text-primary)'}}>Username</label>
                       <input
                         type="text"
                         value={auth.username}
                         onChange={(e) => setAuth(prev => ({ ...prev, username: (e.target as HTMLInputElement).value }))}
                         placeholder="Enter username..."
-                        className="w-full rounded-lg bg-zinc-800 border border-zinc-600 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:border-sky-500 focus:outline-none"
+                        className="w-full rounded-lg api-playground-input px-3 py-2 text-sm"
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-white">Password</label>
+                      <label className="text-sm font-medium" style={{color: 'var(--theme-text-primary)'}}>Password</label>
                       <input
                         type="password"
                         value={auth.password}
                         onChange={(e) => setAuth(prev => ({ ...prev, password: (e.target as HTMLInputElement).value }))}
                         placeholder="Enter password..."
-                        className="w-full rounded-lg bg-zinc-800 border border-zinc-600 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:border-sky-500 focus:outline-none"
+                        className="w-full rounded-lg api-playground-input px-3 py-2 text-sm"
                       />
                     </div>
                   </div>
@@ -605,8 +605,8 @@ export function APIPlayground({
 
         {/* Response */}
         <div className="flex-1">
-          <div className="border-b border-zinc-700 dark:border-zinc-800 px-4 py-3">
-            <h3 className="text-sm font-semibold text-white">Response</h3>
+          <div className="api-playground-panel px-4 py-3">
+            <h3 className="text-sm font-semibold" style={{color: 'var(--theme-text-primary)'}}>Response</h3>
           </div>
           
           <div className="p-4">
@@ -627,18 +627,18 @@ export function APIPlayground({
                   <span className={classNames(
                     'inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset',
                     response.status >= 200 && response.status < 300
-                      ? 'bg-sky-500/10 text-sky-400 ring-sky-500/20'
+                      ? 'bg-success text-success'
                       : response.status >= 400
-                      ? 'bg-rose-500/10 text-rose-400 ring-rose-500/20'
-                      : 'bg-yellow-500/10 text-yellow-400 ring-yellow-500/20'
+                      ? 'bg-error text-error'
+                      : 'bg-warning text-warning'
                   )}>
                     {response.status} {response.statusText}
                   </span>
-                  <span className="text-xs text-zinc-400">{response.duration}ms</span>
+                  <span className="text-xs" style={{color: 'var(--theme-text-secondary)'}}>{response.duration}ms</span>
                 </div>
 
                 <div className="space-y-2">
-                  <h4 className="text-sm font-medium text-white">Response Body</h4>
+                  <h4 className="text-sm font-medium" style={{color: 'var(--theme-text-primary)'}}>Response Body</h4>
                   <Fence language="json">
                     {typeof response.data === 'string' 
                       ? response.data 
@@ -648,12 +648,12 @@ export function APIPlayground({
                 </div>
 
                 <div className="space-y-2">
-                  <h4 className="text-sm font-medium text-white">Response Headers</h4>
+                  <h4 className="text-sm font-medium" style={{color: 'var(--theme-text-primary)'}}>Response Headers</h4>
                   <div className="space-y-1">
                     {Object.entries(response.headers).map(([key, value]) => (
                       <div key={key} className="flex text-xs">
-                        <span className="text-zinc-400 w-32">{key}:</span>
-                        <span className="text-zinc-300">{value}</span>
+                        <span className="w-32" style={{color: 'var(--theme-text-secondary)'}}>{key}:</span>
+                        <span style={{color: 'var(--theme-text-primary)'}}>{value}</span>
                       </div>
                     ))}
                   </div>
@@ -661,7 +661,7 @@ export function APIPlayground({
               </div>
             ) : (
               <div className="text-center py-8">
-                <div className="text-zinc-400 text-sm">
+                <div className="text-sm" style={{color: 'var(--theme-text-secondary)'}}>
                   Click "Send Request" to see the response
                 </div>
               </div>
