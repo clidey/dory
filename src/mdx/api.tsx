@@ -73,7 +73,7 @@ function CopyButton({ code }: { code: string }) {
       className={classNames(
         'group/button absolute top-3.5 right-4 overflow-hidden rounded-full py-1 pr-3 pl-2 text-2xs font-medium opacity-0 backdrop-blur-sm transition group-hover:opacity-100 focus:opacity-100',
         copied
-          ? 'bg-emerald-400/10 ring-1 ring-emerald-400/20 ring-inset'
+          ? 'bg-sky-400/10 ring-1 ring-sky-400/20 ring-inset'
           : 'bg-white/5 hover:bg-white/7.5 dark:bg-white/2.5 dark:hover:bg-white/5',
       )}
       onClick={() => {
@@ -95,7 +95,7 @@ function CopyButton({ code }: { code: string }) {
       <span
         aria-hidden={!copied}
         className={classNames(
-          'pointer-events-none absolute inset-0 flex items-center justify-center text-emerald-400 transition duration-300',
+          'pointer-events-none absolute inset-0 flex items-center justify-center text-sky-400 transition duration-300',
           !copied && 'translate-y-1.5 opacity-0',
         )}
       >
@@ -190,7 +190,7 @@ function APIGroupHeader({
               className={classNames(
                 'border-b py-3 transition data-selected:not-data-focus:outline-hidden',
                 childIndex === selectedIndex
-                  ? 'border-emerald-500 text-emerald-400'
+                  ? 'border-sky-500 text-sky-400'
                   : 'border-transparent text-zinc-400 hover:text-zinc-300',
               )}
             >
@@ -304,7 +304,7 @@ export function APIGroup({
   const hasTabs = Children.count(children) > 1
 
   const containerClassName =
-    'my-6 overflow-hidden rounded-2xl bg-zinc-900 shadow-md dark:ring-1 dark:ring-white/10'
+    'my-6 overflow-hidden rounded-2xl bg-zinc-900 shadow-md dark:ring-1 dark:ring-white/10 w-full'
   const header = (
     <APIGroupHeader title={title} selectedIndex={tabGroupProps.selectedIndex}>
       {children}

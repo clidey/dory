@@ -26,7 +26,10 @@
           {
             "group": "API Reference",
             "pages": [
-              "api-playground-demo"
+              "api-reference/operations/create",
+              "api-reference/operations/get",
+              "api-reference/operations/update",
+              "api-reference/operations/delete"
             ]
           }
         ]

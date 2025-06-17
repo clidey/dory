@@ -1,3 +1,4 @@
+import classNames from "classnames"
 import { useState } from "preact/hooks"
 
 
@@ -36,6 +37,7 @@ export function Row({ children, cols = 1 }: { children: preact.ComponentChildren
     </div>
   )
 }
+
 export function Col({
   children,
   sticky = false,
@@ -49,7 +51,9 @@ export function Col({
 }) {
   return (
     <div
-      className={`[&>:first-child]:mt-0 [&>:last-child]:mb-0 ${sticky ? 'xl:sticky xl:top-24' : ''}`}
+      className={classNames("[&>:first-child]:mt-0 [&>:last-child]:mb-0", {
+        'xl:sticky xl:top-24': sticky,
+      })}
       style={{ 
         display: 'grid',
         gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))`,

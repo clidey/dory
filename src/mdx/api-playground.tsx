@@ -3,6 +3,10 @@ import classNames from 'classnames'
 import { useState, useEffect } from 'react'
 import { Tag } from './tag'
 import { Fence } from './fence'
+import { themes } from 'prism-react-renderer'
+import { useDarkMode } from '../utils/hooks'
+import { Highlight } from 'prism-react-renderer'
+import Dropdown from '../components/dropdown'
 
 interface APIPlaygroundProps {
   method: string
@@ -38,7 +42,7 @@ interface ResponseData {
   duration: number
 }
 
-function PlayButton(props: React.ComponentPropsWithoutRef<'svg'>) {
+export function PlayButton(props: React.ComponentPropsWithoutRef<'svg'>) {
   return (
     <svg viewBox="0 0 20 20" aria-hidden="true" {...props}>
       <path
@@ -75,7 +79,8 @@ export function APIPlayground({
   const [isLoading, setIsLoading] = useState(false)
   const [response, setResponse] = useState<ResponseData | null>(null)
   const [error, setError] = useState<string | null>(null)
-
+  const { isDark } = useDarkMode();
+  
   // Request configuration state
   const [requestConfig, setRequestConfig] = useState<RequestConfig>({
     method: method.toUpperCase(),
@@ -223,9 +228,9 @@ export function APIPlayground({
   ]
 
   return (
-    <div className="my-6 overflow-hidden rounded-2xl bg-zinc-900 shadow-md dark:ring-1 dark:ring-white/10">
+    <div className="my-6 overflow-hidden rounded-2xl">
       {/* Header */}
-      <div className="flex min-h-[calc(--spacing(12)+1px)] flex-wrap items-start gap-x-4 border-b border-zinc-700 bg-zinc-800 px-4 dark:border-zinc-800 dark:bg-transparent">
+      <div className="flex min-h-[calc(--spacing(12)+1px)] flex-wrap items-start gap-x-4 border-b border-zinc-700 bg-zinc-800 px-4 dark:border-zinc-800 dark:bg-transparent pb-4">
         <div className="flex items-center gap-3 pt-3">
           <Tag variant="small">{method.toUpperCase()}</Tag>
           <span className="font-mono text-sm text-white">{title || url}</span>
@@ -237,7 +242,7 @@ export function APIPlayground({
             'ml-auto mt-3 flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition',
             isLoading
               ? 'bg-zinc-600 text-zinc-400 cursor-not-allowed'
-              : 'bg-emerald-600 text-white hover:bg-emerald-700'
+              : 'bg-sky-600 text-white hover:bg-sky-700'
           )}
         >
           {isLoading ? (
@@ -255,7 +260,7 @@ export function APIPlayground({
         </div>
       )}
 
-      <div className="flex">
+      <div className="flex flex-col">
         {/* Request Configuration */}
         <div className="flex-1 border-r border-zinc-700 dark:border-zinc-800">
           <TabGroup selectedIndex={selectedTab} onChange={setSelectedTab}>
@@ -267,7 +272,7 @@ export function APIPlayground({
                     classNames(
                       'px-4 py-3 text-sm font-medium transition border-b-2',
                       selected
-                        ? 'border-emerald-500 text-emerald-400'
+                        ? 'border-sky-500 text-sky-400'
                         : 'border-transparent text-zinc-400 hover:text-zinc-300'
                     )
                   }
@@ -277,9 +282,11 @@ export function APIPlayground({
               ))}
             </TabList>
 
-            <TabPanels>
+            <TabPanels className="min-h-[250px]">
               {/* Parameters Tab */}
-              <TabPanel className="p-4 space-y-4">
+              <TabPanel className={classNames("p-4 space-y-4", {
+                "flex justify-center items-center min-h-[250px]": parameters.length === 0
+              })}>
                 {parameters.length > 0 ? (
                   parameters.map((param) => (
                     <div key={param.name} className="space-y-2">
@@ -291,9 +298,9 @@ export function APIPlayground({
                       <input
                         type="text"
                         value={paramValues[param.name] || ''}
-                        onChange={(e) => setParamValues(prev => ({ ...prev, [param.name]: e.target.value }))}
+                        onChange={(e) => setParamValues(prev => ({ ...prev, [param.name]: (e.target as HTMLInputElement).value }))}
                         placeholder={param.description}
-                        className="w-full rounded-lg bg-zinc-800 border border-zinc-600 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:border-emerald-500 focus:outline-none"
+                        className="w-full rounded-lg bg-zinc-800 border border-zinc-600 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:border-sky-500 focus:outline-none"
                       />
                     </div>
                   ))
@@ -328,7 +335,7 @@ export function APIPlayground({
                 
                 <button
                   onClick={addCustomHeader}
-                  className="text-sm text-emerald-400 hover:text-emerald-300"
+                  className="text-sm text-sky-400 hover:text-sky-300"
                 >
                   + Add Custom Header
                 </button>
@@ -337,15 +344,23 @@ export function APIPlayground({
               {/* Body Tab */}
               <TabPanel className="p-4">
                 {['POST', 'PUT', 'PATCH'].includes(method.toUpperCase()) ? (
-                  <div className="space-y-2">
+                  <div className="flex flex-col space-y-2">
                     <label className="text-sm font-medium text-white">Request Body (JSON)</label>
-                    <textarea
-                      value={requestConfig.body}
-                      onChange={(e) => setRequestConfig(prev => ({ ...prev, body: e.target.value }))}
-                      placeholder="Enter JSON body..."
-                      rows={8}
-                      className="w-full rounded-lg bg-zinc-800 border border-zinc-600 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:border-emerald-500 focus:outline-none font-mono"
-                    />
+                    <Highlight
+                      code={requestConfig.body || ''}
+                      language="json"
+                      theme={isDark ? themes.vsDark : themes.vsLight}>
+                      {({ className, style }) => (
+                        <textarea
+                          value={requestConfig.body}
+                          onChange={(e) => setRequestConfig(prev => ({ ...prev, body: (e.target as HTMLTextAreaElement).value }))}
+                          placeholder="Enter JSON body..."
+                          rows={8}
+                          className={`w-full rounded-lg bg-zinc-800 border border-zinc-600 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:border-sky-500 focus:outline-none font-mono ${className}`}
+                          style={style}
+                        />
+                      )}
+                    </Highlight>
                   </div>
                 ) : (
                   <p className="text-sm text-zinc-400">Request body not applicable for {method.toUpperCase()} requests.</p>
@@ -354,18 +369,18 @@ export function APIPlayground({
 
               {/* Auth Tab */}
               <TabPanel className="p-4 space-y-4">
-                <div className="space-y-2">
+                <div className="flex flex-col space-y-2">
                   <label className="text-sm font-medium text-white">Authentication Type</label>
-                  <select
-                    value={auth.type}
-                    onChange={(e) => setAuth(prev => ({ ...prev, type: e.target.value as any }))}
-                    className="w-full rounded-lg bg-zinc-800 border border-zinc-600 px-3 py-2 text-sm text-white focus:border-emerald-500 focus:outline-none"
-                  >
-                    <option value="none">None</option>
-                    <option value="bearer">Bearer Token</option>
-                    <option value="apiKey">API Key</option>
-                    <option value="basic">Basic Auth</option>
-                  </select>
+                  <Dropdown
+                    buttonLabel={auth.type === 'none' ? 'Select Auth Type' : auth.type.charAt(0).toUpperCase() + auth.type.slice(1)}
+                    items={[
+                      { label: 'None', onClick: () => setAuth(prev => ({ ...prev, type: 'none' })) },
+                      { label: 'Bearer Token', onClick: () => setAuth(prev => ({ ...prev, type: 'bearer' })) },
+                      { label: 'API Key', onClick: () => setAuth(prev => ({ ...prev, type: 'apiKey' })) },
+                      { label: 'Basic Auth', onClick: () => setAuth(prev => ({ ...prev, type: 'basic' })) }
+                    ]}
+                    className="w-full"
+                  />
                 </div>
 
                 {auth.type === 'bearer' && (
@@ -374,9 +389,9 @@ export function APIPlayground({
                     <input
                       type="password"
                       value={auth.token}
-                      onChange={(e) => setAuth(prev => ({ ...prev, token: e.target.value }))}
+                      onChange={(e) => setAuth(prev => ({ ...prev, token: (e.target as HTMLInputElement).value }))}
                       placeholder="Enter bearer token..."
-                      className="w-full rounded-lg bg-zinc-800 border border-zinc-600 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:border-emerald-500 focus:outline-none"
+                      className="w-full rounded-lg bg-zinc-800 border border-zinc-600 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:border-sky-500 focus:outline-none"
                     />
                   </div>
                 )}
@@ -387,9 +402,9 @@ export function APIPlayground({
                     <input
                       type="password"
                       value={auth.apiKey}
-                      onChange={(e) => setAuth(prev => ({ ...prev, apiKey: e.target.value }))}
+                      onChange={(e) => setAuth(prev => ({ ...prev, apiKey: (e.target as HTMLInputElement).value }))}
                       placeholder="Enter API key..."
-                      className="w-full rounded-lg bg-zinc-800 border border-zinc-600 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:border-emerald-500 focus:outline-none"
+                      className="w-full rounded-lg bg-zinc-800 border border-zinc-600 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:border-sky-500 focus:outline-none"
                     />
                   </div>
                 )}
@@ -401,9 +416,9 @@ export function APIPlayground({
                       <input
                         type="text"
                         value={auth.username}
-                        onChange={(e) => setAuth(prev => ({ ...prev, username: e.target.value }))}
+                        onChange={(e) => setAuth(prev => ({ ...prev, username: (e.target as HTMLInputElement).value }))}
                         placeholder="Enter username..."
-                        className="w-full rounded-lg bg-zinc-800 border border-zinc-600 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:border-emerald-500 focus:outline-none"
+                        className="w-full rounded-lg bg-zinc-800 border border-zinc-600 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:border-sky-500 focus:outline-none"
                       />
                     </div>
                     <div className="space-y-2">
@@ -411,9 +426,9 @@ export function APIPlayground({
                       <input
                         type="password"
                         value={auth.password}
-                        onChange={(e) => setAuth(prev => ({ ...prev, password: e.target.value }))}
+                        onChange={(e) => setAuth(prev => ({ ...prev, password: (e.target as HTMLInputElement).value }))}
                         placeholder="Enter password..."
-                        className="w-full rounded-lg bg-zinc-800 border border-zinc-600 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:border-emerald-500 focus:outline-none"
+                        className="w-full rounded-lg bg-zinc-800 border border-zinc-600 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:border-sky-500 focus:outline-none"
                       />
                     </div>
                   </div>
@@ -447,7 +462,7 @@ export function APIPlayground({
                   <span className={classNames(
                     'inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset',
                     response.status >= 200 && response.status < 300
-                      ? 'bg-emerald-500/10 text-emerald-400 ring-emerald-500/20'
+                      ? 'bg-sky-500/10 text-sky-400 ring-sky-500/20'
                       : response.status >= 400
                       ? 'bg-rose-500/10 text-rose-400 ring-rose-500/20'
                       : 'bg-yellow-500/10 text-yellow-400 ring-yellow-500/20'
