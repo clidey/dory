@@ -8,8 +8,86 @@ html {
   background-color: var(--theme-bg-primary) !important;
 }
 
-h1, h2, h3, h4, h5, h6, p, li {
+/* Typography theming */
+body {
+  font-family: var(--theme-font-family-primary) !important;
+  font-size: var(--theme-font-size-md) !important;
+  font-weight: var(--theme-font-weight-normal) !important;
+  line-height: var(--theme-line-height-normal) !important;
+  transition: var(--theme-transition-normal) !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
   color: var(--theme-text-primary) !important;
+  font-family: var(--theme-font-family-primary) !important;
+  font-weight: var(--theme-font-weight-semibold) !important;
+  line-height: var(--theme-line-height-tight) !important;
+}
+
+h1 {
+  font-size: var(--theme-font-size-3xl) !important;
+  font-weight: var(--theme-font-weight-bold) !important;
+}
+
+h2 {
+  font-size: var(--theme-font-size-2xl) !important;
+}
+
+h3 {
+  font-size: var(--theme-font-size-xl) !important;
+}
+
+h4 {
+  font-size: var(--theme-font-size-lg) !important;
+}
+
+h5, h6 {
+  font-size: var(--theme-font-size-md) !important;
+}
+
+p, li, span {
+  color: var(--theme-text-primary) !important;
+  line-height: var(--theme-line-height-normal) !important;
+}
+
+/* Code and preformatted text */
+code, pre, .code {
+  font-family: var(--theme-font-family-mono) !important;
+  font-size: var(--theme-font-size-sm) !important;
+}
+
+/* Spacing and layout theming */
+.container, .content, .section {
+  padding: var(--theme-space-lg) !important;
+}
+
+.btn, button {
+  padding: var(--theme-space-sm) var(--theme-space-md) !important;
+  border-radius: var(--theme-radius-md) !important;
+  font-weight: var(--theme-font-weight-medium) !important;
+  transition: var(--theme-transition-fast) !important;
+  box-shadow: var(--theme-shadow-sm) !important;
+}
+
+.btn:hover, button:hover {
+  box-shadow: var(--theme-shadow-md) !important;
+}
+
+/* Cards and panels */
+.card, .panel {
+  border-radius: var(--theme-radius-lg) !important;
+  box-shadow: var(--theme-shadow-md) !important;
+  padding: var(--theme-space-lg) !important;
+  margin-bottom: var(--theme-space-md) !important;
+}
+
+/* Input fields */
+input, textarea, select {
+  border-radius: var(--theme-radius-sm) !important;
+  padding: var(--theme-space-sm) var(--theme-space-md) !important;
+  font-family: var(--theme-font-family-primary) !important;
+  font-size: var(--theme-font-size-md) !important;
+  transition: var(--theme-transition-fast) !important;
 }
 
 /* ========================================
@@ -226,29 +304,124 @@ body.dark td {
 
 /* Cyberpunk theme specific glowing effects */
 body.theme-cyberpunk .api-playground-button,
-body.theme-cyberpunk .btn-primary {
-  box-shadow: 0 0 10px var(--theme-bg-button);
-  transition: box-shadow 0.3s ease;
+body.theme-cyberpunk .btn-primary,
+body.theme-cyberpunk .btn {
+  box-shadow: var(--theme-shadow-md) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  font-family: var(--theme-font-family-mono) !important;
 }
 
 body.theme-cyberpunk .api-playground-button:hover,
-body.theme-cyberpunk .btn-primary:hover {
-  box-shadow: 0 0 20px var(--theme-bg-button-hover);
+body.theme-cyberpunk .btn-primary:hover,
+body.theme-cyberpunk .btn:hover {
+  box-shadow: var(--theme-shadow-lg) !important;
+  transform: translateY(-1px) !important;
+}
+
+body.theme-cyberpunk h1,
+body.theme-cyberpunk h2,
+body.theme-cyberpunk h3 {
+  font-family: var(--theme-font-family-mono) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.1em !important;
+}
+
+/* Corporate theme specific professional styling */
+body.theme-corporate {
+  letter-spacing: 0.01em !important;
+}
+
+body.theme-corporate h1,
+body.theme-corporate h2,
+body.theme-corporate h3 {
+  font-weight: var(--theme-font-weight-semibold) !important;
+}
+
+body.theme-corporate .btn,
+body.theme-corporate button {
+  font-weight: var(--theme-font-weight-medium) !important;
+  text-transform: none !important;
+}
+
+/* Minimal theme specific clean styling */
+body.theme-minimal {
+  font-weight: var(--theme-font-weight-normal) !important;
+}
+
+body.theme-minimal h1,
+body.theme-minimal h2,
+body.theme-minimal h3 {
+  font-weight: var(--theme-font-weight-medium) !important;
+}
+
+body.theme-minimal .btn,
+body.theme-minimal button {
+  box-shadow: none !important;
+  border: 1px solid var(--theme-border-primary) !important;
+}
+
+body.theme-minimal .btn:hover,
+body.theme-minimal button:hover {
+  box-shadow: var(--theme-shadow-sm) !important;
+}
+
+/* Sepia theme specific text styling */
+body.theme-sepia {
+  font-family: var(--theme-font-family-primary) !important;
+  line-height: var(--theme-line-height-relaxed) !important;
+}
+
+body.theme-sepia h1, 
+body.theme-sepia h2, 
+body.theme-sepia h3 {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+  font-family: var(--theme-font-family-primary) !important;
+}
+
+body.theme-sepia p,
+body.theme-sepia li {
+  line-height: var(--theme-line-height-relaxed) !important;
 }
 
 /* Nord theme specific styles */
 body.theme-nord .mermaid .node rect {
-  border-radius: 4px;
+  border-radius: var(--theme-radius-sm) !important;
+}
+
+body.theme-nord .card,
+body.theme-nord .panel {
+  border-radius: var(--theme-radius-sm) !important;
 }
 
 /* Ocean theme specific wave effects */
 body.theme-ocean .api-playground-panel {
-  background: linear-gradient(135deg, var(--theme-playground-panel) 0%, var(--theme-bg-secondary) 100%);
+  background: linear-gradient(135deg, var(--theme-playground-panel) 0%, var(--theme-bg-secondary) 100%) !important;
 }
 
-/* Sepia theme specific text shadow for better readability */
-body.theme-sepia h1, 
-body.theme-sepia h2, 
-body.theme-sepia h3 {
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+body.theme-ocean .card,
+body.theme-ocean .panel {
+  background: linear-gradient(135deg, var(--theme-bg-secondary) 0%, var(--theme-bg-tertiary) 100%) !important;
+}
+
+/* Forest theme specific organic styling */
+body.theme-forest .btn,
+body.theme-forest button {
+  border-radius: var(--theme-radius-lg) !important;
+}
+
+body.theme-forest .card,
+body.theme-forest .panel {
+  border-radius: var(--theme-radius-xl) !important;
+}
+
+/* Sunset theme specific warm styling */
+body.theme-sunset .btn,
+body.theme-sunset button {
+  background: linear-gradient(135deg, var(--theme-bg-button) 0%, var(--theme-bg-button-hover) 100%) !important;
+}
+
+body.theme-sunset .card,
+body.theme-sunset .panel {
+  background: linear-gradient(135deg, var(--theme-bg-secondary) 0%, var(--theme-bg-tertiary) 100%) !important;
 }

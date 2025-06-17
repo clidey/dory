@@ -3,15 +3,11 @@ import { useTheme } from '../utils/hooks';
 import classNames from 'classnames';
 
 export function DarkModeToggle() {
-  const { isDark, currentTheme, setTheme } = useTheme();
+  const { isDark, currentTheme, toggleMode } = useTheme();
   
   const toggleDarkMode = () => {
     // Toggle between light and dark variants of current theme family
-    if (isDark) {
-      setTheme('light');
-    } else {
-      setTheme('dark');
-    }
+    toggleMode();
   };
 
   return (

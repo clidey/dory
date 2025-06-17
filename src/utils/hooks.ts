@@ -61,7 +61,7 @@ export function useTheme() {
     
     // Fallback to dark/light based on system preference
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    return getTheme(prefersDark ? 'dark' : 'light') || themes[0];
+    return getTheme(prefersDark ? 'default-dark' : 'default-light') || themes[0];
   });
 
   // Apply theme CSS custom properties
@@ -76,6 +76,16 @@ export function useTheme() {
       root.style.setProperty(`--theme-${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`, value);
     });
 
+    // Apply typography properties as CSS custom properties
+    Object.entries(currentTheme.typography).forEach(([key, value]) => {
+      root.style.setProperty(`--theme-${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`, value);
+    });
+
+    // Apply spacing properties as CSS custom properties
+    Object.entries(currentTheme.spacing).forEach(([key, value]) => {
+      root.style.setProperty(`--theme-${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`, value);
+    });
+
     // Set theme class for legacy compatibility
     if (currentTheme.isDark) {
       body.classList.add('dark');
@@ -86,8 +96,8 @@ export function useTheme() {
     }
 
     // Set theme-specific class
-    body.className = body.className.replace(/theme-\w+/g, '');
-    body.classList.add(`theme-${currentTheme.id}`);
+    body.className = body.className.replace(/theme-[a-z-]+/g, '');
+    body.classList.add(`theme-${currentTheme.id.replace('-light', '').replace('-dark', '')}`);
 
     // Store theme preference
     localStorage.setItem('selectedTheme', currentTheme.id);
@@ -106,10 +116,39 @@ export function useTheme() {
     setCurrentTheme(themes[nextIndex]);
   };
 
+  const toggleMode = () => {
+    const currentBaseThemeId = currentTheme.id.replace('-light', '').replace('-dark', '');
+    const newMode = currentTheme.mode === 'light' ? 'dark' : 'light';
+    const newThemeId = `${currentBaseThemeId}-${newMode}`;
+    const newTheme = getTheme(newThemeId);
+    if (newTheme) {
+      setCurrentTheme(newTheme);
+    }
+  };
+
+  const getThemesByBase = () => {
+    const themesByBase = new Map();
+    themes.forEach(theme => {
+      const baseId = theme.id.replace('-light', '').replace('-dark', '');
+      if (!themesByBase.has(baseId)) {
+        themesByBase.set(baseId, { light: null, dark: null });
+      }
+      const entry = themesByBase.get(baseId);
+      if (theme.mode === 'light') {
+        entry.light = theme;
+      } else {
+        entry.dark = theme;
+      }
+    });
+    return themesByBase;
+  };
+
   return {
     currentTheme,
     setTheme,
     toggleTheme,
+    toggleMode,
+    getThemesByBase,
     themes: themes,
     isDark: currentTheme.isDark
   };
