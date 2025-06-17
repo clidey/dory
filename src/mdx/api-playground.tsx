@@ -1,12 +1,18 @@
-import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react'
+import { Input, Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react'
+import { CheckIcon } from '@heroicons/react/24/outline'
 import classNames from 'classnames'
-import { useState, useEffect } from 'react'
-import { Tag } from './tag'
-import { Fence } from './fence'
-import { themes } from 'prism-react-renderer'
-import { useDarkMode } from '../utils/hooks'
-import { Highlight } from 'prism-react-renderer'
+import { PencilIcon, TrashIcon, XIcon } from 'lucide-react'
+import { useCallback, useEffect, useRef, useState } from 'preact/hooks'
+import { Highlight, themes } from 'prism-react-renderer'
 import Dropdown from '../components/dropdown'
+import { useDarkMode } from '../utils/hooks'
+import { Fence } from './fence'
+import { Tag } from './tag'
+
+export interface Server {
+  url: string;
+  description?: string;
+}
 
 interface APIPlaygroundProps {
   method: string
@@ -23,7 +29,7 @@ interface APIPlaygroundProps {
   headers?: Record<string, string>
   body?: object
   authType?: 'bearer' | 'apiKey' | 'basic' | 'none'
-  baseUrl?: string
+  servers?: Server[]
 }
 
 interface RequestConfig {
@@ -64,6 +70,248 @@ function LoadingSpinner(props: React.ComponentPropsWithoutRef<'svg'>) {
   )
 }
 
+interface RequestConfig {
+  headers: Record<string, string>
+}
+
+interface HeadersTabProps {
+  requestConfig: RequestConfig
+  setRequestConfig: React.Dispatch<React.SetStateAction<RequestConfig>>
+}
+
+interface HeaderItem {
+  key: string
+  value: string
+  isEditing: boolean
+  isNew?: boolean
+}
+
+export const HeadersTab = ({ requestConfig, setRequestConfig }: HeadersTabProps) => {
+  const [headersList, setHeadersList] = useState<HeaderItem[]>([])
+  const hasInitialized = useRef(false)
+
+  useEffect(() => {
+    if (!hasInitialized.current) {
+      const initialHeaders = Object.entries(requestConfig.headers ?? {}).map(([key, value]) => ({
+        key,
+        value,
+        isEditing: false
+      }))
+      setHeadersList(initialHeaders)
+      hasInitialized.current = true
+    }
+  }, [requestConfig.headers])
+
+  useEffect(() => {
+    const newHeaders: Record<string, string> = {}
+    headersList.forEach(h => {
+      if (h.key.trim()) newHeaders[h.key] = h.value
+    })
+    setRequestConfig(prev => ({ ...prev, headers: newHeaders }))
+  }, [headersList, setRequestConfig])
+
+  const updateHeader = (index: number, field: 'key' | 'value', value: string) => {
+    setHeadersList(list =>
+      list.map((h, i) => (i === index ? { ...h, [field]: value } : h))
+    )
+  }
+
+  const saveHeader = (index: number) => {
+    setHeadersList(list =>
+      list.map((h, i) => (i === index ? { ...h, isEditing: false, isNew: false } : h))
+    )
+  }
+
+  const cancelEdit = (index: number) => {
+    setHeadersList(list =>
+      list.reduce<HeaderItem[]>((acc, h, i) => {
+        if (i === index) {
+          if (h.isNew) return acc // remove new row if cancelled
+          return [...acc, { ...h, isEditing: false }]
+        }
+        return [...acc, h]
+      }, [])
+    )
+  }
+
+  const editHeader = (index: number) => {
+    setHeadersList(list =>
+      list.map((h, i) => (i === index ? { ...h, isEditing: true } : h))
+    )
+  }
+
+  const removeHeader = (index: number) => {
+    setHeadersList(list => list.filter((_, i) => i !== index))
+  }
+
+  const addEmptyHeaderRow = () => {
+    setHeadersList(list => [
+      ...list,
+      { key: '', value: '', isEditing: true, isNew: true }
+    ])
+  }
+
+  return (
+    <div className="flex flex-col gap-2 px-2 py-4">
+      <div className="flex items-center gap-2 px-2">
+        <span className="text-sm font-medium text-zinc-400 w-32">Key</span>
+        <span className="text-sm font-medium text-zinc-400 flex-1">Value</span>
+      </div>
+      {headersList.map((hdr, idx) => (
+        <div key={idx} className="flex items-center gap-2">
+          {hdr.isEditing ? (
+            <>
+              <Input
+                type="text"
+                value={hdr.key}
+                onChange={e => updateHeader(idx, 'key', (e.target as HTMLInputElement).value)}
+                placeholder="Header name"
+                className="w-32 rounded-lg bg-zinc-800 border border-zinc-600 px-2 py-1 text-sm text-white"
+              />
+              <Input
+                type="text"
+                value={hdr.value}
+                onChange={e => updateHeader(idx, 'value', (e.target as HTMLInputElement).value)}
+                placeholder="Header value"
+                className="flex-1 rounded-lg bg-zinc-800 border border-zinc-600 px-2 py-1 text-sm text-white"
+              />
+              <button onClick={() => saveHeader(idx)} className="text-white">
+                <CheckIcon className="w-4 h-4" />
+              </button>
+              <button onClick={() => cancelEdit(idx)} className="text-white">
+                <XIcon className="w-4 h-4" />
+              </button>
+            </>
+          ) : (
+            <>
+              <span className="text-sm text-white w-32 truncate">{hdr.key}</span>
+              <span className="text-sm text-white flex-1 truncate">{hdr.value}</span>
+              <button onClick={() => editHeader(idx)} className="text-white">
+                <PencilIcon className="w-4 h-4" />
+              </button>
+              <button onClick={() => removeHeader(idx)} className="text-red-400">
+                <TrashIcon className="w-4 h-4" />
+              </button>
+            </>
+          )}
+        </div>
+      ))}
+      <button onClick={addEmptyHeaderRow} className="text-sm text-sky-400 hover:text-sky-300 mt-2 w-fit">
+        + Add Header
+      </button>
+    </div>
+  )
+}
+
+interface ParamItem {
+  name: string;
+  value: string;
+  isEditing: boolean;
+  isNew?: boolean;
+}
+
+interface ParamsTabProps {
+  queryParams: Record<string, string>;
+  setQueryParams: React.Dispatch<React.SetStateAction<RequestConfig>>;
+}
+
+export const ParamsTab = ({ queryParams, setQueryParams }: ParamsTabProps) => {
+  const [paramsList, setParamsList] = useState<ParamItem[]>([]);
+  const hasInitialized = useRef(false);
+
+  useEffect(() => {
+    if (!hasInitialized.current) {
+      const initial = Object.entries(queryParams ?? {}).map(([key, value]) => ({
+        name: key, value, isEditing: false
+      }));
+      setParamsList(initial);
+      hasInitialized.current = true;
+    }
+  }, [queryParams]);
+
+  useEffect(() => {
+    const newParams: Record<string, string> = {};
+    paramsList.forEach(p => {
+      if (p.name.trim()) newParams[p.name] = p.value;
+    });
+    setQueryParams(prev => ({ ...prev, queryParams: newParams }));
+  }, [paramsList, setQueryParams]);
+
+  const updateParam = (idx: number, field: 'name' | 'value', val: string) =>
+    setParamsList(list => list.map((p, i) =>
+      i === idx ? { ...p, [field]: val } : p
+    ));
+
+  const saveParam = (idx: number) =>
+    setParamsList(list => list.map((p, i) =>
+      i === idx ? { ...p, isEditing: false, isNew: false } : p
+    ));
+
+  const cancelEdit = (idx: number) =>
+    setParamsList(list =>
+      list.reduce<ParamItem[]>((acc, p, i) => {
+        if (i === idx) {
+          if (p.isNew) return acc;
+          return [...acc, { ...p, isEditing: false }];
+        }
+        return [...acc, p];
+      }, [])
+    );
+
+  const editParam = (idx: number) =>
+    setParamsList(list =>
+      list.map((p, i) => (i === idx ? { ...p, isEditing: true } : p))
+    );
+
+  const removeParam = (idx: number) =>
+    setParamsList(list => list.filter((_, i) => i !== idx));
+
+  const addParamRow = () =>
+    setParamsList(list => [
+      ...list, { name: '', value: '', isEditing: true, isNew: true }
+    ]);
+
+  return (
+    <div className="flex flex-col gap-2 px-2 py-4">
+      <div className="flex items-center gap-2">
+        <span className="text-sm font-medium text-zinc-400 w-32">Name</span>
+        <span className="text-sm font-medium text-zinc-400 flex-1">Value</span>
+      </div>
+      {paramsList.map((p, i) => (
+        <div key={i} className="flex items-center gap-2">
+          {p.isEditing ? (
+            <>
+              <Input value={p.name} onChange={e => updateParam(i, 'name', (e.target as HTMLInputElement).value)} placeholder="Param name" className="w-32 rounded-lg bg-zinc-800 border border-zinc-600 px-2 py-1 text-sm text-white" />
+              <Input value={p.value} onChange={e => updateParam(i, 'value', (e.target as HTMLInputElement).value)} placeholder="Param value" className="flex-1 rounded-lg bg-zinc-800 border border-zinc-600 px-2 py-1 text-sm text-white" />
+              <button onClick={() => saveParam(i)} className="text-white">
+                <CheckIcon className="w-4 h-4" />
+              </button>
+              <button onClick={() => cancelEdit(i)} className="text-white">
+                <XIcon className="w-4 h-4" />
+              </button>
+            </>
+          ) : (
+            <>
+              <span className="w-32 truncate text-sm text-white">{p.name}</span>
+              <span className="flex-1 truncate text-sm text-white">{p.value}</span>
+              <button onClick={() => editParam(i)} className="text-white">
+                <PencilIcon className="w-4 h-4" />
+              </button>
+              <button onClick={() => removeParam(i)} className="text-red-400">
+                <TrashIcon className="w-4 h-4" />
+              </button>
+            </>
+          )}
+        </div>
+      ))}
+      <button onClick={addParamRow} className="mt-2 text-sm text-sky-400 hover:text-sky-300 self-start">
+        + Add Parameter
+      </button>
+    </div>
+  );
+};
+
+
 export function APIPlayground({
   method,
   url,
@@ -73,20 +321,24 @@ export function APIPlayground({
   headers: defaultHeaders = {},
   body: defaultBody,
   authType = 'none',
-  baseUrl = ''
+  servers = []
 }: APIPlaygroundProps) {
   const [selectedTab, setSelectedTab] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
   const [response, setResponse] = useState<ResponseData | null>(null)
   const [error, setError] = useState<string | null>(null)
   const { isDark } = useDarkMode();
+  const [selectedServer, setSelectedServer] = useState<Server | null>(servers?.[0] || null)
   
   // Request configuration state
   const [requestConfig, setRequestConfig] = useState<RequestConfig>({
     method: method.toUpperCase(),
-    url: baseUrl + url,
+    url: selectedServer?.url + url,
     headers: { 'Content-Type': 'application/json', ...defaultHeaders },
-    queryParams: {},
+    queryParams: parameters.reduce((acc, param) => {
+      acc[param.name] = param.defaultValue || ''
+      return acc
+    }, {} as Record<string, string>),
     body: defaultBody ? JSON.stringify(defaultBody, null, 2) : ''
   })
 
@@ -99,64 +351,7 @@ export function APIPlayground({
     password: ''
   })
 
-  // Parameter values state
-  const [paramValues, setParamValues] = useState<Record<string, string>>(() => {
-    const initial: Record<string, string> = {}
-    parameters.forEach(param => {
-      initial[param.name] = param.defaultValue || ''
-    })
-    return initial
-  })
-
-  // Additional headers state
-  const [customHeaders, setCustomHeaders] = useState<Record<string, string>>({})
-
-  // Update URL with parameters
-  useEffect(() => {
-    let finalUrl = baseUrl + url
-    
-    // Replace path parameters
-    Object.entries(paramValues).forEach(([key, value]) => {
-      if (value && url.includes(`{${key}}`)) {
-        finalUrl = finalUrl.replace(`{${key}}`, encodeURIComponent(value))
-      }
-    })
-
-    // Add query parameters
-    const queryString = new URLSearchParams(requestConfig.queryParams).toString()
-    if (queryString) {
-      finalUrl += `?${queryString}`
-    }
-
-    setRequestConfig(prev => ({ ...prev, url: finalUrl }))
-  }, [paramValues, requestConfig.queryParams, url, baseUrl])
-
-  // Update headers with auth
-  useEffect(() => {
-    const headers = { ...requestConfig.headers, ...customHeaders }
-    
-    switch (auth.type) {
-      case 'bearer':
-        if (auth.token) {
-          headers['Authorization'] = `Bearer ${auth.token}`
-        }
-        break
-      case 'apiKey':
-        if (auth.apiKey) {
-          headers['X-API-Key'] = auth.apiKey
-        }
-        break
-      case 'basic':
-        if (auth.username && auth.password) {
-          headers['Authorization'] = `Basic ${btoa(`${auth.username}:${auth.password}`)}`
-        }
-        break
-    }
-
-    setRequestConfig(prev => ({ ...prev, headers }))
-  }, [auth, customHeaders, requestConfig.headers])
-
-  const executeRequest = async () => {
+  const executeRequest = useCallback(async () => {
     setIsLoading(true)
     setError(null)
     setResponse(null)
@@ -164,13 +359,34 @@ export function APIPlayground({
     const startTime = Date.now()
 
     try {
+      // Prepare headers based on auth type
+      const headers = { ...requestConfig.headers }
+      
+      switch (auth.type) {
+        case 'bearer':
+          if (auth.token) {
+            headers['Authorization'] = `Bearer ${auth.token}`
+          }
+          break
+        case 'apiKey':
+          if (auth.apiKey) {
+            headers['X-API-Key'] = auth.apiKey
+          }
+          break
+        case 'basic':
+          if (auth.username && auth.password) {
+            headers['Authorization'] = `Basic ${btoa(`${auth.username}:${auth.password}`)}`
+          }
+          break
+      }
+
       const fetchOptions: RequestInit = {
         method: requestConfig.method,
-        headers: requestConfig.headers
+        headers
       }
 
       if (requestConfig.method !== 'GET' && requestConfig.body) {
-        fetchOptions.body = requestConfig.body
+        fetchOptions.body = JSON.stringify(JSON.parse(requestConfig.body))
       }
 
       const response = await fetch(requestConfig.url, fetchOptions)
@@ -202,23 +418,7 @@ export function APIPlayground({
     } finally {
       setIsLoading(false)
     }
-  }
-
-  const addCustomHeader = () => {
-    const key = prompt('Header name:')
-    const value = prompt('Header value:')
-    if (key && value) {
-      setCustomHeaders(prev => ({ ...prev, [key]: value }))
-    }
-  }
-
-  const removeCustomHeader = (key: string) => {
-    setCustomHeaders(prev => {
-      const newHeaders = { ...prev }
-      delete newHeaders[key]
-      return newHeaders
-    })
-  }
+  }, [requestConfig, auth])
 
   const tabs = [
     { name: 'Parameters', key: 'params' },
@@ -260,7 +460,16 @@ export function APIPlayground({
         </div>
       )}
 
-      <div className="flex flex-col">
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-medium text-white">Server</label>
+          <Dropdown
+            buttonLabel={selectedServer?.description || 'Select Server'}
+            items={servers.map(server => ({ label: server.description || server.url, onClick: () => setSelectedServer(server) }))}
+            className="w-full"
+          />
+        </div>
+
         {/* Request Configuration */}
         <div className="flex-1 border-r border-zinc-700 dark:border-zinc-800">
           <TabGroup selectedIndex={selectedTab} onChange={setSelectedTab}>
@@ -283,62 +492,18 @@ export function APIPlayground({
             </TabList>
 
             <TabPanels className="min-h-[250px]">
-              {/* Parameters Tab */}
-              <TabPanel className={classNames("p-4 space-y-4", {
-                "flex justify-center items-center min-h-[250px]": parameters.length === 0
-              })}>
-                {parameters.length > 0 ? (
-                  parameters.map((param) => (
-                    <div key={param.name} className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <label className="text-sm font-medium text-white">{param.name}</label>
-                        {param.required && <span className="text-xs text-rose-400">Required</span>}
-                        <span className="text-xs text-zinc-400">{param.type}</span>
-                      </div>
-                      <input
-                        type="text"
-                        value={paramValues[param.name] || ''}
-                        onChange={(e) => setParamValues(prev => ({ ...prev, [param.name]: (e.target as HTMLInputElement).value }))}
-                        placeholder={param.description}
-                        className="w-full rounded-lg bg-zinc-800 border border-zinc-600 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:border-sky-500 focus:outline-none"
-                      />
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-sm text-zinc-400">No parameters required for this endpoint.</p>
-                )}
+              <TabPanel className="p-4">
+                <ParamsTab
+                  queryParams={requestConfig.queryParams}
+                  setQueryParams={setRequestConfig}
+                />
               </TabPanel>
 
-              {/* Headers Tab */}
-              <TabPanel className="p-4 space-y-4">
-                <div className="space-y-3">
-                  {Object.entries(requestConfig.headers).map(([key, value]) => (
-                    <div key={key} className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-zinc-300 w-32">{key}:</span>
-                      <span className="text-sm text-zinc-400">{value}</span>
-                    </div>
-                  ))}
-                  
-                  {Object.entries(customHeaders).map(([key, value]) => (
-                    <div key={key} className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-zinc-300 w-32">{key}:</span>
-                      <span className="text-sm text-zinc-400 flex-1">{value}</span>
-                      <button
-                        onClick={() => removeCustomHeader(key)}
-                        className="text-xs text-rose-400 hover:text-rose-300"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  ))}
-                </div>
-                
-                <button
-                  onClick={addCustomHeader}
-                  className="text-sm text-sky-400 hover:text-sky-300"
-                >
-                  + Add Custom Header
-                </button>
+              <TabPanel className="p-4">
+                <HeadersTab 
+                  requestConfig={requestConfig}
+                  setRequestConfig={setRequestConfig}
+                />
               </TabPanel>
 
               {/* Body Tab */}

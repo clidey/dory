@@ -1,6 +1,6 @@
 import { useState } from "preact/hooks"
 import { APIGroup } from "./api"
-import { APIPlayground, PlayButton } from "./api-playground"
+import { APIPlayground, PlayButton, type Server } from "./api-playground"
 import { Fence } from "./fence"
 import { Tag } from "./tag"
 import { Col, Row } from "./text"
@@ -45,7 +45,6 @@ export function Property({
     </div>
   )
 }
-
 
 interface ParamFieldProps {
   body: string;
@@ -129,6 +128,7 @@ interface PathMethod {
 export interface OpenAPIJson {
   paths: Record<string, Record<string, PathMethod>>;
   components: Components;
+  servers?: Server[];
 }
 
 function resolveSchema(schema: Schema | undefined, components: Components): Schema {
@@ -194,7 +194,7 @@ export function OpenAPI({ openAPIJson, method: selectedMethod, path: selectedPat
             <APIPlayground
               method={selectedMethod}
               url={selectedPath}
-              baseUrl="https://api.example.com"
+              servers={openAPIJson.servers}
             />
           </div>
         </motion.div>
