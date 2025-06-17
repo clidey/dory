@@ -1,0 +1,317 @@
+---
+title: 'Features'
+description: 'Overview of available components and features'
+---
+
+## Headings Examples
+
+```mdx
+# Heading 1
+```
+# Heading 1
+
+```mdx
+## Heading 2
+```
+# Heading 2
+
+```mdx
+### Heading 3
+```
+# Heading 3
+```mdx
+#### Heading 4
+```
+# Heading 4
+```mdx
+##### Heading 5
+```
+# Heading 5
+```mdx
+###### Heading 6
+```
+# Heading 6
+
+<br />
+
+### Images
+
+```mdx
+<img src="./assets/dory.jpeg" alt="Example image" className="object-cover w-64 h-64" />
+```
+
+<img src="./assets/dory.jpeg" alt="Example image" className="object-cover w-64 h-64" />
+
+
+<br />
+<br />
+<br />
+
+## Code Components
+
+### Code Block
+```typescript
+function example() {
+  return "Hello World";
+}
+```
+
+### Code Group Block
+
+<CodeGroup>
+```typescript
+function example(): string {
+  return "Hello World";
+}
+```
+```javascript
+function example() {
+  return "Hello World";
+}
+```
+</CodeGroup>
+
+
+<br />
+<br />
+<br />
+
+
+## Interactive Components
+
+### Accordion
+
+```mdx
+<AccordionGroup>
+  <Accordion title="First Section" icon="DocumentIcon">
+    This is the content of the first accordion section.
+  </Accordion>
+  <Accordion title="Second Section" icon="CodeBracketIcon">
+    This is the content of the second accordion section.
+  </Accordion>
+</AccordionGroup>
+```
+
+<AccordionGroup>
+  <Accordion title="First Section" icon="DocumentIcon">
+    This is the content of the first accordion section.
+  </Accordion>
+  <Accordion title="Second Section" icon="CodeBracketIcon">
+    This is the content of the second accordion section.
+  </Accordion>
+</AccordionGroup>
+
+### Callouts
+
+```mdx
+<Note>
+  This is a note callout with important information.
+</Note>
+```
+
+<Note>
+  This is a note callout with important information.
+</Note>
+
+```mdx
+<Warning>
+  This is a warning callout for critical information.
+</Warning>
+```
+
+<Warning>
+  This is a warning callout for critical information.
+</Warning>
+
+```mdx
+<Info>
+  This is an info callout for general information.
+</Info>
+```
+
+<Info>
+  This is an info callout for general information.
+</Info>
+
+```mdx
+<Tip>
+  This is a tip callout for helpful suggestions.
+</Tip>
+```
+
+<Tip>
+  This is a tip callout for helpful suggestions.
+</Tip>
+
+```mdx
+<Check>
+  This is a check callout for completed items.
+</Check>
+```
+
+<Check>
+  This is a check callout for completed items.
+</Check>
+
+
+<br />
+
+### Cards
+```mdx
+<CardGroup cols={2}>
+  <Card 
+    title="Example Card" 
+    description="This is an example card component with an icon and title."
+    icon="FileText"
+    href="#"
+  />
+  <Card 
+    title="Another Card" 
+    description="This is another example card with different content."
+    icon="Code"
+    href="#"
+  />
+</CardGroup>
+```
+
+<CardGroup cols={2}>
+  <Card 
+    title="Example Card" 
+    description="This is an example card component with an icon and title."
+    icon="FileText"
+    href="#"
+  />
+  <Card 
+    title="Another Card" 
+    description="This is another example card with different content."
+    icon="Code"
+    href="#"
+  />
+</CardGroup>
+
+<br />
+
+### Expandable
+
+```mdx
+<Expandable title="Click to Expand">
+  This is an expandable section that can be toggled.
+</Expandable>
+```
+
+<Expandable title="Click to Expand">
+  This is an expandable section that can be toggled.
+</Expandable>
+
+<br />
+<br />
+<br />
+
+
+## Special Components
+
+### Grids
+
+#### Rows
+```mdx
+<Row cols={2}>
+  <Icon icon="FileText" />
+  <Icon icon="CheckCircle" />
+</Row>
+```
+
+<Row cols={2}>
+  <Icon icon="FileText" />
+  <Icon icon="CheckCircle" />
+</Row>
+
+<br />
+
+#### Columns
+
+```mdx
+<Col>
+  <Icon icon="FileText" />
+  <Icon icon="FileText" />
+</Col>
+```
+
+<Col>
+  <Icon icon="FileText" />
+  <Icon icon="FileText" />
+</Col>
+
+<br />
+<br />
+<br />
+
+### Latex
+
+```mdx
+<Latex>
+E = mc^2
+</Latex>
+```
+
+<Latex>
+E = mc^2
+</Latex>
+
+<br />
+<br />
+<br />
+
+### Tables
+
+```mdx
+| Property | Description                           |
+| -------- | ------------------------------------- |
+| Name     | Full name of user                     |
+| Age      | Reported age                          |
+| Joined   | Whether the user joined the community |
+```
+
+| Property | Description                           |
+| -------- | ------------------------------------- |
+| Name     | Full name of user                     |
+| Age      | Reported age                          |
+| Joined   | Whether the user joined the community |
+
+
+### Steps
+
+```mdx
+<Steps>
+  <Step title="First Step">
+  This is the first step in the process.
+  </Step>
+  <Step title="Second Step">
+  This is the second step in the process.
+  </Step>
+</Steps>
+```
+
+<Steps>
+  <Step title="First Step">
+  This is the first step in the process.
+  </Step>
+  <Step title="Second Step">
+  This is the second step in the process.
+  </Step>
+</Steps>
+
+### Icons
+
+```mdx
+<Col rows={2}>
+  <Icon icon="Code" />
+  <Icon icon="FileText" />
+  <Icon icon="CheckCircle" />
+</Col>
+```
+
+<Row cols={3}>
+<Icon icon="Code" />
+<Icon icon="FileText" />
+<Icon icon="CheckCircle" />
+</Row>

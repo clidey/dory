@@ -1,7 +1,10 @@
+import { useState } from "preact/hooks"
 import { APIGroup } from "./api"
+import { APIPlayground, PlayButton, type Server } from "./api-playground"
 import { Fence } from "./fence"
 import { Tag } from "./tag"
 import { Col, Row } from "./text"
+import { motion } from "motion/react"
 
 export function Properties({ children }: { children: React.ReactNode }) {
   return (
@@ -35,14 +38,13 @@ export function Property({
           {type}
         </p>
         {required && <span className="text-rose-400 ml-1 text-xs">Required</span>}
-        <div className="w-full flex-none [&>:first-child]:mt-0 [&>:last-child]:mb-0 text-sm">
+        <p className="w-full flex-none [&>:first-child]:mt-0 [&>:last-child]:mb-0 text-sm">
           {children}
-        </div>
+        </p>
       </div>
     </div>
   )
 }
-
 
 interface ParamFieldProps {
   body: string;
@@ -126,6 +128,7 @@ interface PathMethod {
 export interface OpenAPIJson {
   paths: Record<string, Record<string, PathMethod>>;
   components: Components;
+  servers?: Server[];
 }
 
 function resolveSchema(schema: Schema | undefined, components: Components): Schema {
@@ -159,9 +162,44 @@ function resolveSchema(schema: Schema | undefined, components: Components): Sche
 
 export function OpenAPI({ openAPIJson, method: selectedMethod, path: selectedPath }: { openAPIJson: OpenAPIJson, method: string, path: string }) {
   const { paths, components } = openAPIJson;
+  const [showPlayground, setShowPlayground] = useState(false);
+
+  const handleShowPlayground = () => {
+    setShowPlayground(true);
+  }
 
   return (
     <div className="max-w-none w-full">
+      {
+        showPlayground &&
+        <motion.div
+          initial={{ x: "100%" }}
+          animate={{ x: 0 }}
+          exit={{ x: "100%" }}
+          transition={{ type: "spring", damping: 20 }}
+          className="fixed inset-y-0 right-0 w-full max-w-3xl bg-white dark:bg-[#1e1e1e] shadow-xl z-50 overflow-y-auto border-l border-zinc-200 dark:border-zinc-800"
+        >
+          <div className="p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-semibold">API Playground</h2>
+              <button
+                onClick={() => setShowPlayground(false)}
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <APIPlayground
+              method={selectedMethod}
+              url={selectedPath}
+              servers={openAPIJson.servers}
+            />
+          </div>
+        </motion.div>
+      }
+
       {Object.entries(paths).map(([path, methods]) => {
         if (path !== selectedPath) {
           return null;
@@ -178,7 +216,7 @@ export function OpenAPI({ openAPIJson, method: selectedMethod, path: selectedPat
             }
 
             return (
-              <Row key={`${method}-${path}`}>
+              <Row key={`${method}-${path}`} cols={2}>
                 <Col>
                   <h2 className="flex items-center mt-4">
                     <Tag variant="medium" className="mr-2 py-1 px-4 rounded-lg">{methodUpper}</Tag>
@@ -255,6 +293,12 @@ export function OpenAPI({ openAPIJson, method: selectedMethod, path: selectedPat
                   )}
                 </Col>
                 <Col sticky>
+                  <button
+                    onClick={handleShowPlayground}
+                    className='ml-auto mt-3 flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition bg-sky-600 text-white hover:bg-sky-700'>
+                      Try
+                    <PlayButton className="h-4 w-4" />
+                  </button>
                   <APIGroup title="Request" tag={methodUpper} label={path}>
                     {Object.entries(responses).map(([code, response]) => (
                       <div key={code} title={code}>

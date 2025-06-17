@@ -28,8 +28,7 @@ export default function Dropdown({ buttonLabel, items, className = '' }: Dropdow
 
       <MenuItems
         transition
-        className="absolute right-0 z-10 mt-2 w-56 origin-top-right divide-y divide-[#444444] rounded-md bg-[#1e1e1e] shadow-lg ring-1 ring-[#444444]/50 transition focus:outline-hidden data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
-      >
+        className="absolute left-0 right-0 z-10 mt-2 w-full origin-top-right divide-y divide-[#444444] rounded-md bg-[#1e1e1e] shadow-lg ring-1 ring-[#444444]/50 transition focus:outline-hidden data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in">
         {items.map((item, index) => (
           <div key={index} className={item.divider ? 'py-1' : ''}>
             <MenuItem className="group">
