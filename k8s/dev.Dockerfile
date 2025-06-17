@@ -13,4 +13,4 @@ RUN rm -rf /app/src/data
 
 EXPOSE 3000
 
-CMD ["pnpm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "3000"]
+CMD ["pnpm", "dev", "--host", "0.0.0.0", "--port", "3000"]
