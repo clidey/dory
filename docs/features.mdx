@@ -34,6 +34,32 @@ description: 'Overview of available components and features'
 
 <br />
 
+## Lists Examples
+
+```mdx
+- List item 1
+- List item 2
+- List item 3
+```
+
+- List item 1
+- List item 2
+- List item 3
+
+```mdx
+1. List item 1
+2. List item 2
+3. List item 3
+```
+
+1. List item 1
+2. List item 2
+3. List item 3
+
+
+
+<br />
+
 ### Images
 
 ```mdx
@@ -78,6 +104,89 @@ function example() {
 
 
 ## Interactive Components
+
+### Mermaid
+
+```mdx
+mermaid
+graph TD
+
+  %% Main Start
+  Start([Start Process]) --> Validate[Validate Input]
+
+  %% Decision Point
+  Validate -->|Valid| ProcessData{Is Data Clean?}
+  Validate -->|Invalid| Error[Show Error Message]
+
+  %% Clean Data Branch
+  ProcessData -->|Yes| Clean[Clean Data]
+  Clean --> Analyze[Analyze Data]
+
+  %% Dirty Data Branch
+  ProcessData -->|No| Notify[Notify User]
+  Notify --> Wait[Wait for Input]
+  Wait --> Validate
+
+  %% Parallel Branches After Analysis
+  Analyze --> Split1 & Split2
+
+  subgraph Parallel Tasks
+    Split1[Generate Report] --> Merge
+    Split2[Update Dashboard] --> Merge
+  end
+
+  Merge --> Decision2{Is More Input Needed?}
+  Decision2 -->|Yes| WaitMore[Wait for More Input]
+  WaitMore --> Validate
+  Decision2 -->|No| End([End Process])
+
+  %% Style and Class Definitions
+  classDef decision fill:#f9f,stroke:#333,stroke-width:2px;
+  class ProcessData,Decision2 decision;
+
+```
+
+<strong>
+<p>Note: Mermaid should be inside a code block with type "mermaid"</p>
+</strong>
+
+```mermaid
+graph TD
+
+  %% Main Start
+  Start([Start Process]) --> Validate[Validate Input]
+
+  %% Decision Point
+  Validate -->|Valid| ProcessData{Is Data Clean?}
+  Validate -->|Invalid| Error[Show Error Message]
+
+  %% Clean Data Branch
+  ProcessData -->|Yes| Clean[Clean Data]
+  Clean --> Analyze[Analyze Data]
+
+  %% Dirty Data Branch
+  ProcessData -->|No| Notify[Notify User]
+  Notify --> Wait[Wait for Input]
+  Wait --> Validate
+
+  %% Parallel Branches After Analysis
+  Analyze --> Split1 & Split2
+
+  subgraph Parallel Tasks
+    Split1[Generate Report] --> Merge
+    Split2[Update Dashboard] --> Merge
+  end
+
+  Merge --> Decision2{Is More Input Needed?}
+  Decision2 -->|Yes| WaitMore[Wait for More Input]
+  WaitMore --> Validate
+  Decision2 -->|No| End([End Process])
+
+  %% Style and Class Definitions
+  classDef decision fill:#f9f,stroke:#333,stroke-width:2px;
+  class ProcessData,Decision2 decision;
+
+```
 
 ### Accordion
 
@@ -202,6 +311,20 @@ function example() {
 <Expandable title="Click to Expand">
   This is an expandable section that can be toggled.
 </Expandable>
+
+### Source
+
+```mdx
+<Source url="https://github.com/clidey/dory" paths={[
+  { path: "src/mdx/source.tsx", range: "1-46" },
+  { path: "docs/features.mdx", range: "318-322" },
+]} />
+```
+
+<Source url="https://github.com/clidey/dory" paths={[
+  { path: "src/mdx/source.tsx", range: "1-46" },
+  { path: "docs/features.mdx", range: "318-322" },
+]} />
 
 <br />
 <br />

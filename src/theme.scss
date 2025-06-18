@@ -1,4 +1,3 @@
-
 html {
   background-color: #ffffff !important;
 }
@@ -13,37 +12,33 @@ h1, h2, h3, h4, h5, h6, p, li {
   font-size: 12px !important;
 }
 
-/* Nodes */
-.mermaid .node rect {
-  fill: #f0f0f0 !important;
+.mermaid rect {
+  fill: #f8f8f8 !important;
   stroke: #333333 !important;
-  stroke-width: 1px !important;
 }
-.mermaid .nodes p {
+
+.mermaid p {
   color: #000000 !important;
 }
 
-/* Edges */
-.mermaid .edgePaths path {
+.mermaid path {
   stroke: #555555 !important;
-  stroke-width: 1.5px !important;
-}
-.mermaid .edgeLabel {
-  color: unset !important;
 }
 
-/* Clusters */
-.mermaid .cluster rect {
-  fill: #f8f8f8 !important;
-  stroke: #999999 !important;
-  stroke-width: 0px !important;
+.mermaid p {
+  background-color: #f8f8f8 !important;
+  color: #000000 !important;
 }
 
-.mermaid .cluster p {
+.mermaid p, .mermaid text, .mermaid text > tspan {
+  color: #000000 !important;
   fill: #000000 !important;
 }
 
-/* Notes */
+.mermaid line {
+  stroke: #333333 !important;
+}
+
 .mermaid .note {
   fill: #ffffcc !important;
   stroke: #999999 !important;
@@ -51,11 +46,11 @@ h1, h2, h3, h4, h5, h6, p, li {
 }
 
 .docucod-mdx-code {
-    background-color: #f8f8f8 !important;
+  background-color: #f8f8f8 !important;
 }
 
 body.dark {
-    background-color: #1e1e1e !important;
+  background-color: #1e1e1e !important;
 
   #container {
     background-color: #1e1e1e !important;
@@ -70,33 +65,41 @@ body.dark {
     color: #ffffff !important;
   }
   
-  .mermaid .node rect {
-    fill: #333333 !important;
+  .mermaid rect {
+    fill: #2a2a2a !important;
     stroke: #aaaaaa !important;
   }
   
-  .mermaid .nodeLabel p {
+  .mermaid p {
     color: #ffffff !important;
   }
   
-  .mermaid .edgePaths path {
+  .mermaid path {
     stroke: #cccccc !important;
   }
   
-  .mermaid .edgeLabel p {
+  .mermaid p {
     background-color: #2a2a2a !important;
     color: #ffffff !important;
   }
   
-  .mermaid .cluster rect {
+  .mermaid rect,
+  .mermaid polygon,
+  .mermaid circle,
+  .mermaid ellipse {
     fill: #2a2a2a !important;
     stroke: #444444 !important;
   }
 
-  .mermaid .cluster p {
+  .mermaid p, .mermaid text, .mermaid text > tspan {
     color: #ffffff !important;
+    fill: #ffffff !important;
   }
-  
+
+  .mermaid line {
+    stroke: #444444 !important;
+  }
+
   .mermaid .note {
     fill: #2a2a2a !important;
     stroke: #444444 !important;
@@ -104,7 +107,7 @@ body.dark {
   }
   
   .docucod-mdx-code {
-      background-color: #2a2a2a !important;
+    background-color: #2a2a2a !important;
   }
 
   .docucod-mdx-code-group {
@@ -112,7 +115,7 @@ body.dark {
   }
 
   .docucod-mdx-code-group-header {
-      background-color: #2a2a2a !important;
+    background-color: #2a2a2a !important;
   }
 
   .prism-code {

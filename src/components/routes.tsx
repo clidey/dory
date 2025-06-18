@@ -72,6 +72,11 @@ export default function Routes() {
     }
   }, [routes, pathname]);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [pathname]);
+  
+
   if (loading) return <div className="h-[25vh] flex grow"><Loading /></div>;
 
   return (

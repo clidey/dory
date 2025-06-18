@@ -7,15 +7,15 @@ export const h1 = function H1(props: preact.JSX.HTMLAttributes<HTMLHeadingElemen
 }
 
 export const h2 = function H2(props: preact.JSX.HTMLAttributes<HTMLHeadingElement>) {
-  return <h2 className="text-3xl font-bold mb-3 mt-8" {...props} />
+  return <h2 className="text-3xl font-bold mb-3 mt-10" {...props} />
 }
 
 export const h3 = function H3(props: preact.JSX.HTMLAttributes<HTMLHeadingElement>) {
-  return <h3 className="text-2xl font-bold mb-2" {...props} />
+  return <h3 className="text-2xl font-bold mb-2 mt-8" {...props} />
 }
 
 export const h4 = function H4(props: preact.JSX.HTMLAttributes<HTMLHeadingElement>) {
-  return <h4 className="text-xl font-bold mb-2" {...props} />
+  return <h4 className="text-xl font-bold mb-2 mt-6" {...props} />
 }
 
 export const h5 = function H5(props: preact.JSX.HTMLAttributes<HTMLHeadingElement>) {
@@ -27,7 +27,7 @@ export const h6 = function H6(props: preact.JSX.HTMLAttributes<HTMLHeadingElemen
 }
 
 export const p = function P(props: preact.JSX.HTMLAttributes<HTMLParagraphElement>) {
-  return <p className="mb-2" {...props} />
+  return <p className="mb-2 inline-block" {...props} />
 }
 
 export function Row({ children, cols = 1 }: { children: preact.ComponentChildren, cols?: number }) {

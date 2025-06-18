@@ -34,14 +34,16 @@ export function MermaidRenderer({ content }: { content: string }) {
                         rankSpacing: 80,      // vertical spacing between layers
                         padding: 20,
                         useMaxWidth: true,
-                    }
+                    },
                 })
 
                 if (mermaidRef.current) {
                     mermaidRef.current.innerHTML = ''
                 }
 
-                const { svg } = await mermaid.render(diagramId, content)
+                const contentWithoutStyle = content.replace(/classDef.*\n.*class.*\n/, '')
+
+                const { svg } = await mermaid.render(diagramId, contentWithoutStyle)
 
                 if (mounted && mermaidRef.current) {
                     mermaidRef.current.innerHTML = svg
