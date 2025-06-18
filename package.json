@@ -32,7 +32,7 @@
     "react-highlight-words": "^0.21.0",
     "remark-gfm": "^4.0.1",
     "saas": "^1.0.0",
-    "tailwindcss": "^4.1.8",
+    "tailwindcss": "^4.1.10",
     "unist-util-visit": "^5.0.0",
     "vite-plugin-mdx": "^3.6.1",
     "wouter-preact": "^3.7.1"
