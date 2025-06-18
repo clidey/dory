@@ -5,19 +5,20 @@ type PathRange = {
 
 type SourceProps = {
     url: string;
+    branch?: string;
     paths: PathRange[];
 };
 
-export const Source = ({ url, paths }: SourceProps) => {
+export const Source = ({ url, branch = "main", paths }: SourceProps) => {
     const createSourceUrl = (path: string, range: string) => {
         const [start, end] = range.split('-');
 
         if (url.includes('github.com')) {
-            return `${url}/blob/main/${path}#L${start}${end ? `-L${end}` : ''}`;
+            return `${url}/blob/${branch}/${path}#L${start}${end ? `-L${end}` : ''}`;
         } else if (url.includes('bitbucket.org')) {
-            return `${url}/src/main/${path}#lines-${start}${end ? `:${end}` : ''}`;
+            return `${url}/src/${branch}/${path}#lines-${start}${end ? `:${end}` : ''}`;
         } else if (url.includes('gitlab.com')) {
-            return `${url}/-/blob/main/${path}#L${range.replace('-', '-')}`;
+            return `${url}/-/blob/${branch}/${path}#L${range.replace('-', '-')}`;
         }
 
         return url;
