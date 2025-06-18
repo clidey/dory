@@ -41,9 +41,13 @@ export function MermaidRenderer({ content }: { content: string }) {
                     mermaidRef.current.innerHTML = ''
                 }
 
-                const contentWithoutStyle = content.replace(/classDef.*\n.*class.*\n/, '')
-
-                const { svg } = await mermaid.render(diagramId, contentWithoutStyle)
+                const contentWithoutStyle = content
+                    .replace(/^\s*style .*$/gm, '')
+                    .replace(/^\s*classDef .*$/gm, '')
+                    .replace(/^\s*class .*$/gm, '');
+              
+                const { svg } = await mermaid.render(diagramId, contentWithoutStyle);
+                
 
                 if (mounted && mermaidRef.current) {
                     mermaidRef.current.innerHTML = svg
