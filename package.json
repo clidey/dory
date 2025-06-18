@@ -19,7 +19,7 @@
     "@heroicons/react": "^2.2.0",
     "@mdx-js/preact": "^3.1.0",
     "@mdx-js/rollup": "^3.1.0",
-    "@tailwindcss/vite": "^4.1.8",
+    "@tailwindcss/vite": "^4.1.10",
     "classnames": "^2.5.1",
     "flexsearch": "^0.8.205",
     "gray-matter": "^4.0.3",
