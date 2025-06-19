@@ -145,7 +145,7 @@ export default function Layout({ children }: LayoutProps) {
                 </header>
                 {
                   openAPIJSON == null &&
-                  <Dropdown buttonLabel="AI Actions" items={dropdownItems} />
+                  <Dropdown className='min-w-[120px]' buttonLabel="AI Actions" items={dropdownItems} />
                 }
               </div>
               <div className="flex-1 min-h-[calc(100vh-2rem)]">
