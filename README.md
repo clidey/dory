@@ -43,7 +43,7 @@ Dory is:
 Install Dory globally to use the CLI tool:
 
 ```bash
-npm install -g dory
+npm install -g @clidey/dory
 ```
 
 ### CLI Usage
