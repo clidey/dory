@@ -38,7 +38,49 @@ Dory is:
 
 ---
 
-## 🧑‍💻 Quick Start
+## 📦 CLI Installation
+
+Install Dory globally to use the CLI tool:
+
+```bash
+npm install -g dory
+```
+
+### CLI Usage
+
+Once installed, you can use the `dory` command:
+
+#### `dory build`
+Builds your documentation site:
+- Checks for `dory.json` in current directory
+- Clears and prepares the `docs` folder
+- Copies configuration to `docs` folder
+- Runs the build process
+- Creates `dist` folder with build output
+
+```bash
+dory build
+```
+
+#### `dory preview`
+Previews the built documentation site:
+- Requires `dist` folder (run `dory build` first)
+- Starts a local preview server
+
+```bash
+dory preview
+```
+
+#### `dory help`
+Shows CLI usage information:
+
+```bash
+dory help
+```
+
+---
+
+## 🧑‍💻 Development Setup
 
 Follow these steps to set up and preview the documentation locally, as well as build a static site for deployment.
 
