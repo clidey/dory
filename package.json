@@ -1,7 +1,7 @@
 {
   "name": "@clidey/dory",
   "private": false,
-  "version": "1.0.0",
+  "version": "0.1.0",
   "type": "module",
   "description": "A CLI tool for building and previewing documentation sites",
   "keywords": [
@@ -27,7 +27,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "publish": "npm publish --access public"
   },
   "dependencies": {
     "@algolia/autocomplete-core": "^1.19.2",
