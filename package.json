@@ -1,10 +1,16 @@
 {
-  "name": "dory",
+  "name": "@clidey/dory",
   "private": false,
   "version": "1.0.0",
   "type": "module",
   "description": "A CLI tool for building and previewing documentation sites",
-  "keywords": ["cli", "documentation", "build", "preview", "static-site"],
+  "keywords": [
+    "cli",
+    "documentation",
+    "build",
+    "preview",
+    "static-site"
+  ],
   "bin": {
     "dory": "./bin/dory.js"
   },
@@ -47,6 +53,7 @@
     "react-highlight-words": "^0.21.0",
     "remark-gfm": "^4.0.1",
     "saas": "^1.0.0",
+    "sirv": "^3.0.1",
     "tailwindcss": "^4.1.8",
     "unist-util-visit": "^5.0.0",
     "vite-plugin-mdx": "^3.6.1",

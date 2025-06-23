@@ -3,7 +3,9 @@
 import { execSync } from 'child_process';
 import { existsSync, rmSync, mkdirSync, cpSync, readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath } from 'url'
+import http from 'http';
+import sirv from 'sirv';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -45,40 +47,47 @@ const commands = {
     // Run the build command
     console.log('⚡ Running build command...');
     try {
-      execSync('npm run build', { stdio: 'inherit', cwd: currentDir });
+      execSync('npm run build', { stdio: 'inherit', cwd: __dirname });
     } catch (error) {
       console.error('❌ Build failed:', error.message);
       process.exit(1);
     }
     
     // Check if dist folder was created
-    const distDir = resolve(currentDir, 'dist');
+    const distDir = resolve(__dirname, '..', 'dist');
     if (existsSync(distDir)) {
       console.log('✅ Build completed successfully!');
       console.log(`📦 Build output available in: ${distDir}`);
+      console.log('📋 Moving build output to current directory...');
+      cpSync(distDir, resolve(currentDir, 'dist'), { recursive: true });
+      console.log(`📦 Build output moved to: ${resolve(currentDir, 'dist')}`);
     } else {
       console.log('⚠️  Build completed but no dist folder found');
     }
+    rmSync(distDir, { recursive: true, force: true });
   },
 
   preview: () => {
     console.log('👀 Starting Dory preview...');
-    
     const currentDir = process.cwd();
     const distDir = resolve(currentDir, 'dist');
-    
-    if (!existsSync(distDir)) {
-      console.error('❌ No dist folder found. Run "dory build" first.');
-      process.exit(1);
-    }
-    
-    console.log('🚀 Starting preview server...');
-    try {
-      execSync('npm run preview', { stdio: 'inherit', cwd: currentDir });
-    } catch (error) {
-      console.error('❌ Preview failed:', error.message);
-      process.exit(1);
-    }
+    const port = process.env.PORT || 3000;
+
+    const serve = sirv(distDir, {
+      dev: false,
+      single: true,
+      etag: true,
+      gzip: true,
+      brotli: true,
+    });
+
+    const server = http.createServer((req, res) => {
+      serve(req, res);
+    });
+
+    server.listen(port, () => {
+      console.log(`🚀 Serving Dory at http://localhost:${port}`);
+    });
   },
 
   help: () => {
