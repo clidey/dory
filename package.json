@@ -1,8 +1,23 @@
 {
-  "name": "doc-engine-v2",
-  "private": true,
-  "version": "0.0.0",
+  "name": "dory",
+  "private": false,
+  "version": "1.0.0",
   "type": "module",
+  "description": "A CLI tool for building and previewing documentation sites",
+  "keywords": ["cli", "documentation", "build", "preview", "static-site"],
+  "bin": {
+    "dory": "./bin/dory.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/clidey/dory.git"
+  },
+  "author": "Clidey",
+  "license": "MIT",
+  "homepage": "https://github.com/clidey/dory",
+  "bugs": {
+    "url": "https://github.com/clidey/dory/issues"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
