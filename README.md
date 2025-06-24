@@ -150,6 +150,16 @@ This will create a `dist` directory containing the fully built static site, read
 
 ## 🐳 Docker Deployment (Optional)
 
+You can use our official Docker image `clidey/dory` to create a static server. Simply create a Dockerfile inside the project and build the following Dockerfile:
+
+```dockerfile
+FROM clidey/dory
+WORKDIR /app
+COPY . .
+RUN dory build
+CMD ["dory", "preview"]
+```
+
 You can also build and run the static site inside a Docker container using Nginx:
 
 ### Build Docker Image
