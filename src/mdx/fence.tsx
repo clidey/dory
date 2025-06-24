@@ -4,6 +4,7 @@ import { Code, CodeGroup, CodeGroupContext, supportedLanguages } from './code'
 import { MermaidRenderer } from './mermaid'
 import { Loading } from '../components/loading'
 import { useDarkMode } from '../utils/hooks'
+import classNames from 'classnames'
 
 
 export function Fence({
@@ -34,7 +35,7 @@ export function Fence({
       theme={isDark ? themes.vsDark : themes.vsLight}>
       {({ className, style, tokens, getTokenProps }) => (
         <pre>
-          <Code className={className} style={style} title={supportedLanguage}>
+          <Code className={classNames(className, "whitespace-pre-wrap")} style={style} title={supportedLanguage}>
             {tokens.map((line, lineIndex) => (
               <Fragment key={lineIndex}>
                 {line

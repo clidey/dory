@@ -1,3 +1,4 @@
+import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 import classNames from 'classnames'
 import { useEffect, useMemo, useRef, useState } from 'preact/compat'
 
@@ -6,6 +7,7 @@ export function MermaidRenderer({ content }: { content: string }) {
     const [isFullscreen, setIsFullscreen] = useState(false)
     const [isLoaded, setIsLoaded] = useState(false)
     const [error, setError] = useState<string | null>(null)
+    const [isValid, setIsValid] = useState<boolean | null>(null)
 
     const diagramId = useMemo(() => `mermaid-${btoa(content).replace(/[^a-zA-Z0-9]/g, '').substring(0, 10)}`, [content])
 
@@ -15,8 +17,7 @@ export function MermaidRenderer({ content }: { content: string }) {
         const renderMermaid = async () => {
             try {
                 const mermaid = (await import('mermaid')).default
-                mermaid.initialize({ startOnLoad: true });
-
+                
                 if (!mounted || !mermaidRef.current) return
 
                 mermaid.initialize({
@@ -24,14 +25,14 @@ export function MermaidRenderer({ content }: { content: string }) {
                     theme: 'base',
                     themeVariables: {
                         fontSize: '14px',
-                        nodePadding: 20,        // More padding inside nodes
+                        nodePadding: 20,
                         notePadding: 15,
-                        padding: 10,            // Diagram-wide padding
-                        nodeBorderRadius: 8,    // Rounded corners for nodes
+                        padding: 10,
+                        nodeBorderRadius: 8,
                     },
                     flowchart: {
-                        nodeSpacing: 50,      // horizontal spacing between nodes
-                        rankSpacing: 80,      // vertical spacing between layers
+                        nodeSpacing: 50,
+                        rankSpacing: 80,
                         padding: 20,
                         useMaxWidth: true,
                     },
@@ -45,9 +46,20 @@ export function MermaidRenderer({ content }: { content: string }) {
                     .replace(/^\s*style .*$/gm, '')
                     .replace(/^\s*classDef .*$/gm, '')
                     .replace(/^\s*class .*$/gm, '');
+
+                // Validate the mermaid syntax first
+                try {
+                    await mermaid.parse(contentWithoutStyle)
+                    setIsValid(true)
+                } catch (parseError) {
+                    setIsValid(false)
+                    if (mounted) {
+                        setError(parseError instanceof Error ? parseError.message : 'Invalid diagram syntax')
+                    }
+                    return
+                }
               
                 const { svg } = await mermaid.render(diagramId, contentWithoutStyle);
-                
 
                 if (mounted && mermaidRef.current) {
                     mermaidRef.current.innerHTML = svg
@@ -56,6 +68,7 @@ export function MermaidRenderer({ content }: { content: string }) {
             } catch (err) {
                 console.error('Mermaid rendering error:', err)
                 if (mounted) {
+                    setIsValid(false)
                     setError(err instanceof Error ? err.message : 'Failed to render diagram')
                 }
             }
@@ -72,10 +85,25 @@ export function MermaidRenderer({ content }: { content: string }) {
         setIsFullscreen(!isFullscreen)
     }
 
-    if (error) {
+    if (error || isValid === false) {
         return (
-            <div className="flex items-center justify-center py-8 text-red-400 bg-red-900/20 border border-red-800 rounded">
-                <span>Error rendering diagram: {error}</span>
+            <div className="mermaid-wrapper my-8">
+                <div className="flex flex-col items-center justify-center py-12 px-6 text-center bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 border-2 border-dashed border-red-300 dark:border-red-700 rounded-lg">
+                    <div className="w-16 h-16 mb-4 flex items-center justify-center bg-red-100 dark:bg-red-900/30 rounded-full">
+                        <ExclamationTriangleIcon className="w-8 h-8 text-red-500" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-red-700 dark:text-red-300 mb-2">
+                        Diagram Syntax Error
+                    </h3>
+                    <p className="text-red-600 dark:text-red-400 mb-4 max-w-md">
+                        The Mermaid diagram contains invalid syntax and cannot be rendered.
+                    </p>
+                    <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-md p-3 max-w-md">
+                        <p className="text-sm text-red-700 dark:text-red-300 font-mono break-all">
+                            {error}
+                        </p>
+                    </div>
+                </div>
             </div>
         )
     }
