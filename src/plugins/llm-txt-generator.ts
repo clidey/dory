@@ -170,7 +170,7 @@ export function llmTxtGenerator(options: LlmTxtGeneratorOptions = {}): Plugin {
 
       this.emitFile({
         type: 'asset',
-        fileName: 'llm.txt',
+        fileName: 'llms.txt',
         source: aggregatedContent
       });
 

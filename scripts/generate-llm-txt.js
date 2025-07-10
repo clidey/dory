@@ -103,7 +103,7 @@ async function generateLlmTxt() {
   }
   
   // Write to output file
-  const outputPath = path.join(outputDir, 'llm.txt');
+  const outputPath = path.join(outputDir, 'llms.txt');
   fs.writeFileSync(outputPath, aggregatedContent.trim());
   
   console.log(`✅ Generated LLM text file: ${outputPath}`);

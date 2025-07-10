@@ -160,7 +160,7 @@ export function llmTxtDevServer(): Plugin {
   return {
     name: 'llm-txt-dev-server',
     configureServer(server) {
-      server.middlewares.use('/llm.txt', (req, res, next) => {
+      server.middlewares.use('/llms.txt', (req, res, next) => {
         if (req.method !== 'GET') {
           return next();
         }
