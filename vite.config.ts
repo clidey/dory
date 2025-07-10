@@ -4,6 +4,8 @@ import mdx from '@mdx-js/rollup';
 import tailwindcss from '@tailwindcss/vite'
 import remarkGfm from 'remark-gfm';
 import { remarkSafeVars } from './src/plugins/sanitize';
+import { llmTxtGenerator } from './src/plugins/llm-txt-generator';
+import { llmTxtDevServer } from './src/plugins/llm-txt-dev-server';
 
 export default defineConfig({
   plugins: [
@@ -13,6 +15,8 @@ export default defineConfig({
       remarkPlugins: [remarkGfm, remarkSafeVars],
     }),
     tailwindcss(),
+    llmTxtGenerator(),
+    llmTxtDevServer(),
   ],
   resolve: {
     alias: {
