@@ -24,12 +24,28 @@
             ]
           },
           {
+            "group": "Playground",
+            "pages": [
+              "websocket-playground-demo"
+            ]
+          },
+          {
             "group": "API Reference",
             "pages": [
               "api-reference/operations/create",
               "api-reference/operations/get",
               "api-reference/operations/update",
               "api-reference/operations/delete"
+            ]
+          },
+          {
+            "group": "WebSocket API Reference",
+            "pages": [
+              "api-reference/websocket-operations/send-chat-message",
+              "api-reference/websocket-operations/receive-chat-message",
+              "api-reference/websocket-operations/receive-notifications",
+              "api-reference/websocket-operations/send-presence-update",
+              "api-reference/websocket-operations/receive-presence-update"
             ]
           }
         ]

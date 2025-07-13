@@ -1,0 +1,324 @@
+{
+  "asyncapi": "3.0.0",
+  "info": {
+    "title": "Chat WebSocket API",
+    "version": "1.0.0",
+    "description": "Real-time chat API using WebSocket for bidirectional communication"
+  },
+  "servers": {
+    "development": {
+      "host": "localhost:8080",
+      "pathname": "/ws",
+      "protocol": "ws",
+      "description": "Development WebSocket server"
+    },
+    "production": {
+      "host": "api.example.com",
+      "pathname": "/ws",
+      "protocol": "wss",
+      "description": "Production WebSocket server"
+    }
+  },
+  "channels": {
+    "/chat": {
+      "address": "/chat",
+      "title": "Chat Channel",
+      "description": "Channel for sending and receiving chat messages",
+      "subscribe": {
+        "operationId": "receiveChatMessage",
+        "summary": "Receive chat messages",
+        "description": "Subscribe to receive chat messages from other users",
+        "message": {
+          "$ref": "#/components/messages/ChatMessage"
+        }
+      },
+      "publish": {
+        "operationId": "sendChatMessage",
+        "summary": "Send chat message",
+        "description": "Send a chat message to other users",
+        "message": {
+          "$ref": "#/components/messages/ChatMessage"
+        }
+      }
+    },
+    "/notifications": {
+      "address": "/notifications",
+      "title": "Notifications Channel",
+      "description": "Channel for receiving system notifications",
+      "subscribe": {
+        "operationId": "receiveNotification",
+        "summary": "Receive notifications",
+        "description": "Subscribe to receive system notifications",
+        "message": {
+          "$ref": "#/components/messages/Notification"
+        }
+      }
+    },
+    "/presence": {
+      "address": "/presence",
+      "title": "Presence Channel",
+      "description": "Channel for user presence updates",
+      "subscribe": {
+        "operationId": "receivePresenceUpdate",
+        "summary": "Receive presence updates",
+        "description": "Subscribe to receive user presence updates",
+        "message": {
+          "$ref": "#/components/messages/PresenceUpdate"
+        }
+      },
+      "publish": {
+        "operationId": "sendPresenceUpdate",
+        "summary": "Send presence update",
+        "description": "Send a presence update",
+        "message": {
+          "$ref": "#/components/messages/PresenceUpdate"
+        }
+      }
+    }
+  },
+  "components": {
+    "messages": {
+      "ChatMessage": {
+        "name": "ChatMessage",
+        "title": "Chat Message",
+        "summary": "Message sent in a chat conversation",
+        "description": "A message sent by a user in a chat conversation",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "#/components/schemas/ChatMessagePayload"
+        },
+        "headers": {
+          "$ref": "#/components/schemas/MessageHeaders"
+        },
+        "examples": [
+          {
+            "id": "msg_123",
+            "type": "message",
+            "content": "Hello, how are you?",
+            "userId": "user_456",
+            "username": "john_doe",
+            "timestamp": "2024-01-15T10:30:00Z",
+            "channel": "general"
+          }
+        ]
+      },
+      "Notification": {
+        "name": "Notification",
+        "title": "System Notification",
+        "summary": "System-generated notification",
+        "description": "A notification sent by the system to inform users about events",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "#/components/schemas/NotificationPayload"
+        },
+        "headers": {
+          "$ref": "#/components/schemas/MessageHeaders"
+        },
+        "examples": [
+          {
+            "id": "notif_789",
+            "type": "notification",
+            "title": "New Message",
+            "message": "You have a new message from Alice",
+            "level": "info",
+            "timestamp": "2024-01-15T10:35:00Z",
+            "userId": "user_456"
+          }
+        ]
+      },
+      "PresenceUpdate": {
+        "name": "PresenceUpdate",
+        "title": "Presence Update",
+        "summary": "User presence status update",
+        "description": "Update about a user's presence status (online, offline, away)",
+        "contentType": "application/json",
+        "payload": {
+          "$ref": "#/components/schemas/PresenceUpdatePayload"
+        },
+        "headers": {
+          "$ref": "#/components/schemas/MessageHeaders"
+        },
+        "examples": [
+          {
+            "id": "presence_101",
+            "type": "presence",
+            "userId": "user_456",
+            "username": "john_doe",
+            "status": "online",
+            "lastSeen": "2024-01-15T10:40:00Z",
+            "timestamp": "2024-01-15T10:40:00Z"
+          }
+        ]
+      }
+    },
+    "schemas": {
+      "ChatMessagePayload": {
+        "type": "object",
+        "required": ["id", "type", "content", "userId", "username", "timestamp"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the message",
+            "example": "msg_123"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["message"],
+            "description": "Message type identifier",
+            "example": "message"
+          },
+          "content": {
+            "type": "string",
+            "description": "The message content",
+            "example": "Hello, how are you?"
+          },
+          "userId": {
+            "type": "string",
+            "description": "ID of the user who sent the message",
+            "example": "user_456"
+          },
+          "username": {
+            "type": "string",
+            "description": "Username of the sender",
+            "example": "john_doe"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the message was sent",
+            "example": "2024-01-15T10:30:00Z"
+          },
+          "channel": {
+            "type": "string",
+            "description": "Channel where the message was sent",
+            "example": "general"
+          },
+          "replyTo": {
+            "type": "string",
+            "description": "ID of the message this is replying to",
+            "example": "msg_122"
+          }
+        }
+      },
+      "NotificationPayload": {
+        "type": "object",
+        "required": ["id", "type", "title", "message", "timestamp"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the notification",
+            "example": "notif_789"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["notification"],
+            "description": "Message type identifier",
+            "example": "notification"
+          },
+          "title": {
+            "type": "string",
+            "description": "Notification title",
+            "example": "New Message"
+          },
+          "message": {
+            "type": "string",
+            "description": "Notification message content",
+            "example": "You have a new message from Alice"
+          },
+          "level": {
+            "type": "string",
+            "enum": ["info", "warning", "error", "success"],
+            "description": "Notification level",
+            "example": "info"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the notification was created",
+            "example": "2024-01-15T10:35:00Z"
+          },
+          "userId": {
+            "type": "string",
+            "description": "ID of the user receiving the notification",
+            "example": "user_456"
+          },
+          "actionUrl": {
+            "type": "string",
+            "description": "URL to navigate to when notification is clicked",
+            "example": "/chat/general"
+          }
+        }
+      },
+      "PresenceUpdatePayload": {
+        "type": "object",
+        "required": ["id", "type", "userId", "username", "status", "timestamp"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the presence update",
+            "example": "presence_101"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["presence"],
+            "description": "Message type identifier",
+            "example": "presence"
+          },
+          "userId": {
+            "type": "string",
+            "description": "ID of the user whose presence is being updated",
+            "example": "user_456"
+          },
+          "username": {
+            "type": "string",
+            "description": "Username of the user",
+            "example": "john_doe"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["online", "offline", "away", "busy"],
+            "description": "User's presence status",
+            "example": "online"
+          },
+          "lastSeen": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the user was last seen",
+            "example": "2024-01-15T10:40:00Z"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the presence update was sent",
+            "example": "2024-01-15T10:40:00Z"
+          }
+        }
+      },
+      "MessageHeaders": {
+        "type": "object",
+        "properties": {
+          "correlation-id": {
+            "type": "string",
+            "description": "Correlation ID for request tracking",
+            "example": "corr_123"
+          },
+          "user-id": {
+            "type": "string",
+            "description": "ID of the user sending the message",
+            "example": "user_456"
+          },
+          "session-id": {
+            "type": "string",
+            "description": "Session ID for the connection",
+            "example": "sess_789"
+          },
+          "client-version": {
+            "type": "string",
+            "description": "Version of the client application",
+            "example": "1.0.0"
+          }
+        }
+      }
+    }
+  }
+}
