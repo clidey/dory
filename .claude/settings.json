@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(rg:*)",
+      "Bash(npm run generate:*)",
+      "Bash(ls:*)",
+      "Bash(rm:*)",
+      "Bash(npm run build:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx typescript:*)",
+      "Bash(npm install:*)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm run:*)",
+      "Bash(node*)",
+      "Bash(git config*)",
+      "Bash(git checkout -b*)",
+      "Bash(git add*)",
+      "Bash(git commit -m*)",
+      "Bash(git push*)",
+      "Bash(gh pr create*)",
+      "Bash(git status*)", 
+      "Bash(git diff*)",
+      "Bash(git log*)"
+    ]
+  },
+  "enableAllProjectMcpServers": false
+}
