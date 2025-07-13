@@ -2,7 +2,7 @@ import type { ComponentChildren } from 'preact';
 import { useCallback, useEffect, useMemo, useState } from 'preact/hooks';
 import { useLocation } from 'wouter-preact';
 import { Navigation } from '../components/navigation';
-import { ALL_NAVIGATION, ALL_OPENAPI, completeFrontMatter, loadMDXFrontMatterForPath, loadAllMDXFrontMatter, ALL_PAGES, pathFromFilename } from '../components/store';
+import { ALL_NAVIGATION, ALL_OPENAPI, completeFrontMatter, loadMDXFrontMatterForPath, loadAllMDXFrontMatter, ALL_PAGES, pathFromFilename, preloadFrontmatter } from '../components/store';
 import { OpenAPI } from '../mdx/open-api';
 import { Header } from './header';
 import { PrevNextLinks } from './prev-next-link';
@@ -63,14 +63,21 @@ export default function Layout({ children }: LayoutProps) {
   ], [handleOpenMDX, handleCopyMDX, handleOpenChatGPT, handleOpenAnthropic]);
 
   useEffect(() => {
-    loadMDXFrontMatterForPath(pathname).then(() => {
-      loadAllMDXFrontMatter(pathname).then(() => {
-        setLoading(false);
+    // Try to preload frontmatter first (optimized approach)
+    preloadFrontmatter().then(() => {
+      // If preloading succeeds, we're done
+      setLoading(false);
+    }).catch(() => {
+      // Fallback to the original approach
+      loadMDXFrontMatterForPath(pathname).then(() => {
+        loadAllMDXFrontMatter(pathname).then(() => {
+          setLoading(false);
+        }).catch(() => {
+          setLoading(false);
+        });
       }).catch(() => {
         setLoading(false);
       });
-    }).catch(() => {
-      setLoading(false);
     });
   }, [pathname]);
 
