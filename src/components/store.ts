@@ -71,11 +71,70 @@ function parseFrontMatter(content: string) {
 }
 
 export let completeFrontMatter: Record<string, any>[] = [];
+let preloadedFrontMatter: Record<string, any>[] | null = null;
 
-// Load frontmatter for a specific pathname
+// Preload frontmatter from JSON file (optimized approach)
+export async function preloadFrontmatter() {
+    if (preloadedFrontMatter) return; // Already loaded
+    
+    try {
+        const response = await fetch('/frontmatter.json');
+        if (response.ok) {
+            preloadedFrontMatter = await response.json();
+            if (preloadedFrontMatter) {
+                completeFrontMatter = [...preloadedFrontMatter];
+                
+                // Update navigation titles from preloaded data
+                for (const fm of preloadedFrontMatter) {
+                    updateNavigationTitle(fm.path, fm.title);
+                }
+                
+                // Add to search index
+                await addPreloadedContentToSearch();
+            }
+        }
+    } catch (error) {
+        console.warn('Failed to load prebuilt frontmatter JSON, falling back to dynamic loading:', error);
+    }
+}
+
+// Add preloaded content to search index
+async function addPreloadedContentToSearch() {
+    if (!preloadedFrontMatter) return;
+    
+    const mdxFiles = import.meta.glob<{ default: string }>('../../docs/**/*.mdx', { query: 'raw' });
+    const fileEntries = Object.entries(mdxFiles);
+
+    await Promise.all(
+        preloadedFrontMatter.map(async (fm) => {
+            const fileEntry = fileEntries.find(([filePath]) => pathFromFilename(filePath) === fm.path);
+            if (fileEntry) {
+                const [, loader] = fileEntry;
+                const rawContent = (await loader()).default;
+                const { content } = parseFrontMatter(rawContent);
+                
+                searchIndex.add({
+                    url: fm.path,
+                    title: fm.title || '',
+                    content,
+                    pageTitle: fm.title || ''
+                });
+            }
+        })
+    );
+}
+
+// Load frontmatter for a specific pathname (optimized with fallback)
 export async function loadMDXFrontMatterForPath(pathname: string) {
+    // If we have preloaded data, check if this path is already loaded
+    if (preloadedFrontMatter && preloadedFrontMatter.find(fm => fm.path === pathname)) {
+        return;
+    }
+    
+    // Check if already loaded in completeFrontMatter
     if (completeFrontMatter.find(fm => fm.path === pathname)) return;
 
+    // Fallback to dynamic loading
     const mdxFiles = import.meta.glob<{ default: string }>('../../docs/**/*.mdx', { query: 'raw' });
     const fileEntries = Object.entries(mdxFiles);
 
@@ -99,8 +158,14 @@ export async function loadMDXFrontMatterForPath(pathname: string) {
     completeFrontMatter = [...completeFrontMatter, frontmatterItem];
 }
 
-// Load all remaining frontmatter (after initial load)
+// Load all remaining frontmatter (after initial load) - optimized with fallback
 export async function loadAllMDXFrontMatter(pathname: string) {
+    // If we have preloaded data, we're already done
+    if (preloadedFrontMatter) {
+        return;
+    }
+
+    // Fallback to dynamic loading
     const mdxFiles = import.meta.glob<{ default: string }>('../../docs/**/*.mdx', { query: 'raw' });
     const fileEntries = Object.entries(mdxFiles);
 
