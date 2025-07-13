@@ -438,3 +438,61 @@ E = mc^2
 <Icon icon="FileText" />
 <Icon icon="CheckCircle" />
 </Row>
+
+<br />
+<br />
+<br />
+
+## API Testing Components
+
+### HTTP API Playground
+
+Interactive playground for testing HTTP API endpoints with authentication, headers, and request/response handling.
+
+```mdx
+<APIPlayground
+  method="GET"
+  url="/api/users"
+  title="Get Users"
+  description="Retrieve a list of users"
+  baseUrl="https://jsonplaceholder.typicode.com"
+/>
+```
+
+### WebSocket Playground
+
+Interactive playground for testing WebSocket connections with real-time messaging capabilities.
+
+```mdx
+<WebSocketPlayground
+  url="/ws"
+  title="Echo WebSocket"
+  description="Connect to a WebSocket server and send/receive messages"
+  servers={[
+    {
+      url: "wss://echo.websocket.org",
+      description: "WebSocket Echo Server"
+    }
+  ]}
+/>
+```
+
+<WebSocketPlayground
+  url="/ws"
+  title="Echo WebSocket"
+  description="Connect to a WebSocket server and send/receive messages in real-time"
+  servers={[
+    {
+      url: "wss://echo.websocket.org",
+      description: "WebSocket Echo Server"
+    }
+  ]}
+/>
+
+The WebSocket playground provides:
+- Real-time connection management
+- Message history with timestamps
+- Custom headers and subprotocols
+- Text and binary message support
+- Multiple server endpoints
+- Connection status indicators

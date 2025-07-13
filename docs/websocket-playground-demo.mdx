@@ -1,0 +1,128 @@
+---
+title: 'WebSocket Playground Demo'
+description: 'Interactive WebSocket playground for testing real-time connections'
+---
+
+# WebSocket Playground Demo
+
+This page demonstrates the new WebSocket playground that allows you to test WebSocket connections directly from the documentation.
+
+## Basic WebSocket Connection
+
+Test a simple WebSocket connection:
+
+<WebSocketPlayground
+  url="/ws"
+  title="Echo WebSocket"
+  description="Connect to a WebSocket server and send/receive messages in real-time"
+  servers={[
+    {
+      url: "wss://echo.websocket.org",
+      description: "WebSocket Echo Server"
+    },
+    {
+      url: "ws://localhost:8080",
+      description: "Local Development Server"
+    }
+  ]}
+/>
+
+## WebSocket with Subprotocols
+
+Test a WebSocket connection with specific subprotocols:
+
+<WebSocketPlayground
+  url="/graphql"
+  title="GraphQL WebSocket"
+  description="Connect to a GraphQL WebSocket server with subscriptions"
+  protocols={["graphql-ws", "graphql-transport-ws"]}
+  servers={[
+    {
+      url: "wss://api.example.com",
+      description: "GraphQL API Server"
+    }
+  ]}
+/>
+
+## Chat WebSocket
+
+Test a chat WebSocket with authentication headers:
+
+<WebSocketPlayground
+  url="/chat"
+  title="Chat WebSocket"
+  description="Connect to a chat server with authentication"
+  headers={{
+    "Authorization": "Bearer your-token-here",
+    "X-Client-Version": "1.0.0"
+  }}
+  protocols={["chat", "v1.0"]}
+  servers={[
+    {
+      url: "wss://chat.example.com",
+      description: "Chat Server"
+    }
+  ]}
+/>
+
+## Features
+
+The WebSocket playground provides:
+
+- **Real-time Connection Management**: Connect and disconnect from WebSocket servers
+- **Connection Status Indicator**: Visual feedback for connection state (connected, connecting, disconnected, error)
+- **Message History**: See all sent and received messages with timestamps
+- **Custom Headers**: Add headers for the WebSocket handshake (authentication, etc.)
+- **Subprotocol Support**: Specify WebSocket subprotocols for specialized connections
+- **Text and Binary Messages**: Send both text and binary data
+- **Multiple Servers**: Easy switching between different WebSocket endpoints
+- **Error Handling**: Clear error messages for connection and message failures
+
+## Usage in Documentation
+
+To add a WebSocket playground to your documentation, use the `WebSocketPlayground` component:
+
+```mdx
+<WebSocketPlayground
+  url="/ws"
+  title="My WebSocket"
+  description="Description of what this WebSocket does"
+  headers={{
+    "Authorization": "Bearer token",
+    "X-Custom-Header": "value"
+  }}
+  protocols={["chat", "v1.0"]}
+  servers={[
+    {
+      url: "wss://api.example.com",
+      description: "Production Server"
+    },
+    {
+      url: "ws://localhost:8080",
+      description: "Development Server"
+    }
+  ]}
+/>
+```
+
+## WebSocket vs HTTP
+
+Unlike HTTP requests, WebSocket connections are:
+
+- **Stateful**: The connection remains open for bidirectional communication
+- **Real-time**: Messages can be sent and received instantly
+- **Event-driven**: Both client and server can initiate message sending
+- **Lower overhead**: No need for repeated HTTP handshakes
+
+## Common Use Cases
+
+WebSocket playgrounds are perfect for:
+
+- **Real-time APIs**: Chat applications, live updates, notifications
+- **GraphQL Subscriptions**: Real-time data subscriptions
+- **Gaming**: Real-time multiplayer game communication
+- **IoT**: Device communication and monitoring
+- **Trading**: Real-time market data and order updates
+- **Collaborative Tools**: Real-time document editing, shared whiteboards
+
+The playground seamlessly integrates with your existing documentation and provides a comprehensive testing environment for WebSocket-based APIs.
