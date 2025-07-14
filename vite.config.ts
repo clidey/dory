@@ -4,6 +4,7 @@ import mdx from '@mdx-js/rollup';
 import tailwindcss from '@tailwindcss/vite'
 import remarkGfm from 'remark-gfm';
 import { remarkSafeVars } from './src/plugins/sanitize';
+import { remarkJsxWhitespaceFix } from './src/plugins/remark-jsx-whitespace-fix';
 import { llmTxtGenerator } from './src/plugins/llm-txt-generator';
 import { llmTxtDevServer } from './src/plugins/llm-txt-dev-server';
 
@@ -12,7 +13,7 @@ export default defineConfig({
     preact(),
     mdx({
       providerImportSource: '@mdx-js/preact',
-      remarkPlugins: [remarkGfm, remarkSafeVars],
+      remarkPlugins: [remarkJsxWhitespaceFix, remarkGfm, remarkSafeVars],
     }),
     tailwindcss(),
     llmTxtGenerator(),
