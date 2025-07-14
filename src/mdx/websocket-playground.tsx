@@ -5,6 +5,7 @@ import { PencilIcon, TrashIcon, XIcon } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks'
 import Dropdown from '../components/dropdown'
 import { Tag } from './tag'
+import { PlayButton } from './api-playground'
 
 export interface WebSocketServer {
   url: string;
@@ -34,17 +35,6 @@ interface WebSocketMessage {
   data: string
   timestamp: number
   binary?: boolean
-}
-
-export function ConnectButton(props: React.ComponentPropsWithoutRef<'svg'>) {
-  return (
-    <svg viewBox="0 0 20 20" aria-hidden="true" {...props}>
-      <path
-        fill="currentColor"
-        d="M10 2a8 8 0 100 16 8 8 0 000-16zm1 11V9a1 1 0 00-2 0v4a1 1 0 002 0zm-1-6a1 1 0 100-2 1 1 0 000 2z"
-      />
-    </svg>
-  )
 }
 
 export function DisconnectButton(props: React.ComponentPropsWithoutRef<'svg'>) {
@@ -513,7 +503,7 @@ export function WebSocketPlayground({
             {connectionState === 'connecting' ? (
               <LoadingSpinner className="h-4 w-4" />
             ) : (
-              <ConnectButton className="h-4 w-4" />
+              <PlayButton className="h-4 w-4" />
             )}
             {connectionState === 'connecting' ? 'Connecting...' : 'Connect'}
           </button>

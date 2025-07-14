@@ -1,11 +1,12 @@
+import { motion } from "motion/react"
 import { useState } from "preact/hooks"
 import { APIGroup } from "./api"
-import { WebSocketPlayground, ConnectButton, type WebSocketServer } from "./websocket-playground"
+import { PlayButton } from "./api-playground"
 import { Fence } from "./fence"
+import { Properties, Property } from "./open-api"
 import { Tag } from "./tag"
 import { Col, Row } from "./text"
-import { motion } from "motion/react"
-import { Properties, Property } from "./open-api"
+import { WebSocketPlayground, type WebSocketServer } from "./websocket-playground"
 
 interface AsyncAPIMessage {
   name?: string
@@ -174,7 +175,7 @@ export function AsyncAPI({
   channel: string
   operation: 'subscribe' | 'publish'
 }) {
-  const { channels, components, servers } = asyncAPIJson
+  const { channels, components, servers } = asyncAPIJson;
   const [showPlayground, setShowPlayground] = useState(false)
 
   const handleShowPlayground = () => {
@@ -186,7 +187,7 @@ export function AsyncAPI({
     url: `${server.protocol}://${server.host}${server.pathname || ''}`,
     description: server.description || server.title || key,
     protocol: server.protocol
-  })) : []
+  })) : [];
 
   return (
     <div className="max-w-none w-full">
@@ -231,7 +232,7 @@ export function AsyncAPI({
         const { summary, description, message } = operation
         const resolvedMessage = isDirectMessage(message) ? message : 
           (message?.oneOf && message.oneOf.length > 0 ? message.oneOf[0] : undefined)
-        
+
         return (
           <div key={channelPath} className="my-8">
             <Row cols={2}>
@@ -344,17 +345,19 @@ export function AsyncAPI({
                   className='ml-auto mt-3 flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition bg-sky-600 text-white hover:bg-sky-700'
                 >
                   Try
-                  <ConnectButton className="h-4 w-4" />
+                  <PlayButton className="h-4 w-4" />
                 </button>
                 <APIGroup title="Message" tag={selectedOperation.toUpperCase()} label={channelPath}>
-                  {resolvedMessage?.payload && (() => {
-                    const resolvedPayload = resolveSchema(resolvedMessage.payload, components || {})
-                    return (
-                      <Fence language="json">
-                        {JSON.stringify(resolvedPayload, null, 2)}
-                      </Fence>
-                    )
-                  })()}
+                  <>
+                    {resolvedMessage?.payload && (() => {
+                      const resolvedPayload = resolveSchema(resolvedMessage.payload, components || {})
+                      return (
+                        <Fence language="json">
+                          {JSON.stringify(resolvedPayload, null, 2)}
+                        </Fence>
+                      )
+                    })()}
+                  </>
                 </APIGroup>
               </Col>
             </Row>

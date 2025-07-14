@@ -124,7 +124,7 @@ export default function Layout({ children }: LayoutProps) {
     const firstDirectory = `/${tab.path.split('/')[1]}`;
     return ALL_ASYNCAPI[`${firstDirectory}/asyncapi.json`].default;
   }, [tab, loading]);
-
+  
   const { operation, channel } = useMemo(() => {
     if (tab == null || tab.asyncapi == null) {
       return { operation: '', channel: '' };
