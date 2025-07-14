@@ -11,6 +11,10 @@ export const ALL_OPENAPI = Object.fromEntries(
   Object.entries(import.meta.glob<{ default: string }>('../../docs/**/openapi.json', { query: 'raw', eager: true }))
     .map(([path, loader]) => [pathFromFilename(path), loader])
 );
+export const ALL_ASYNCAPI = Object.fromEntries(
+  Object.entries(import.meta.glob<{ default: string }>('../../docs/**/asyncapi.json', { query: 'raw', eager: true }))
+    .map(([path, loader]) => [pathFromFilename(path), loader])
+);
 
 export interface Route {
     path: string;

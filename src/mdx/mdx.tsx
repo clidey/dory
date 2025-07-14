@@ -18,6 +18,8 @@ export { Steps, Step } from './step';
 export { Table as table, Th as th, Td as td } from './table';
 export { UnorderedList as ul, OrderedList as ol, ListItem as li } from './list';
 export { APIPlayground } from './api-playground';
+export { WebSocketPlayground } from './websocket-playground';
+export { AsyncAPI } from './async-api';
 export { Source } from './source';
 
 export const wrapper = ({ children }: { children: preact.ComponentChildren }) => {
