@@ -43,3 +43,5 @@ export const wrapper = ({ children }: { children: preact.ComponentChildren }) =>
 
 
 export const hr = () => <hr className="my-4 text-gray-500/25 dark:text-gray-200/25" />;
+
+export const br = () => <br />;
