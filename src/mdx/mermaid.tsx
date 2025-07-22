@@ -2,6 +2,20 @@ import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 import classNames from 'classnames'
 import { useEffect, useMemo, useRef, useState } from 'preact/compat'
 
+function fixNodeLabelsWithSpecialChars(content: string): string {
+    // Pattern to match node definitions with brackets containing special characters
+    // Matches: NodeId[text content] where text content has special chars and isn't already quoted
+    const nodePattern = /(\w+)\[([^\]"]*[(),\s][^\]"]*)\]/g;
+    
+    return content.replace(nodePattern, (match, nodeId, labelContent) => {
+        // Only wrap in quotes if not already quoted and contains special characters
+        if (!labelContent.startsWith('"') || !labelContent.endsWith('"')) {
+            return `${nodeId}["${labelContent}"]`;
+        }
+        return match;
+    });
+}
+
 export function MermaidRenderer({ content }: { content: string }) {
     const mermaidRef = useRef<HTMLDivElement>(null)
     const [isFullscreen, setIsFullscreen] = useState(false)
@@ -47,9 +61,12 @@ export function MermaidRenderer({ content }: { content: string }) {
                     .replace(/^\s*classDef .*$/gm, '')
                     .replace(/^\s*class .*$/gm, '');
 
+                // Fix node labels with special characters by wrapping them in quotes
+                const processedContent = fixNodeLabelsWithSpecialChars(contentWithoutStyle);
+
                 // Validate the mermaid syntax first
                 try {
-                    await mermaid.parse(contentWithoutStyle)
+                    await mermaid.parse(processedContent)
                     setIsValid(true)
                 } catch (parseError) {
                     setIsValid(false)
@@ -59,7 +76,7 @@ export function MermaidRenderer({ content }: { content: string }) {
                     return
                 }
               
-                const { svg } = await mermaid.render(diagramId, contentWithoutStyle);
+                const { svg } = await mermaid.render(diagramId, processedContent);
 
                 if (mounted && mermaidRef.current) {
                     mermaidRef.current.innerHTML = svg
