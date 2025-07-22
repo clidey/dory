@@ -1,5 +1,26 @@
 import { visit } from 'unist-util-visit';
 
+export function preprocessMdxTags() {
+  return {
+    name: 'preprocess-mdx-tags',
+    enforce: 'pre' as const,
+    transform(code: string, id: string) {
+      if (!id.endsWith('.mdx')) return;
+
+      // Replace unrecognized <someTag> with `"<someTag>"`
+      const processed = code.replace(/<([a-z][a-z0-9]+)>/gi, (match, tag) => {
+        const known = KNOWN_COMPONENTS.includes(tag);
+        return known ? match : `\`<${tag}>\``; // wrap in backticks to keep as code
+      });
+
+      return {
+        code: processed,
+        map: null,
+      };
+    },
+  };
+}
+
 // List of known MDX components that should NOT be converted to code
 const KNOWN_COMPONENTS = [
   // Text components

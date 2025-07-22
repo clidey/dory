@@ -3,12 +3,13 @@ import preact from '@preact/preset-vite';
 import mdx from '@mdx-js/rollup';
 import tailwindcss from '@tailwindcss/vite'
 import remarkGfm from 'remark-gfm';
-import { remarkSafeVars } from './src/plugins/sanitize';
+import { preprocessMdxTags, remarkSafeVars } from './src/plugins/sanitize';
 import { llmTxtGenerator } from './src/plugins/llm-txt-generator';
 import { llmTxtDevServer } from './src/plugins/llm-txt-dev-server';
 
 export default defineConfig({
   plugins: [
+    preprocessMdxTags(),
     preact(),
     mdx({
       providerImportSource: '@mdx-js/preact',
