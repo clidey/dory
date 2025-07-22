@@ -2,8 +2,9 @@ import type { ComponentChildren } from 'preact';
 import { useCallback, useEffect, useMemo, useState } from 'preact/hooks';
 import { useLocation } from 'wouter-preact';
 import { Navigation } from '../components/navigation';
-import { ALL_NAVIGATION, ALL_OPENAPI, completeFrontMatter, loadMDXFrontMatterForPath, loadAllMDXFrontMatter, ALL_PAGES, pathFromFilename, preloadFrontmatter } from '../components/store';
+import { ALL_NAVIGATION, ALL_OPENAPI, completeFrontMatter, loadMDXFrontMatterForPath, loadAllMDXFrontMatter, ALL_PAGES, pathFromFilename, preloadFrontmatter, ALL_ASYNCAPI } from '../components/store';
 import { OpenAPI } from '../mdx/open-api';
+import { AsyncAPI } from '../mdx/async-api';
 import { Header } from './header';
 import { PrevNextLinks } from './prev-next-link';
 import { TableOfContents } from './table-of-content';
@@ -123,6 +124,21 @@ export default function Layout({ children }: LayoutProps) {
     return { method: tab.openapi.split(' ')[0], path: tab.openapi.split(' ')[1] };
   }, [tab, loading]);
 
+  const asyncAPIJSON = useMemo(() => {
+    if (tab == null || tab.asyncapi == null) {
+      return null;
+    }
+    const firstDirectory = `/${tab.path.split('/')[1]}`;
+    return ALL_ASYNCAPI[`${firstDirectory}/asyncapi.json`].default;
+  }, [tab, loading]);
+  
+  const { operation, channel } = useMemo(() => {
+    if (tab == null || tab.asyncapi == null) {
+      return { operation: '', channel: '' };
+    }
+    return { operation: tab.asyncapi.split(' ')[0].toLowerCase(), channel: tab.asyncapi.split(' ')[1] };
+  }, [tab, loading]);
+
   if (loading) return <div className="h-[25vh] flex grow"><Loading /></div>;
 
   return (
@@ -151,20 +167,22 @@ export default function Layout({ children }: LayoutProps) {
                   )}
                 </header>
                 {
-                  openAPIJSON == null &&
+                  openAPIJSON == null && asyncAPIJSON == null &&
                   <Dropdown className='min-w-[120px]' buttonLabel="AI Actions" items={dropdownItems} />
                 }
               </div>
               <div className="flex-1 min-h-[calc(100vh-2rem)]">
                 {openAPIJSON && tab && "openapi" in tab && method && path ? 
                   <OpenAPI openAPIJson={JSON.parse(openAPIJSON)} method={method} path={path} />
+                 : asyncAPIJSON && tab && "asyncapi" in tab && operation && channel ?
+                  <AsyncAPI asyncAPIJson={JSON.parse(asyncAPIJSON)} operation={operation} channel={channel} />
                  : children}
               </div>
               <PrevNextLinks />
             </article>
           </div>
           {
-            openAPIJSON == null &&
+            openAPIJSON == null && asyncAPIJSON == null &&
             <TableOfContents />
           }
         </main>

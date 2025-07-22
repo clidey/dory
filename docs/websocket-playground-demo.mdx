@@ -1,0 +1,135 @@
+---
+title: 'WebSocket Playground Demo'
+description: 'Interactive WebSocket playground for testing real-time connections'
+---
+
+# WebSocket Playground Demo
+
+This page demonstrates the WebSocket playground component with various configuration options and real-time connection testing capabilities.
+
+## Basic WebSocket Connection
+
+<WebSocketPlayground
+  url="/ws/chat"
+  title="Basic Chat WebSocket"
+  description="Connect to a WebSocket server and send/receive messages in real-time"
+  servers={[
+    {
+      url: "wss://echo.websocket.org",
+      description: "WebSocket Echo Server"
+    },
+    {
+      url: "wss://ws.postman-echo.com/raw",
+      description: "Postman Echo WebSocket"
+    }
+  ]}
+/>
+
+## WebSocket with Subprotocols
+
+<WebSocketPlayground
+  url="/ws/protocol"
+  title="WebSocket with Subprotocols"
+  description="WebSocket connection with custom subprotocols for specialized communication"
+  subprotocols={["chat", "v1.0"]}
+  servers={[
+    {
+      url: "wss://echo.websocket.org",
+      description: "Echo Server with Subprotocols"
+    }
+  ]}
+/>
+
+## WebSocket with Authentication
+
+<WebSocketPlayground
+  url="/ws/secure"
+  title="Authenticated WebSocket"
+  description="WebSocket connection with authentication headers"
+  authType="bearer"
+  headers={{
+    "User-Agent": "Dory WebSocket Client",
+    "X-Client-Version": "1.0.0"
+  }}
+  servers={[
+    {
+      url: "wss://echo.websocket.org",
+      description: "Secure Echo Server"
+    }
+  ]}
+/>
+
+## Real-time Chat Example
+
+<WebSocketPlayground
+  url="/chat"
+  title="Real-time Chat"
+  description="Connect to a chat server and participate in real-time conversations"
+  subprotocols={["chat.v1", "json"]}
+  headers={{
+    "X-Client-Type": "web",
+    "X-Protocol-Version": "1.0"
+  }}
+  servers={[
+    {
+      url: "wss://echo.websocket.org",
+      description: "Chat Echo Server"
+    }
+  ]}
+/>
+
+## Testing Instructions
+
+1. **Connect**: Click the "Connect" button to establish a WebSocket connection
+2. **Send Messages**: Type messages in the input field and click "Send" or press Enter
+3. **View Messages**: All sent and received messages appear in the message history with timestamps
+4. **Configuration**: Use the tabs to configure headers, subprotocols, and authentication
+5. **Server Selection**: Choose different servers from the dropdown to test various endpoints
+
+## Features
+
+- **Real-time Connection**: Live WebSocket connection with status indicators
+- **Message History**: View all sent/received messages with timestamps
+- **Custom Headers**: Add authentication and custom headers
+- **Subprotocols**: Configure WebSocket subprotocols
+- **Multiple Servers**: Easy switching between different WebSocket endpoints
+- **Error Handling**: Clear error messages for connection issues
+- **Binary Support**: Handles both text and binary messages
+
+## Message Types
+
+The playground supports different message types:
+- **Sent**: Messages you send (blue background)
+- **Received**: Messages from the server (green background)
+- **Error**: Connection or sending errors (red background)
+- **System**: Connection status updates (gray background)
+
+## Example Messages
+
+Try sending these JSON messages to test structured data:
+
+```json
+{
+  "type": "chat",
+  "message": "Hello, WebSocket!",
+  "userId": "user123",
+  "timestamp": "2024-01-15T10:30:00Z"
+}
+```
+
+```json
+{
+  "type": "presence",
+  "status": "online",
+  "userId": "user123"
+}
+```
+
+```json
+{
+  "type": "notification",
+  "title": "Test Notification",
+  "message": "This is a test notification",
+  "level": "info"
+}
+```
