@@ -115,6 +115,34 @@ export function preprocessMdxTags() {
         return `\`<${tag}>\``;
       });
 
+      // Second pass: handle malformed tags that contain invalid characters
+      // This specifically targets cases like <AccordionNo Documents'"> 
+      processed = processed.replace(/<([a-z][a-z0-9]*)\s+[^>]*['"][^>]*>/gi, (match, _tag, offset) => {
+        // If inside a code block, do not touch
+        if (isInsideCodeBlock(processed, offset)) {
+          return match;
+        }
+        
+        // If already inside backticks, do not wrap again
+        const before = processed.slice(0, offset);
+        const backtickMatches = before.match(/`+/g);
+        const insideBackticks = backtickMatches ? backtickMatches.reduce((acc, s) => acc + s.length, 0) % 2 === 1 : false;
+        if (insideBackticks) {
+          return match;
+        }
+        
+        // Check if this looks like malformed content (has quotes not in proper attribute format)
+        const content = match.slice(1, -1); // Remove < and >
+        const hasProperAttributes = /\w+\s*=\s*(['"][^'"]*['"]|\{[^}]*\})/.test(content);
+        
+        // If it doesn't have proper attribute syntax, wrap it as text
+        if (!hasProperAttributes) {
+          return `\`${match}\``;
+        }
+        
+        return match;
+      });
+
       return {
         code: processed,
         map: null,
