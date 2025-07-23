@@ -42,6 +42,36 @@ function isInsideCodeBlock(code: string, idx: number): boolean {
   return codeBlockMatches ? codeBlockMatches.length % 2 === 1 : false;
 }
 
+// Helper: checks if a known component tag has a matching closing tag
+function hasMatchingClosingTag(code: string, tagName: string, openingTagOffset: number): boolean {
+  // Simple approach: look for the next occurrence of either an opening or closing tag of the same type
+  const afterOpening = code.slice(openingTagOffset + `<${tagName}>`.length);
+  
+  // Find the first occurrence of either opening or closing tag
+  const nextOpeningMatch = afterOpening.match(new RegExp(`<${tagName}>`, 'i'));
+  const nextClosingMatch = afterOpening.match(new RegExp(`</${tagName}>`, 'i'));
+  
+  // If no closing tag found at all
+  if (!nextClosingMatch) {
+    return false;
+  }
+  
+  const nextOpeningIndex = nextOpeningMatch ? nextOpeningMatch.index! : Infinity;
+  const nextClosingIndex = nextClosingMatch ? nextClosingMatch.index! : Infinity;
+  
+  // If the closing tag comes before any other opening tag, this tag is properly closed
+  if (nextClosingIndex < nextOpeningIndex) {
+    // Check if the closing tag is inside a code block
+    const closingTagOffset = openingTagOffset + `<${tagName}>`.length + nextClosingIndex;
+    if (isInsideCodeBlock(code, closingTagOffset)) {
+      return false;
+    }
+    return true;
+  }
+  
+  return false; // Another opening tag comes before the closing tag, so this one is not properly closed
+}
+
 // Allow any <[a-z][a-z0-9]*> tag inside code blocks to be left as-is (not parsed as JSX).
 export function preprocessMdxTags() {
   return {
@@ -60,10 +90,17 @@ export function preprocessMdxTags() {
         if (isInsideCodeBlock(processed, offset)) {
           return match;
         }
-        // If known component, leave as-is
+        
+        // If known component, check if it has a closing tag
         if (KNOWN_COMPONENTS.includes(tag)) {
+          // If it doesn't have a matching closing tag, treat it as text
+          if (!hasMatchingClosingTag(processed, tag, offset)) {
+            return `\`<${tag}>\``;
+          }
+          // Otherwise, leave as-is for proper JSX parsing
           return match;
         }
+        
         // If already inside backticks, do not wrap again
         // Find the start of the line up to the match
         const before = processed.slice(0, offset);
