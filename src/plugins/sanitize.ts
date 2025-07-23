@@ -64,8 +64,14 @@ export function preprocessMdxTags() {
         if (KNOWN_COMPONENTS.includes(tag)) {
           return match;
         }
-        // If tag is 'service', always leave as-is (do not wrap in backticks)
-        if (tag === 'service') {
+        // If already inside backticks, do not wrap again
+        // Find the start of the line up to the match
+        const before = processed.slice(0, offset);
+        // Count the number of backticks before this tag
+        const backtickMatches = before.match(/`+/g);
+        // If the number of backticks is odd, we're inside a backtick span
+        const insideBackticks = backtickMatches ? backtickMatches.reduce((acc, s) => acc + s.length, 0) % 2 === 1 : false;
+        if (insideBackticks) {
           return match;
         }
         // Otherwise, wrap in backticks to prevent JSX parsing
