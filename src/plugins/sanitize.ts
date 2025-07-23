@@ -83,6 +83,22 @@ export function preprocessMdxTags() {
       // Remove leading whitespace from code fence blocks
       let processed = code.replace(/^(\s+)(```\w*)/gm, '$2');
 
+      // Handle malformed tags with single quotes appearing where attribute names should be
+      // Very specific pattern: <TagName space then single quote not followed by = (malformed attribute)
+      processed = processed.replace(/<([a-z][a-z0-9]*)\s+[^>=\s]*?['"][^>=]*?>/gi, (match, _tag, offset) => {
+        // If inside a code block, do not touch
+        if (isInsideCodeBlock(processed, offset)) {
+          return match;
+        }
+        // Check if this looks like a malformed attribute (quote not preceded by =)
+        const beforeQuote = match.match(/<[a-z][a-z0-9]*\s+([^>=]*?)['"][^>=]*?>/i);
+        if (beforeQuote && beforeQuote[1] && !beforeQuote[1].endsWith('=')) {
+          // This is malformed - quote appears where it shouldn't
+          return `\`${match}\``;
+        }
+        return match;
+      });
+
       // Only replace unrecognized <someTag> with `"<someTag>"` if NOT inside a code block
       // This regex finds all <tag> occurrences
       processed = processed.replace(/<([a-z][a-z0-9]*)>/gi, (match, tag, offset) => {
