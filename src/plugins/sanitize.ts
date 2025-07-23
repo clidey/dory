@@ -40,8 +40,11 @@ export function preprocessMdxTags() {
     transform(code: string, id: string) {
       if (!id.endsWith('.mdx')) return;
 
+      // Remove leading whitespace from code fence blocks
+      let processed = code.replace(/^(\s+)(```\w*)/gm, '$2');
+
       // Replace unrecognized <someTag> with `"<someTag>"`
-      const processed = code.replace(/<([a-z][a-z0-9]+)>/gi, (match, tag) => {
+      processed = processed.replace(/<([a-z][a-z0-9]+)>/gi, (match, tag) => {
         const known = KNOWN_COMPONENTS.includes(tag);
         return known ? match : `\`<${tag}>\``; // wrap in backticks to keep as code
       });
