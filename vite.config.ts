@@ -16,6 +16,9 @@ export default defineConfig({
     mdx({
       providerImportSource: '@mdx-js/preact',
       remarkPlugins: [remarkGfm, remarkSafeVars],
+      format: 'mdx',
+      development: false,
+      jsxRuntime: 'automatic',
     }),
     tailwindcss(),
     llmTxtGenerator(),
