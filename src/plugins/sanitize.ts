@@ -42,7 +42,7 @@ function isInsideCodeBlock(code: string, idx: number): boolean {
   return codeBlockMatches ? codeBlockMatches.length % 2 === 1 : false;
 }
 
-// Allow <service> and any <[a-z][a-z0-9]*> tag inside code blocks to be left as-is (not parsed as JSX).
+// Allow any <[a-z][a-z0-9]*> tag inside code blocks to be left as-is (not parsed as JSX).
 export function preprocessMdxTags() {
   return {
     name: 'preprocess-mdx-tags',
