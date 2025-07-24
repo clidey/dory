@@ -100,19 +100,44 @@ export function preprocessMdxTags() {
           // Otherwise, leave as-is for proper JSX parsing
           return match;
         }
-        
+        // For unknown components, always treat as text (wrap in backticks)
         // If already inside backticks, do not wrap again
-        // Find the start of the line up to the match
         const before = processed.slice(0, offset);
-        // Count the number of backticks before this tag
         const backtickMatches = before.match(/`+/g);
-        // If the number of backticks is odd, we're inside a backtick span
         const insideBackticks = backtickMatches ? backtickMatches.reduce((acc, s) => acc + s.length, 0) % 2 === 1 : false;
         if (insideBackticks) {
           return match;
         }
-        // Otherwise, wrap in backticks to prevent JSX parsing
         return `\`<${tag}>\``;
+      });
+
+      // This regex finds all <tag> and </tag> occurrences
+      processed = processed.replace(/<\/?([a-z][a-z0-9]*)>/gi, (match, tag, offset) => {
+        // If inside a code block, do not touch
+        if (isInsideCodeBlock(processed, offset)) {
+          return match;
+        }
+        
+        // If known component, check if it has a closing tag (only for opening tags)
+        if (KNOWN_COMPONENTS.includes(tag)) {
+          // Only check for matching closing tag for opening tags
+          if (!match.startsWith('</')) {
+            if (!hasMatchingClosingTag(processed, tag, offset)) {
+              return `\`${match}\``;
+            }
+          }
+          // Otherwise, leave as-is for proper JSX parsing
+          return match;
+        }
+        // For unknown components, always treat as text (wrap in backticks)
+        // If already inside backticks, do not wrap again
+        const before = processed.slice(0, offset);
+        const backtickMatches = before.match(/`+/g);
+        const insideBackticks = backtickMatches ? backtickMatches.reduce((acc, s) => acc + s.length, 0) % 2 === 1 : false;
+        if (insideBackticks) {
+          return match;
+        }
+        return `\`${match}\``;
       });
 
       return {
