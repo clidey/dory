@@ -14,15 +14,21 @@ const commands = {
   build: () => {
     console.log('🐟 Dory is ready to build your docs!');
     
-    // Clear the docs folder if it exists
-    const docsDir = resolve(__dirname, '..', 'docs');
+    const currentDir = process.cwd();
+    const userDocsDir = resolve(currentDir, 'docs');
+    const hasUserDocs = existsSync(userDocsDir);
+    
+    // Use different temp directory if user has their own docs folder
+    const tempDirName = hasUserDocs ? '.dory-build-temp' : 'docs';
+    const docsDir = resolve(__dirname, '..', tempDirName);
+    
+    // Clear the temp build folder if it exists
     if (existsSync(docsDir)) {
       console.log('🧹 Tidying up the workspace...');
       rmSync(docsDir, { recursive: true, force: true });
     }
     
     // Check if dory.json exists in current directory
-    const currentDir = process.cwd();
     const doryConfigPath = resolve(currentDir, 'dory.json');
     
     if (!existsSync(doryConfigPath)) {
@@ -53,8 +59,9 @@ const commands = {
       }
     };
     
-    // Copy all files and directories except node_modules, dist, and .git
-    const excludeDirs = ['node_modules', 'dist', '.git', 'docs', 'pnpm-lock.yaml'];
+    // Copy all files and directories except node_modules, dist, .git, and temp build dir
+    // Don't exclude 'docs' if user has their own docs folder - we need to copy it
+    const excludeDirs = ['node_modules', 'dist', '.git', 'pnpm-lock.yaml', tempDirName];
     
     const items = readdirSync(currentDir);
     for (const item of items) {
@@ -88,7 +95,7 @@ const commands = {
     }
     rmSync(distDir, { recursive: true, force: true });
     
-    // Revert docs folder back to original state
+    // Clean up temp build folder (but preserve user's docs folder if it exists)
     console.log('🧹 Cleaning up...');
     rmSync(docsDir, { recursive: true, force: true });
     console.log('✅ All done!');
