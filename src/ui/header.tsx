@@ -56,10 +56,10 @@ export function Header({ className }: { className?: string }) {
         },
       )}
     >
-      <div className="relative flex justify-between gap-6 sm:gap-8 md:grow items-center w-full">
-        <div className="flex items-center grow gap-4 lg:gap-6">
-          <img src={`/${light}`} alt="logo" className="w-10 h-10 hidden dark:block rounded-full" />
-          <img src={`/${dark}`} alt="logo" className="w-10 h-10 block dark:hidden rounded-full" />
+      <div className="relative flex justify-between gap-6 sm:gap-8 md:grow items-center w-full px-4">
+        <div className="flex items-center grow gap-2">
+          <img src={`/${light}`} alt="logo" className="w-8 hidden dark:block" />
+          <img src={`/${dark}`} alt="logo" className="w-8 block dark:hidden" />
           <h1 className="text-base lg:text-2xl font-bold">{docsConfig.name}</h1>
         </div>
         <nav className="hidden md:block">

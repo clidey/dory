@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./assets/dory_logo.png" alt="Dory Logo" width="200" />
+  <img src="./assets/logo.svg" alt="Dory Logo" width="100" />
 </div>
 
 # Dory
