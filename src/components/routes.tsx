@@ -47,10 +47,13 @@ export default function Routes() {
   useEffect(() => {
     setLoading(true);
     const loadRoutes = async () => {
+      // For root path, load the first navigation page
+      const targetPath = pathname === '/' ? ALL_NAVIGATION[0].groups[0].pages[0].href : pathname;
+      
       const entries = await Promise.all(
-        Object.entries(ALL_PAGES).filter(([path]) => path === pathname).map(async ([path, loader]) => {
+        Object.entries(ALL_PAGES).filter(([path]) => path === targetPath).map(async ([path, loader]) => {
           const module = await loader();
-          const routePath = pathFromFilename(path);
+          const routePath = pathname === '/' ? '/' : pathFromFilename(path);
           return {
             path: routePath,
             component: module.default,
@@ -66,7 +69,7 @@ export default function Routes() {
 
   useEffect(() => {
     const page = ALL_NAVIGATION.find((tab) => tab.groups.find((group) => group.pages.find((page) => page.href === pathname)));
-    if (!page) {
+    if (!page && pathname !== '/') {
       navigate(ALL_NAVIGATION[0].groups[0].pages[0].href);
       window.location.reload();
     }

@@ -7,14 +7,17 @@ import { Link } from 'wouter-preact';
 export function Navigation() {
     const pathname = usePathname();
 
+    const effectivePath = pathname === '/' 
+        ? ALL_NAVIGATION[0]?.groups[0]?.pages[0]?.href ?? '/' 
+        : pathname;
+
     const currentTab = useMemo(() => {
-        // Find the tab containing the current pathname
         return ALL_NAVIGATION.find(tab => 
             tab.groups.some(group => 
-                group.pages.some(page => page.href === pathname)
+                group.pages.some(page => page.href === effectivePath)
             )
         );
-    }, [pathname]);
+    }, [effectivePath]);
 
     return (
         <nav className="docucod-navigation text-base lg:text-sm">
@@ -27,7 +30,7 @@ export function Navigation() {
                             <h3 className="mt-4 text-sm font-semibold text-slate-900 dark:text-white">{group.title}</h3>
                             <ul role="list" className="mt-2 space-y-2 border-l-2 border-slate-100 lg:mt-4 lg:space-y-4 lg:border-slate-200 dark:border-slate-800">
                                 {group.pages.map((page) => {
-                                    const isActive = pathname === page.href;
+                                    const isActive = effectivePath === page.href;
                                     return (
                                         <li key={page.href} className="relative">
                                             <Link to={page.href} className={classNames(
