@@ -25,8 +25,7 @@ Dory is:
 
 ## 🎬 Quick Demo
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/t9nJxEAHZ3E" frameborder="0" allowfullscreen></iframe>
-
+https://github.com/user-attachments/assets/5a2840ce-a0b9-41fd-8d15-3ee1d2356f07
 
 ## ✨ Features
 
