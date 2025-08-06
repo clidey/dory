@@ -10,7 +10,6 @@ Dory is a lightweight static site generator built for developers who want fast, 
 
 Built with [Preact](https://preactjs.com/), [Vite](https://vitejs.dev/), [Tailwind CSS](https://tailwindcss.com/), [Mermaid](https://mermaid.js.org/), and [TypeScript](https://www.typescriptlang.org/).
 
----
 
 ## 🚀 Why Dory?
 
@@ -23,7 +22,6 @@ Dory is:
 - 🌐 **Portable** — No SSR, no lock-in, deploy anywhere.
 - 🧩 **Flexible** — Hackable theme, readable codebase, minimal magic.
 
----
 
 ## 🎬 Quick Demo
 
@@ -47,7 +45,6 @@ Dory is:
 - 🌍 Deploy to Netlify, Vercel, S3, GitHub Pages — your call
 - 🌐 HTTP client for testing API endpoints (automatic inference from openapi.json)
 
----
 
 ## 📦 CLI Installation
 
@@ -89,7 +86,6 @@ Shows CLI usage information:
 dory help
 ```
 
----
 
 ## 🧑‍💻 Development Setup
 
@@ -104,7 +100,6 @@ git clone https://github.com/clidey/dory.git
 cd dory
 ````
 
----
 
 ### 2️⃣ Install Dependencies
 
@@ -157,7 +152,6 @@ pnpm run build
 
 This will create a `dist` directory containing the fully built static site, ready to be served.
 
----
 
 ## 🐳 Docker Deployment (Optional)
 
@@ -187,8 +181,6 @@ docker run -it -p 8080:80 docs:1.0.0
 
 > The site will be available at `http://localhost:8080` inside your browser.
 
----
-
 ## 📂 Notes
 
 * `pnpm run build` creates the static site inside the `dist` folder, which can be served using any static file server.
@@ -203,4 +195,3 @@ We’re actively improving Dory. Here’s what’s on deck:
 * [ ] 🎨 **Themes** — full theming support with a flexible theme API
 * [ ] 🌐 **Multi-language Support** — internationalization (i18n) & localization (l10n)
 * [ ] 🚀 **GraphQL Client** — integrated GraphQL playground and client support
-* [ ] 🔄 **WebSocket Client** — built-in WebSocket utilities for real-time API demos
