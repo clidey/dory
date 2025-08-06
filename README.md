@@ -25,7 +25,7 @@ Dory is:
 
 ## 🎬 Quick Demo
 
-[![See Dory in action — supported features, REST, and Websockets playground.](https://img.youtube.com/vi/t9nJxEAHZ3E/0.jpg)](https://www.youtube.com/watch?v=t9nJxEAHZ3E)
+<iframe width="560" height="315" src="https://www.youtube.com/embed/t9nJxEAHZ3E" frameborder="0" allowfullscreen></iframe>
 
 
 ## ✨ Features
