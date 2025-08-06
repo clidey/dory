@@ -25,13 +25,7 @@ Dory is:
 
 ## 🎬 Quick Demo
 
-<div align="center" style="margin: 2em 0;">
-  <video src="https://github.com/clidey/dory/raw/main/public/demo.mov" controls width="600" style="border-radius: 12px; box-shadow: 0 2px 16px #0002;">
-    Your browser does not support the video tag.
-  </video>
-  <br />
-  <em style="color: #888;">See Dory in action — supported features, REST, and Websockets playground.</em>
-</div>
+[![See Dory in action — supported features, REST, and Websockets playground.](https://img.youtube.com/vi/t9nJxEAHZ3E/0.jpg)](https://www.youtube.com/watch?v=t9nJxEAHZ3E)
 
 
 ## ✨ Features
