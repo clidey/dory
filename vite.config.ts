@@ -9,11 +9,11 @@ import { frontmatterGenerator } from './src/plugins/frontmatter-generator';
 import { frontmatterDevServer } from './src/plugins/frontmatter-dev-server';
 import { getMdxConfig } from './src/config/mdx';
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   plugins: [
     preprocessMdxTags(),
     preact(),
-    mdx(getMdxConfig()),
+    mdx(getMdxConfig(command === 'serve')),
     tailwindcss(),
     llmTxtGenerator(),
     llmTxtDevServer(),
@@ -30,4 +30,4 @@ export default defineConfig({
   server: {
     allowedHosts: true,
   },
-});
+}));
