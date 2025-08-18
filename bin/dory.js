@@ -1,11 +1,13 @@
 #!/usr/bin/env node
 
 import { execSync } from 'child_process';
-import { existsSync, rmSync, mkdirSync, cpSync, readFileSync, readdirSync } from 'fs';
+import { existsSync, rmSync, mkdirSync, cpSync, readFileSync, readdirSync, writeFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url'
 import http from 'http';
 import sirv from 'sirv';
+import { compile } from '@mdx-js/mdx';
+import remarkGfm from 'remark-gfm';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -117,6 +119,67 @@ const commands = {
     });
   },
 
+  'build:file': async () => {
+    const args = process.argv.slice(3);
+    let content = '';
+    
+    // Parse arguments
+    for (let i = 0; i < args.length; i++) {
+      if (args[i] === '--content' && i + 1 < args.length) {
+        content = args[i + 1];
+        break;
+      }
+    }
+    
+    if (!content) {
+      console.error('❌ Error: --content argument is required');
+      console.log('Usage: dory build:file --content "<mdx-content>"');
+      process.exit(1);
+    }
+    
+    console.log('🐟 Dory is compiling your MDX content...');
+    
+    try {
+      // Apply the same preprocessor that the main build uses
+      const { preprocessMdxTags, remarkSafeVars } = await import('../src/plugins/sanitize.js');
+      const preprocessor = preprocessMdxTags();
+      
+      // Preprocess the content to handle MDX tags properly
+      let processedContent = content;
+      if (preprocessor.transform) {
+        const result = preprocessor.transform(processedContent, 'test.mdx');
+        if (result && typeof result === 'object' && result.code) {
+          processedContent = result.code;
+        }
+      }
+      
+      // Compile MDX content using the same configuration as the main build
+      const compiled = await compile(processedContent, {
+        providerImportSource: '@mdx-js/preact',
+        remarkPlugins: [remarkGfm, remarkSafeVars],
+        development: false,
+      });
+      
+      console.log('✅ MDX content compiled successfully!');
+      console.log('📝 Compiled output:');
+      console.log(compiled.toString());
+      
+    } catch (error) {
+      console.error('❌ MDX compilation failed:');
+      console.error(error.message);
+      
+      // Provide more detailed error information if available
+      if (error.line !== undefined && error.column !== undefined) {
+        console.error(`   at line ${error.line}, column ${error.column}`);
+      }
+      if (error.source) {
+        console.error('   Source:', error.source);
+      }
+      
+      process.exit(1);
+    }
+  },
+
   help: () => {
     console.log(`
 🐟 Dory CLI - Your Friendly Documentation Builder
@@ -125,19 +188,24 @@ Usage:
   dory <command>
 
 Commands:
-  build     Build your documentation site
-            - Needs dory.json in your project
-            - Creates a beautiful dist folder
-            
-  preview   Preview your built documentation
-            - Shows your docs in the browser
-            - Run build first!
-            
-  help      Show this help message
+  build         Build your documentation site
+                - Needs dory.json in your project
+                - Creates a beautiful dist folder
+                
+  build:file    Compile a single MDX file for testing
+                - Tests if MDX content is supported by Dory
+                - Shows compilation errors if any
+                
+  preview       Preview your built documentation
+                - Shows your docs in the browser
+                - Run build first!
+                
+  help          Show this help message
 
 Examples:
-  dory build    # Build your docs
-  dory preview  # Preview your docs
+  dory build                                    # Build your docs
+  dory build:file --content "# Hello World"    # Test MDX compilation
+  dory preview                                  # Preview your docs
 `);
   }
 };
@@ -145,12 +213,19 @@ Examples:
 // Parse command line arguments
 const command = process.argv[2];
 
-if (!command || command === 'help' || command === '--help' || command === '-h') {
-  commands.help();
-} else if (commands[command]) {
-  commands[command]();
-} else {
-  console.error(`❌ Unknown command: ${command}`);
-  console.log('Run "dory help" for usage information');
-  process.exit(1);
+async function runCommand() {
+  if (!command || command === 'help' || command === '--help' || command === '-h') {
+    commands.help();
+  } else if (commands[command]) {
+    await commands[command]();
+  } else {
+    console.error(`❌ Unknown command: ${command}`);
+    console.log('Run "dory help" for usage information');
+    process.exit(1);
+  }
 }
+
+runCommand().catch((error) => {
+  console.error('❌ Command failed:', error.message);
+  process.exit(1);
+});
