@@ -83,9 +83,23 @@ export function preprocessMdxTags() {
       // Remove leading whitespace from code fence blocks
       let processed = code.replace(/^(\s+)(```\w*)/gm, '$2');
 
+      // Handle self-closing tags first (like <VideoPlayer />)
+      processed = processed.replace(/<([A-Za-z][A-Za-z0-9]*)[^>]*\/>/g, (match, tag, offset) => {
+        // If inside a code block, do not touch
+        if (isInsideCodeBlock(processed, offset)) {
+          return match;
+        }
+        
+        // If unknown component, treat as text
+        if (!KNOWN_COMPONENTS.includes(tag)) {
+          return `\`${match}\``;
+        }
+        return match;
+      });
+
       // Only replace unrecognized <someTag> with `"<someTag>"` if NOT inside a code block
-      // This regex finds all <tag> occurrences
-      processed = processed.replace(/<([a-z][a-z0-9]*)>/gi, (match, tag, offset) => {
+      // This regex finds all <tag> occurrences (fixed to handle uppercase)
+      processed = processed.replace(/<([A-Za-z][A-Za-z0-9]*)>/g, (match, tag, offset) => {
         // If inside a code block, do not touch
         if (isInsideCodeBlock(processed, offset)) {
           return match;
@@ -111,8 +125,8 @@ export function preprocessMdxTags() {
         return `\`<${tag}>\``;
       });
 
-      // This regex finds all <tag> and </tag> occurrences
-      processed = processed.replace(/<\/?([a-z][a-z0-9]*)>/gi, (match, tag, offset) => {
+      // This regex finds all <tag> and </tag> occurrences (fixed to handle uppercase)
+      processed = processed.replace(/<\/?([A-Za-z][A-Za-z0-9]*)>/g, (match, tag, offset) => {
         // If inside a code block, do not touch
         if (isInsideCodeBlock(processed, offset)) {
           return match;

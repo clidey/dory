@@ -1,5 +1,5 @@
 import remarkGfm from 'remark-gfm';
-import { remarkSafeVars } from '../plugins/sanitize.js';
+import { remarkSafeVars } from '../plugins/sanitize.ts';
 
 /**
  * Shared MDX configuration used by both main build (vite.config.ts) 

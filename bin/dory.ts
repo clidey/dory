@@ -1,10 +1,11 @@
-#!/usr/bin/env node
+#!/usr/bin/env -S npx tsx
 
+// @ts-nocheck - gang
 import { execSync } from 'child_process';
-import { existsSync, rmSync, mkdirSync, cpSync, readFileSync, readdirSync, writeFileSync } from 'fs';
+import { existsSync, rmSync, mkdirSync, cpSync, readFileSync, readdirSync } from 'fs';
 import { resolve, dirname } from 'path';
-import { fileURLToPath } from 'url'
-import http from 'http';
+import { fileURLToPath } from 'url';
+import { createServer } from 'http';
 import sirv from 'sirv';
 import { compile } from '@mdx-js/mdx';
 
@@ -109,7 +110,7 @@ const commands = {
       brotli: true,
     });
 
-    const server = http.createServer((req, res) => {
+    const server = createServer((req, res) => {
       serve(req, res);
     });
 
@@ -118,7 +119,7 @@ const commands = {
     });
   },
 
-  'build:file': async () => {
+  'verify:content': async () => {
     const args = process.argv.slice(3);
     let content = '';
     
@@ -127,20 +128,26 @@ const commands = {
       if (args[i] === '--content' && i + 1 < args.length) {
         content = args[i + 1];
         break;
+      } else if (args[i] === '--file' && i + 1 < args.length) {
+        const filePath = args[i + 1];
+        if (!existsSync(filePath)) {
+          console.error(`❌ Error: File not found: ${filePath}`);
+          process.exit(1);
+        }
+        content = readFileSync(filePath, 'utf8');
+        break;
       }
     }
     
     if (!content) {
-      console.error('❌ Error: --content argument is required');
-      console.log('Usage: dory build:file --content "<mdx-content>"');
+      console.error('❌ Error: --content or --file argument is required');
+      console.log('Usage: dory verify:content --content "<mdx-content>" | --file <path-to-mdx-file>');
       process.exit(1);
     }
     
-    console.log('🐟 Dory is compiling your MDX content...');
-    
     try {
       // Apply the same preprocessor that the main build uses
-      const { preprocessMdxTags } = await import('../src/plugins/sanitize.js');
+      const { preprocessMdxTags } = await import('../src/plugins/sanitize.ts');
       const { getMdxConfig } = await import('../src/config/mdx.js');
       const preprocessor = preprocessMdxTags();
       
@@ -156,9 +163,7 @@ const commands = {
       // Compile MDX content using the same configuration as the main build
       const compiled = await compile(processedContent, getMdxConfig(false));
       
-      console.log('✅ MDX content compiled successfully!');
-      console.log('📝 Compiled output:');
-      console.log(compiled.toString());
+      // Silent success - no output means no errors
       
     } catch (error) {
       console.error('❌ MDX compilation failed:');
@@ -188,9 +193,10 @@ Commands:
                 - Needs dory.json in your project
                 - Creates a beautiful dist folder
                 
-  build:file    Compile a single MDX file for testing
-                - Tests if MDX content is supported by Dory
-                - Shows compilation errors if any
+  verify:content  Verify that MDX content compiles without errors
+                  - Silent on success, shows errors on failure
+                  - Uses the same preprocessing as the main build
+                  - Accepts --content or --file arguments
                 
   preview       Preview your built documentation
                 - Shows your docs in the browser
@@ -199,9 +205,10 @@ Commands:
   help          Show this help message
 
 Examples:
-  dory build                                    # Build your docs
-  dory build:file --content "# Hello World"    # Test MDX compilation
-  dory preview                                  # Preview your docs
+  dory build                                      # Build your docs
+  dory verify:content --content "# Hello World"  # Verify MDX content
+  dory verify:content --file content.mdx         # Verify MDX from file
+  dory preview                                    # Preview your docs
 `);
   }
 };

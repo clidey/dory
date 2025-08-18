@@ -72,6 +72,24 @@ Previews the built documentation site:
 dory preview
 ```
 
+#### `dory verify:content`
+Verifies that MDX content compiles without errors:
+- Silent on success (no output means no errors)
+- Shows detailed error messages on failure
+- Uses the same preprocessing as the main build
+- Perfect for automated testing and debugging
+
+```bash
+# Verify content directly
+dory verify:content --content "# Hello World\n\nThis is a test."
+
+# Verify content from file (recommended for complex content)
+dory verify:content --file content.mdx
+
+# Development repository usage:
+pnpm exec tsx bin/dory.ts verify:content --file content.mdx
+```
+
 #### `dory help`
 Shows CLI usage information:
 
