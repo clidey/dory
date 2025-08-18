@@ -7,7 +7,6 @@ import { fileURLToPath } from 'url'
 import http from 'http';
 import sirv from 'sirv';
 import { compile } from '@mdx-js/mdx';
-import remarkGfm from 'remark-gfm';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -141,7 +140,8 @@ const commands = {
     
     try {
       // Apply the same preprocessor that the main build uses
-      const { preprocessMdxTags, remarkSafeVars } = await import('../src/plugins/sanitize.js');
+      const { preprocessMdxTags } = await import('../src/plugins/sanitize.js');
+      const { getMdxConfig } = await import('../src/config/mdx.js');
       const preprocessor = preprocessMdxTags();
       
       // Preprocess the content to handle MDX tags properly
@@ -154,11 +154,7 @@ const commands = {
       }
       
       // Compile MDX content using the same configuration as the main build
-      const compiled = await compile(processedContent, {
-        providerImportSource: '@mdx-js/preact',
-        remarkPlugins: [remarkGfm, remarkSafeVars],
-        development: false,
-      });
+      const compiled = await compile(processedContent, getMdxConfig(false));
       
       console.log('✅ MDX content compiled successfully!');
       console.log('📝 Compiled output:');
