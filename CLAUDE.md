@@ -2,6 +2,23 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Communication Style
+- Maintain a professional, neutral tone in all communications
+- Use exclamation points sparingly and only when genuinely necessary
+- Approach problems with the measured perspective of an experienced software engineer
+- Keep a level head when discussing technical challenges and solutions
+- Focus on clear, factual explanations without unnecessary enthusiasm
+
+## Development requirements
+To develop Dory, follow the below requirements every time you do a task:
+1. Clean code is paramount—make sure it is easy to understand and follow
+2. Do not overengineer if you can help it—only add what is required.
+3. Do not remove or modify existing functionally UNLESS you have to and UNLESS you can justify it.
+4. Do not change existing variable names UNLESS absolutely necessary.
+5. Do not leave unused code lying around.
+6. Ask as many questions as you have to in order to understand your task.
+7. You MUST use multiple subagents wherever possible to help you accomplish your task faster.
+
 ## Project Overview
 
 Dory is a lightweight static site generator for technical documentation, published as `@clidey/dory` on npm. It uses Preact, Vite, TypeScript, and Tailwind CSS.
