@@ -41,28 +41,36 @@ export async function preprocessMdxContent(
     // Step 2: Convert URLs in angle brackets to markdown links
     // Handles cases like <https://example.com> which MDX would interpret as JSX
     // But preserves them inside code blocks
-    const codeBlockRegex = /```[\s\S]*?```|`[^`]+`/g;
-    const codeBlocks: string[] = [];
-    let codeBlockIndex = 0;
     
-    // First, temporarily replace code blocks with placeholders
-    processedContent = processedContent.replace(codeBlockRegex, (match) => {
-      const placeholder = `___CODE_BLOCK_${codeBlockIndex}___`;
-      codeBlocks[codeBlockIndex] = match;
-      codeBlockIndex++;
-      return placeholder;
-    });
+    // Simple approach: process line by line to avoid complex regex issues
+    const lines = processedContent.split('\n');
+    let inCodeBlock = false;
     
-    // Now safely convert URLs outside of code blocks
-    processedContent = processedContent.replace(
-      /<(https?:\/\/[^\s>]+)>/g,
-      '[$1]($1)'
-    );
-    
-    // Restore code blocks
-    codeBlocks.forEach((block, index) => {
-      processedContent = processedContent.replace(`___CODE_BLOCK_${index}___`, block);
-    });
+    processedContent = lines.map(line => {
+      // Check if we're entering or leaving a code block
+      if (line.startsWith('```')) {
+        inCodeBlock = !inCodeBlock;
+        return line;
+      }
+      
+      // Don't process lines inside code blocks
+      if (inCodeBlock) {
+        return line;
+      }
+      
+      // For lines outside code blocks, preserve inline code
+      // Split by backticks to handle inline code
+      const parts = line.split(/(`[^`]*`)/g);
+      
+      return parts.map((part, index) => {
+        // Odd indices are inline code (captured groups)
+        if (index % 2 === 1) {
+          return part; // Keep inline code as-is
+        }
+        // Even indices are regular text - convert URLs
+        return part.replace(/<(https?:\/\/[^\s>]+)>/g, '[$1]($1)');
+      }).join('');
+    }).join('\n');
     
     // Step 3: Add any future preprocessing steps here
     // Example: processedContent = await yourNewPreprocessor(processedContent);
