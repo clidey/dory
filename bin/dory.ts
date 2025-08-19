@@ -7,7 +7,6 @@ import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { createServer } from 'http';
 import sirv from 'sirv';
-import { compile } from '@mdx-js/mdx';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -122,6 +121,7 @@ const commands = {
   'verify:content': async () => {
     const args = process.argv.slice(3);
     let content = '';
+    let fileName = '';
     
     // Parse arguments
     for (let i = 0; i < args.length; i++) {
@@ -135,6 +135,7 @@ const commands = {
           process.exit(1);
         }
         content = readFileSync(filePath, 'utf8');
+        fileName = filePath;
         break;
       }
     }
@@ -146,22 +147,13 @@ const commands = {
     }
     
     try {
-      // Apply the same preprocessor that the main build uses
-      const { preprocessMdxTags } = await import('../src/plugins/sanitize.ts');
-      const { getMdxConfig } = await import('../src/config/mdx.js');
-      const preprocessor = preprocessMdxTags();
+      // Use the shared MDX processor that matches the main build exactly
+      const { verifyMdxContent } = await import('../src/mdx/processor.ts');
+      const result = await verifyMdxContent(content, fileName);
       
-      // Preprocess the content to handle MDX tags properly
-      let processedContent = content;
-      if (preprocessor.transform) {
-        const result = preprocessor.transform(processedContent, 'test.mdx');
-        if (result && typeof result === 'object' && result.code) {
-          processedContent = result.code;
-        }
+      if (!result.valid) {
+        throw result.error;
       }
-      
-      // Compile MDX content using the same configuration as the main build
-      const compiled = await compile(processedContent, getMdxConfig(false));
       
       // Silent success - no output means no errors
       
