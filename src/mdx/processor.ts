@@ -42,13 +42,13 @@ export async function preprocessMdxContent(
     // Handles cases like <https://example.com> which MDX would interpret as JSX
     // But preserves them inside code blocks
     
-    // Simple approach: process line by line to avoid complex regex issues
+    // Process line by line to handle code blocks correctly
     const lines = processedContent.split('\n');
     let inCodeBlock = false;
     
     processedContent = lines.map(line => {
-      // Check if we're entering or leaving a code block
-      if (line.startsWith('```')) {
+      // Check if we're entering or leaving a code block (with optional indentation)
+      if (line.trim().startsWith('```')) {
         inCodeBlock = !inCodeBlock;
         return line;
       }
@@ -59,17 +59,31 @@ export async function preprocessMdxContent(
       }
       
       // For lines outside code blocks, preserve inline code
-      // Split by backticks to handle inline code
-      const parts = line.split(/(`[^`]*`)/g);
+      // More robust regex that handles inline code with potential spaces
+      // Matches: `...` including multi-line content
+      let result = '';
+      let lastIndex = 0;
       
-      return parts.map((part, index) => {
-        // Odd indices are inline code (captured groups)
-        if (index % 2 === 1) {
-          return part; // Keep inline code as-is
-        }
-        // Even indices are regular text - convert URLs
-        return part.replace(/<(https?:\/\/[^\s>]+)>/g, '[$1]($1)');
-      }).join('');
+      // Find all inline code spans in the line
+      const inlineCodeRegex = /`([^`]+)`/g;
+      let match;
+      
+      while ((match = inlineCodeRegex.exec(line)) !== null) {
+        // Process text before the inline code
+        const beforeCode = line.substring(lastIndex, match.index);
+        result += beforeCode.replace(/<(https?:\/\/[^\s>]+)>/g, '[$1]($1)');
+        
+        // Keep inline code as-is
+        result += match[0];
+        
+        lastIndex = match.index + match[0].length;
+      }
+      
+      // Process remaining text after last inline code (or entire line if no inline code)
+      const remainingText = line.substring(lastIndex);
+      result += remainingText.replace(/<(https?:\/\/[^\s>]+)>/g, '[$1]($1)');
+      
+      return result;
     }).join('\n');
     
     // Step 3: Add any future preprocessing steps here
