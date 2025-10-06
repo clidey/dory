@@ -2,33 +2,64 @@ name: Claude Code Review
 
 on:
   pull_request:
-    types: [opened, synchronize]
-    # Optional: Only run on specific file changes
-    # paths:
-    #   - "src/**/*.ts"
-    #   - "src/**/*.tsx"
-    #   - "src/**/*.js"
-    #   - "src/**/*.jsx"
+    types: [opened]
+  issue_comment:
+    types: [created]
 
 jobs:
+  post-instructions:
+    # Only run on new PR creation
+    if: github.event_name == 'pull_request' && github.event.action == 'opened'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+
+    steps:
+      - name: Post instruction comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: 'Hey, leave a @claude-review comment below and I\'ll do a code review!'
+            });
+
   claude-review:
-    # Optional: Filter by PR author
-    # if: |
-    #   github.event.pull_request.user.login == 'external-contributor' ||
-    #   github.event.pull_request.user.login == 'new-developer' ||
-    #   github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR'
-    
+    # Only run when someone comments "@claude-review" on a PR
+    if: |
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '@claude-review')
+
     runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: read
       issues: read
       id-token: write
-    
+
     steps:
+      # Get PR details to checkout the correct commit
+      - name: Get PR details
+        uses: actions/github-script@v7
+        id: pr
+        with:
+          script: |
+            const { data: pullRequest } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+            return {
+              ref: pullRequest.head.ref,
+              sha: pullRequest.head.sha
+            };
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
+          ref: ${{ fromJSON(steps.pr.outputs.result).sha }}
           fetch-depth: 1
 
       - name: Run Claude Code Review
@@ -38,19 +69,39 @@ jobs:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           prompt: |
             REPO: ${{ github.repository }}
-            PR NUMBER: ${{ github.event.pull_request.number }}
+            PR NUMBER: ${{ github.event.issue.number }}
 
-            Please review this pull request and provide feedback on:
-            - Code quality and best practices
-            - Potential bugs or issues
-            - Performance considerations
-            - Security concerns
-            - Test coverage
-            
-            Use the repository's CLAUDE.md for guidance on style and conventions. Be constructive and helpful in your feedback.
+            Review this Dory pull request. Use CLAUDE.md for detailed guidelines.
 
-            Use `gh pr comment` with your Bash tool to leave your review as a comment on the PR.
-          
+            CRITICAL CHECKS:
+            1. TypeScript: Ensure strict mode compliance, proper typing, no 'any' without justification
+            2. MDX Components: Verify custom components follow existing patterns in src/mdx/
+            3. Vite Plugins: Any changes to build system must maintain LLM support functionality
+            4. Tailwind CSS: Use v4 utilities properly, ensure dark mode compatibility
+
+            REVIEW AREAS:
+            - Code Quality: Clean, understandable code without overengineering
+            - Component Patterns: Follow existing Preact functional component patterns
+            - Build System: Vite config changes, custom plugin modifications
+            - MDX Support: Proper sanitization with remarkSafeVars, custom component usage
+            - Configuration: dory.json changes for navigation, branding
+            - Performance: Bundle size impact, lazy loading where appropriate
+            - Security: MDX sanitization, no XSS vulnerabilities, proper input validation
+            - Dark Mode: All UI changes must work in both light and dark themes
+            - Documentation: Ensure docs/ content is clear and accurate
+            - Dependencies: pnpm usage (not npm/yarn), version compatibility
+
+            FOCUS ON:
+            - Finding actual bugs and TypeScript issues
+            - Ensuring existing functionality isn't broken
+            - Maintaining clean code principles from CLAUDE.md
+            - Verifying MDX content renders correctly
+            - Checking API Playground, Mermaid diagrams, LaTeX math features still work
+
+            Be specific and actionable. Reference file:line_number when pointing out issues.
+
+            Use `gh pr comment` to post your review as a single, well-formatted comment.
+
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://docs.claude.com/en/docs/claude-code/sdk#command-line for available options
           claude_args: '--allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*)"'
