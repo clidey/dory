@@ -30,5 +30,7 @@ export default defineConfig(({ command }) => ({
   publicDir: "docs",
   server: {
     allowedHosts: true,
+    port: 3000,
+    strictPort: false,
   },
 }));

@@ -99,7 +99,7 @@ const commands = {
     console.log('👀 Starting your docs preview...');
     const currentDir = process.cwd();
     const distDir = resolve(currentDir, 'dist');
-    const port = process.env.PORT || 3000;
+    let port = parseInt(process.env.PORT || '3000', 10);
 
     const serve = sirv(distDir, {
       dev: false,
@@ -113,9 +113,23 @@ const commands = {
       serve(req, res);
     });
 
-    server.listen(port, () => {
-      console.log(`🚀 Your docs are live at http://localhost:${port}`);
-    });
+    const tryPort = (currentPort: number) => {
+      server.listen(currentPort)
+        .on('listening', () => {
+          console.log(`🚀 Your docs are live at http://localhost:${currentPort}`);
+        })
+        .on('error', (err: any) => {
+          if (err.code === 'EADDRINUSE') {
+            console.log(`⚠️  Port ${currentPort} is busy, trying ${currentPort + 1}...`);
+            tryPort(currentPort + 1);
+          } else {
+            console.error('❌ Failed to start server:', err.message);
+            process.exit(1);
+          }
+        });
+    };
+
+    tryPort(port);
   },
 
   'verify:content': async () => {
