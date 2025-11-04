@@ -12,6 +12,7 @@ dist
 dist-ssr
 bin/dist
 *.local
+.docs-backup
 
 # Editor directories and files
 .vscode/*

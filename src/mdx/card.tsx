@@ -29,18 +29,18 @@ export function Card({
   icon,
   children,
 }: {
-  title: string
-  description: string
-  href: string
-  icon: string
+  title?: string
+  description?: string
+  href?: string
+  icon?: string
   children?: ComponentChildren
 }) {
   return (
-    <UXCard className="group relative">
-      <a href={href} className="absolute inset-0 z-10" aria-label={title} />
+    <UXCard className="group relative border-ring border-1 border-black/10 dark:border-white/10">
+      {href && <a href={href} className="absolute inset-0 z-10" aria-label={title} />}
       <CardHeader>
         <div className="flex items-center gap-3">
-          <Icon icon={icon} className="h-8 w-8" />
+          {icon && <Icon icon={icon} className="h-8 w-8" />}
           <CardTitle className="text-base">{title}</CardTitle>
         </div>
       </CardHeader>

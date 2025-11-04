@@ -21,6 +21,8 @@
     // Using light color for light mode
     --primary: var(--brand-light);
     --primary-rgb: var(--brand-light-rgb);
+    
+    --ring: rgba(0, 0, 0, 0.1);
 }
 
 // Dark mode overrides
@@ -28,6 +30,8 @@
     // Use dark color for dark mode
     --primary: var(--brand-dark);
     --primary-rgb: var(--brand-dark-rgb);
+
+    --ring: rgba(255, 255, 255, 0.1);
 }
   
 article h2:first-of-type {
@@ -45,7 +49,7 @@ article img {
 
 [data-testid="header-actions"] button,
 [data-slot="dropdown-menu-content"] {
-    border-color: rgba(0, 0, 0, 0.1);
+    border-color: var(--ring);
 }
 
 [data-slot="search-input-wrapper"] {

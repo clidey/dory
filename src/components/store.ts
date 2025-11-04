@@ -1,6 +1,6 @@
 import type { ComponentType } from 'preact';
 import { type RouteComponentProps } from 'wouter-preact';
-import docsConfig from '../../docs/dory.json';
+import docsConfig from '../../docs/dory.json' with { type: 'json' };
 import type { DoryConfig } from '../types/config';
 import { searchIndex } from './search-index';
 

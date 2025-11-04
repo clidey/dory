@@ -7,6 +7,7 @@ import { llmTxtGenerator } from './src/plugins/llm-txt-generator';
 import { llmTxtDevServer } from './src/plugins/llm-txt-dev-server';
 import { frontmatterGenerator } from './src/plugins/frontmatter-generator';
 import { frontmatterDevServer } from './src/plugins/frontmatter-dev-server';
+import { docsAssetsPlugin } from './src/plugins/docs-assets';
 import { getMdxConfig } from './src/config/mdx';
 
 export default defineConfig(({ command }) => ({
@@ -20,6 +21,7 @@ export default defineConfig(({ command }) => ({
     llmTxtDevServer(),
     frontmatterGenerator(),
     frontmatterDevServer(),
+    docsAssetsPlugin(),
   ],
   resolve: {
     alias: {
@@ -27,10 +29,13 @@ export default defineConfig(({ command }) => ({
       'react-dom': 'preact/compat'
     }
   },
-  publicDir: "docs",
+  publicDir: false, // Don't use a public directory since we need to import from docs
   server: {
     allowedHosts: true,
     port: 3000,
     strictPort: false,
+  },
+  json: {
+    stringify: false
   },
 }));

@@ -43,6 +43,7 @@ const commands = {
     const doryRoot = getDoryRoot();
     const doryConfigPath = resolve(userRoot, 'dory.json');
     const tempDocsDir = resolve(doryRoot, 'docs');
+    const docsBackupDir = resolve(doryRoot, '.docs-backup');
     const doryDistDir = resolve(doryRoot, 'dist');
     const userDistDir = resolve(userRoot, 'dist');
 
@@ -80,9 +81,16 @@ const commands = {
       process.exit(1);
     }
 
-    // Step 2: Clean up temp directories
+    // Step 2: Backup existing docs directory if it exists
     console.log('🧹 Preparing workspace...');
-    if (existsSync(tempDocsDir)) {
+    const docsExistedBefore = existsSync(tempDocsDir);
+
+    if (docsExistedBefore) {
+      console.log('💾 Backing up existing docs directory...');
+      if (existsSync(docsBackupDir)) {
+        rmSync(docsBackupDir, { recursive: true, force: true });
+      }
+      cpSync(tempDocsDir, docsBackupDir, { recursive: true, force: true });
       rmSync(tempDocsDir, { recursive: true, force: true });
     }
 
@@ -127,6 +135,15 @@ const commands = {
       }
 
       console.log(`✅ Copied ${copiedCount} items`);
+
+      // Verify critical files exist
+      const doryJsonPath = resolve(tempDocsDir, 'dory.json');
+      if (!existsSync(doryJsonPath)) {
+        console.error('❌ dory.json was not copied to docs directory');
+        console.error(`   Expected: ${doryJsonPath}`);
+        console.error('   This file is required for the build');
+        process.exit(1);
+      }
 
       // Step 4: Run the build
       console.log('⚡ Building documentation...');
@@ -182,13 +199,22 @@ const commands = {
       console.log('✨ Documentation ready in dist/');
 
     } finally {
-      // Step 7: Always clean up temp directories
+      // Step 7: Always clean up temp directories and restore backup
       console.log('🧹 Cleaning up...');
 
       try {
+        // Remove the temporary docs directory
         if (existsSync(tempDocsDir)) {
           rmSync(tempDocsDir, { recursive: true, force: true });
         }
+
+        // Restore the original docs directory if it existed before
+        if (docsExistedBefore && existsSync(docsBackupDir)) {
+          console.log('📦 Restoring original docs directory...');
+          cpSync(docsBackupDir, tempDocsDir, { recursive: true, force: true });
+          rmSync(docsBackupDir, { recursive: true, force: true });
+        }
+
         // Only clean up doryDistDir if it's different from userDistDir
         // (in production they're different, in dev they might be the same)
         if (doryDistDir !== userDistDir && existsSync(doryDistDir)) {
@@ -196,6 +222,21 @@ const commands = {
         }
       } catch (error) {
         console.warn('⚠️  Could not clean up temp directories');
+        // Try to restore backup even if cleanup failed
+        if (docsExistedBefore && existsSync(docsBackupDir)) {
+          console.log('🔄 Attempting to restore backup...');
+          try {
+            if (existsSync(tempDocsDir)) {
+              rmSync(tempDocsDir, { recursive: true, force: true });
+            }
+            cpSync(docsBackupDir, tempDocsDir, { recursive: true, force: true });
+            rmSync(docsBackupDir, { recursive: true, force: true });
+          } catch (restoreError) {
+            console.error('❌ Failed to restore docs backup!');
+            console.error(`   Backup location: ${docsBackupDir}`);
+            console.error('   You may need to manually restore your docs directory');
+          }
+        }
       }
 
       console.log('✅ Done!');

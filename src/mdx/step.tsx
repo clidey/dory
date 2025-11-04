@@ -40,10 +40,12 @@ export function Steps({ children }: { children: preact.ComponentChildren }) {
   )
 }
 
-export function Step({ 
-  children 
-}: { 
-  children: preact.ComponentChildren 
+export function Step({
+  title: _title,
+  children
+}: {
+  title?: string;
+  children: preact.ComponentChildren
 }) {
   return <p className='text-sm'>{children}</p>
 }

@@ -93,7 +93,7 @@ function useAutocomplete({ onNavigate }: { onNavigate: () => void }) {
 function HighlightQuery({ text, query }: { text: string; query: string }) {
   return (
     <Highlighter
-      highlightClassName="underline bg-transparent text-emerald-500"
+      highlightClassName="underline bg-transparent text-brand-foreground"
       searchWords={[query]}
       autoEscape={true}
       textToHighlight={text}
@@ -146,7 +146,7 @@ function SearchResult({
       <div
         id={`${id}-title`}
         aria-hidden="true"
-        className="text-sm font-medium text-zinc-900 group-aria-selected:text-emerald-500 dark:text-white"
+        className="text-sm font-medium text-brand-foreground group-aria-selected:text-brand-foreground"
       >
         <HighlightQuery text={result.title} query={query} />
       </div>
@@ -195,9 +195,9 @@ function SearchResults({
             d="M12.01 12a4.237 4.237 0 0 0 1.24-3c0-.62-.132-1.207-.37-1.738M12.01 12A4.237 4.237 0 0 1 9 13.25c-.635 0-1.237-.14-1.777-.388M12.01 12l3.24 3.25m-3.715-9.661a4.25 4.25 0 0 0-5.975 5.908M4.5 15.5l11-11"
           />
         </svg>
-        <p className="mt-2 text-xs text-zinc-700 dark:text-zinc-400">
+        <p className="mt-2 text-xs">
           Nothing found for{' '}
-          <strong className="font-semibold break-words text-zinc-900 dark:text-white">
+          <strong className="font-semibold break-words">
             &lsquo;{query}&rsquo;
           </strong>
           . Please try again.
@@ -261,7 +261,7 @@ const SearchInput = forwardRef<
       />
       {autocompleteState.status === 'stalled' && (
         <div className="absolute inset-y-0 right-3 flex items-center">
-          <Spinner className="h-5 w-5 animate-spin stroke-zinc-200 text-zinc-900 dark:stroke-zinc-800 dark:text-emerald-400" />
+          <Spinner className="h-5 w-5 animate-spin text-brand-foreground" />
         </div>
       )}
     </div>

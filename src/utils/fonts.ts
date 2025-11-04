@@ -1,4 +1,4 @@
-import docsConfig from '../../docs/dory.json';
+import docsConfig from '../../docs/dory.json' with { type: 'json' };
 import type { DoryConfig } from '../types/config';
 
 const config = docsConfig as DoryConfig;
