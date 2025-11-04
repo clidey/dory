@@ -10,6 +10,8 @@ import {
 } from 'react'
 import { Tag } from './tag'
 import { toTitleCase } from '../utils/functions'
+import { Button, Card } from '@clidey/ux'
+import { CheckIcon } from 'lucide-react'
 
 export const supportedLanguages = {
   'python': 'Python',
@@ -73,10 +75,9 @@ function CopyButton({ code }: { code: string }) {
   }, [copied])
 
   return (
-    <button
-      type="button"
+    <Button
       className={classNames(
-        'group/button absolute top-2 right-4 overflow-hidden rounded-full py-1 pr-3 pl-2 text-2xs font-medium opacity-0 backdrop-blur-sm transition group-hover:opacity-100 focus:opacity-100',
+        'group/button absolute top-1 right-2 overflow-hidden rounded-full py-1 pr-3 pl-2 text-2xs font-medium opacity-0 backdrop-blur-sm transition group-hover:opacity-100 focus:opacity-100',
         {
           'bg-emerald-400/10 ring-1 ring-emerald-400/20 ring-inset': copied,
           'bg-white/5 hover:bg-white/7.5 dark:bg-white/2.5 dark:hover:bg-white/5': !copied,
@@ -95,8 +96,7 @@ function CopyButton({ code }: { code: string }) {
           copied && '-translate-y-1.5 opacity-0',
         )}
       >
-        <ClipboardIcon className="h-5 w-5 fill-zinc-500/20 stroke-zinc-500 transition-colors group-hover/button:stroke-zinc-400" />
-        Copy
+        <ClipboardIcon className="h-4 w-4 fill-zinc-500/20 stroke-zinc-500 transition-colors group-hover/button:stroke-zinc-400" />
       </span>
       <span
         aria-hidden={!copied}
@@ -105,9 +105,9 @@ function CopyButton({ code }: { code: string }) {
           !copied && 'translate-y-1.5 opacity-0',
         )}
       >
-        Copied!
+        <CheckIcon className="h-4 w-4" />
       </span>
-    </button>
+    </Button>
   )
 }
 
@@ -158,7 +158,7 @@ function CodePanel({
     <div className="group dark:bg-white/2.5">
       <CodePanelHeader tag={tag} label={label} />
       <div className="relative">
-        <pre className="overflow-x-auto p-4 text-xs text-white">{children}</pre>
+        <pre className="overflow-x-auto p-4 text-xs">{children}</pre>
         <CopyButton code={code ?? ''} />
       </div>
     </div>
@@ -179,9 +179,9 @@ function CodeGroupHeader({
   if (!title && !hasTabs) return null
 
   return (
-    <div className="flex min-h-[calc(--spacing(12)+1px)] flex-wrap items-start gap-x-4 bg-black/5 px-4 dark:border-zinc-800 dark:bg-transparent">
+    <div className="flex flex-wrap items-start gap-x-4 px-4 pb-2">
       {title && (
-        <p className="mr-auto pt-3 text-xs font-semibold text-white">
+        <p className="mr-auto pt-3 text-xs font-semibold">
           {title}
         </p>
       )}
@@ -197,7 +197,7 @@ function CodeGroupHeader({
               <Tab
                 key={index}
                 className={classNames(
-                  'border-b py-3 transition data-selected:not-data-focus:outline-hidden',
+                  'pt-2 transition data-selected:not-data-focus:outline-hidden',
                   index === selectedIndex
                     ? 'border-emerald-500 text-emerald-400'
                     : 'border-transparent text-zinc-400 hover:text-zinc-300',
@@ -247,7 +247,6 @@ export function CodeGroup({
 
   const hasTabs = childrenArray.length > 1
 
-  const containerClassName = 'docucod-mdx-code-group my-6 overflow-hidden rounded-2xl shadow-md dark:ring-1 dark:ring-white/10'
   const header = (
     <CodeGroupHeader title={title} selectedIndex={selectedIndex}>
       {children}
@@ -258,24 +257,25 @@ export function CodeGroup({
   return (
     <CodeGroupContext.Provider value={true}>
       {hasTabs ? (
-        <TabGroup
-          as="div"
-          selectedIndex={selectedIndex}
-          onChange={setSelectedIndex}
-          className={containerClassName}
-        >
-          <div className="not-prose">
-            {header}
-            {panels}
-          </div>
-        </TabGroup>
+        <Card className="py-0 border-black/10 bg-none overflow-hidden mb-4">
+          <TabGroup
+            as="div"
+            selectedIndex={selectedIndex}
+            onChange={setSelectedIndex}
+          >
+            <div className="not-prose">
+              {header}
+              {panels}
+            </div>
+          </TabGroup>
+        </Card>
       ) : (
-        <div className={containerClassName}>
+        <Card className="py-0 border-black/10 bg-none overflow-hidden mb-4">
           <div className="not-prose">
             {header}
             {panels}
           </div>
-        </div>
+        </Card>
       )}
     </CodeGroupContext.Provider>
   )
@@ -285,5 +285,5 @@ export function Code({
   children,
   ...props
 }: React.ComponentPropsWithoutRef<'code'>) {
-  return <code className={classNames('docucod-mdx-code rounded-md py-1 text-sm px-2', props.className)} {...props}>{children}</code>
+  return <code className={classNames('dory-mdx-code rounded-md py-1 text-sm px-2', props.className)} {...props}>{children}</code>
 }

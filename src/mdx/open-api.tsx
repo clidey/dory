@@ -4,7 +4,7 @@ import { APIPlayground, PlayButton, type Server } from "./api-playground"
 import { Fence } from "./fence"
 import { Tag } from "./tag"
 import { Col, Row } from "./text"
-import { motion } from "motion/react"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, Button } from "@clidey/ux"
 
 export function Properties({ children }: { children: React.ReactNode }) {
   return (
@@ -33,12 +33,16 @@ export function Property({
   return (
     <div className="m-0 px-0 first:pt-0 last:pb-0">
       <div className="my-4 flex flex-wrap items-center gap-x-3 gap-2">
-        <Tag className="px-4 py-1">{name}</Tag>
-        <p className="font-mono text-xs text-zinc-400 dark:text-zinc-500">
-          {type}
-        </p>
-        {required && <span className="text-rose-400 ml-1 text-xs">Required</span>}
-        <p className="w-full flex-none [&>:first-child]:mt-0 [&>:last-child]:mb-0 text-sm">
+        <div className="flex gap-2 items-center grow">
+          <Tag className="px-4 py-1">{name}</Tag>
+          <p className="font-mono text-xs text-zinc-400 dark:text-zinc-500">
+            {type}
+          </p>
+          <div className="flex grow justify-end ">
+            {required && <span className="text-rose-400 ml-1 text-xs">Required</span>}
+          </div>
+        </div>
+        <p className="w-full flex-none [&>:first-child]:mt-0 [&>:last-child]:mb-0 text-xs text-muted-foreground">
           {children}
         </p>
       </div>
@@ -170,36 +174,18 @@ export function OpenAPI({ openAPIJson, method: selectedMethod, path: selectedPat
 
   return (
     <div className="max-w-none w-full">
-      {
-        showPlayground &&
-        <motion.div
-          initial={{ x: "100%" }}
-          animate={{ x: 0 }}
-          exit={{ x: "100%" }}
-          transition={{ type: "spring", damping: 20 }}
-          className="fixed inset-y-0 right-0 w-full max-w-3xl bg-white dark:bg-[#1e1e1e] shadow-xl z-50 overflow-y-auto border-l border-zinc-200 dark:border-zinc-800"
-        >
-          <div className="p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold">API Playground</h2>
-              <button
-                onClick={() => setShowPlayground(false)}
-                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <APIPlayground
-              method={selectedMethod}
-              url={selectedPath}
-              servers={openAPIJson.servers}
-            />
-          </div>
-        </motion.div>
-      }
-
+      <Sheet open={showPlayground} onOpenChange={setShowPlayground} modal={true}>
+        <SheetContent side="bottom" className="h-[90vh] w-full overflow-y-auto p-8">
+          <SheetHeader className="p-0">
+            <SheetTitle>API Playground</SheetTitle>
+          </SheetHeader>
+          <APIPlayground
+            method={selectedMethod}
+            url={selectedPath}
+            servers={openAPIJson.servers}
+          />
+        </SheetContent>
+      </Sheet>
       {Object.entries(paths).map(([path, methods]) => {
         if (path !== selectedPath) {
           return null;
@@ -216,7 +202,7 @@ export function OpenAPI({ openAPIJson, method: selectedMethod, path: selectedPat
             }
 
             return (
-              <Row key={`${method}-${path}`} cols={2}>
+              <Row key={`${method}-${path}`} cols={2} className="gap-0">
                 <Col>
                   <h2 className="flex items-center mt-4">
                     <Tag variant="medium" className="mr-2 py-1 px-4 rounded-lg">{methodUpper}</Tag>
@@ -227,7 +213,7 @@ export function OpenAPI({ openAPIJson, method: selectedMethod, path: selectedPat
 
                   {parameters && parameters.length > 0 && (
                     <div className="mt-4">
-                      <h3>Parameters</h3>
+                      <h3 className="font-bold">Parameters</h3>
                       <Properties>
                         {parameters.map((param) => (
                           <ParamField 
@@ -245,7 +231,7 @@ export function OpenAPI({ openAPIJson, method: selectedMethod, path: selectedPat
                   )}
                   {requestBody && (
                     <div className="mt-4">
-                      <h3>Request Body</h3>
+                      <h3 className="font-bold">Request Body</h3>
                       <p>{requestBody.description}</p>
                       {requestBody.content?.['application/json']?.schema && (
                         (() => {
@@ -271,9 +257,9 @@ export function OpenAPI({ openAPIJson, method: selectedMethod, path: selectedPat
                   )}
                   {components?.schemas && (
                     <div>
-                      <h3>Schemas</h3>
+                      <h3 className="font-bold">Schemas</h3>
                       {Object.entries(components.schemas).filter(([, schema]) => schema.properties).map(([name, schema]) => (
-                        <div key={name} className="mt-4">
+                        <div key={name} className="mt-8">
                           <h4>{name}</h4>
                           <Properties>
                             {Object.entries(schema.properties || {}).map(([propName, prop]) => (
@@ -293,12 +279,12 @@ export function OpenAPI({ openAPIJson, method: selectedMethod, path: selectedPat
                   )}
                 </Col>
                 <Col sticky>
-                  <button
+                  <Button
                     onClick={handleShowPlayground}
-                    className='ml-auto mt-3 flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition bg-sky-600 text-white hover:bg-sky-700'>
+                    className='ml-auto mt-3 flex items-center gap-2'>
                       Try
                     <PlayButton className="h-4 w-4" />
-                  </button>
+                  </Button>
                   <APIGroup title="Request" tag={methodUpper} label={path}>
                     {Object.entries(responses).map(([code, response]) => (
                       <div key={code} title={code}>

@@ -1,7 +1,10 @@
 import type { ComponentType } from 'preact';
 import { type RouteComponentProps } from 'wouter-preact';
 import docsConfig from '../../docs/dory.json';
+import type { DoryConfig } from '../types/config';
 import { searchIndex } from './search-index';
+
+const config = docsConfig as DoryConfig;
 
 export const ALL_PAGES = Object.fromEntries(
   Object.entries(import.meta.glob<{ default: ComponentType; }>('../../docs/**/*.mdx'))
@@ -34,7 +37,7 @@ export interface Navigation {
     }>;
 }
 
-export const ALL_NAVIGATION: Navigation[] = docsConfig.navigation.tabs.map(tab => ({
+export const ALL_NAVIGATION: Navigation[] = config.navigation.tabs.map(tab => ({
     title: tab.tab,
     groups: tab.groups.map(group => ({
       title: group.group,

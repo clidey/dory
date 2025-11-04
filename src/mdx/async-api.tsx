@@ -1,4 +1,3 @@
-import { motion } from "motion/react"
 import { useState } from "preact/hooks"
 import { APIGroup } from "./api"
 import { PlayButton } from "./api-playground"
@@ -7,6 +6,7 @@ import { Properties, Property } from "./open-api"
 import { Tag } from "./tag"
 import { Col, Row } from "./text"
 import { WebSocketPlayground, type WebSocketServer } from "./websocket-playground"
+import { Button, Sheet, SheetContent, SheetHeader, SheetTitle } from "@clidey/ux"
 
 interface AsyncAPIMessage {
   name?: string
@@ -191,33 +191,17 @@ export function AsyncAPI({
 
   return (
     <div className="max-w-none w-full">
-      {showPlayground && (
-        <motion.div
-          initial={{ x: "100%" }}
-          animate={{ x: 0 }}
-          exit={{ x: "100%" }}
-          transition={{ type: "spring", damping: 20 }}
-          className="fixed inset-y-0 right-0 w-full max-w-3xl bg-white dark:bg-[#1e1e1e] shadow-xl z-50 overflow-y-auto border-l border-zinc-200 dark:border-zinc-800"
-        >
-          <div className="p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold">WebSocket Playground</h2>
-              <button
-                onClick={() => setShowPlayground(false)}
-                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <WebSocketPlayground
-              url={selectedChannel}
-              servers={wsServers}
-            />
-          </div>
-        </motion.div>
-      )}
+      <Sheet open={showPlayground} onOpenChange={setShowPlayground} modal={true}>
+        <SheetContent side="bottom" className="h-[90vh] w-full overflow-y-auto p-8">
+          <SheetHeader className="p-0">
+            <SheetTitle>WebSocket Playground</SheetTitle>
+          </SheetHeader>
+          <WebSocketPlayground
+            url={selectedChannel}
+            servers={wsServers}
+          />
+        </SheetContent>
+      </Sheet>
 
       {Object.entries(channels).map(([channelPath, channelDetails]) => {
         if (channelPath !== selectedChannel) {
@@ -340,13 +324,13 @@ export function AsyncAPI({
                 )}
               </Col>
               <Col sticky>
-                <button
+                <Button
                   onClick={handleShowPlayground}
-                  className='ml-auto mt-3 flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition bg-sky-600 text-white hover:bg-sky-700'
+                  className='ml-auto mt-3 flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium'
                 >
                   Try
                   <PlayButton className="h-4 w-4" />
-                </button>
+                </Button>
                 <APIGroup title="Message" tag={selectedOperation.toUpperCase()} label={channelPath}>
                   <>
                     {resolvedMessage?.payload && (() => {

@@ -1,6 +1,11 @@
 {
   "name": "Docucod",
   "favicon": "./favicon.svg",
+  "colors": {
+    "primary": "#0ea5e9",
+    "light": "#0C8BC6",
+    "dark": "#0284c7"
+  },
   "fonts": {
     "family": "Montserrat",
     "source": "https://fonts.gstatic.com/s/googlesansflex/v5/t5sJIQcYNIWbFgDgAAzZ34auoVyXkJCOvp3SFWJbN5hF8Ju1x6sKCyp0l9sI40swNJwGpVd4AZzz0v6lJ4qFXNZhGjLvDSkV4USKMo6qQzwliVdHAy9jxTDHg_ugnAakpwGc-cxgUqDCIUI.woff2",

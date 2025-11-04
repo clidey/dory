@@ -1,66 +1,53 @@
+import { Badge } from '@clidey/ux'
 import classNames from 'classnames'
 
-const variantStyles = {
-  small: '',
-  medium: 'rounded-lg px-1.5 ring-1 ring-inset',
-}
-
-const colorStyles = {
-  emerald: {
-    small: 'text-emerald-500 dark:text-emerald-400',
-    medium:
-      'ring-emerald-300 dark:ring-emerald-400/30 bg-emerald-400/10 text-emerald-500 dark:text-emerald-400',
-  },
-  sky: {
-    small: 'text-sky-500',
-    medium:
-      'ring-sky-300 bg-sky-400/10 text-sky-500 dark:ring-sky-400/30 dark:bg-sky-400/10 dark:text-sky-400',
-  },
-  amber: {
-    small: 'text-amber-500',
-    medium:
-      'ring-amber-300 bg-amber-400/10 text-amber-500 dark:ring-amber-400/30 dark:bg-amber-400/10 dark:text-amber-400',
-  },
-  rose: {
-    small: 'text-red-500 dark:text-rose-500',
-    medium:
-      'ring-rose-200 bg-rose-50 text-red-500 dark:ring-rose-500/20 dark:bg-rose-400/10 dark:text-rose-400',
-  },
-  zinc: {
-    small: 'text-zinc-400 dark:text-zinc-500',
-    medium:
-      'ring-zinc-200 bg-zinc-50 text-zinc-500 dark:ring-zinc-500/20 dark:bg-zinc-400/10 dark:text-zinc-400',
-  },
-}
-
 const valueColorMap = {
+  GET: 'default',
+  POST: 'secondary',
+  PUT: 'outline',
+  DELETE: 'destructive',
+} as const
+
+const customColorClasses = {
+  emerald: 'bg-emerald-400/10 text-emerald-500 dark:text-emerald-400 border-emerald-300 dark:border-emerald-400/30',
+  sky: 'bg-sky-400/10 text-sky-500 dark:text-sky-400 border-sky-300 dark:border-sky-400/30',
+  amber: 'bg-amber-400/10 text-amber-500 dark:text-amber-400 border-amber-300 dark:border-amber-400/30',
+  rose: 'bg-rose-50 text-red-500 dark:bg-rose-400/10 dark:text-rose-400 border-rose-200 dark:border-rose-500/20',
+  zinc: 'bg-zinc-50 text-zinc-500 dark:bg-zinc-400/10 dark:text-zinc-400 border-zinc-200 dark:border-zinc-500/20',
+}
+
+const methodColors: Record<string, keyof typeof customColorClasses> = {
   GET: 'emerald',
   POST: 'sky',
   PUT: 'amber',
   DELETE: 'rose',
-} as Record<string, keyof typeof colorStyles>
+}
 
 export function Tag({
   children,
   variant = 'medium',
-  color = valueColorMap[children] ?? 'zinc',
+  color,
   className,
 }: {
-  children: keyof typeof valueColorMap & (string)
-  variant?: keyof typeof variantStyles
-  color?: keyof typeof colorStyles
+  children: string
+  variant?: 'small' | 'medium'
+  color?: keyof typeof customColorClasses
   className?: string
 }) {
+  const colorKey = color || methodColors[children] || 'zinc'
+  const badgeVariant = valueColorMap[children as keyof typeof valueColorMap] || 'outline'
+
   return (
-    <span
+    <Badge
+      variant={badgeVariant}
       className={classNames(
         'font-mono text-[0.625rem]/6 font-semibold',
-        variantStyles[variant],
-        colorStyles[color][variant],
+        customColorClasses[colorKey],
+        variant === 'small' && 'px-1 py-0',
         className,
       )}
     >
       {children}
-    </span>
+    </Badge>
   )
 }

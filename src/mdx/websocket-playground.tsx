@@ -1,11 +1,12 @@
-import { Input, Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react'
+import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react'
 import { CheckIcon } from '@heroicons/react/24/outline'
 import classNames from 'classnames'
-import { PencilIcon, TrashIcon, XIcon } from 'lucide-react'
+import { PencilIcon, TrashIcon, XIcon, PlusIcon, MessageCircleIcon } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks'
 import Dropdown from '../components/dropdown'
 import { Tag } from './tag'
 import { PlayButton } from './api-playground'
+import { Badge, Button, Card, EmptyState, Sheet, SheetContent, SheetHeader, SheetTitle, Input } from '@clidey/ux'
 
 export interface WebSocketServer {
   url: string;
@@ -156,39 +157,39 @@ export const HeadersTab = ({ wsConfig, setWsConfig }: HeadersTabProps) => {
                 value={hdr.key}
                 onChange={e => updateHeader(idx, 'key', (e.target as HTMLInputElement).value)}
                 placeholder="Header name"
-                className="w-32 rounded-lg bg-zinc-800 border border-zinc-600 px-2 py-1 text-sm text-white"
+                className="w-32 text-sm"
               />
               <Input
                 type="text"
                 value={hdr.value}
                 onChange={e => updateHeader(idx, 'value', (e.target as HTMLInputElement).value)}
                 placeholder="Header value"
-                className="flex-1 rounded-lg bg-zinc-800 border border-zinc-600 px-2 py-1 text-sm text-white"
+                className="flex-1 text-sm"
               />
-              <button onClick={() => saveHeader(idx)} className="text-white">
+              <Button onClick={() => saveHeader(idx)} variant="ghost" size="icon" className="text-white h-8 w-8">
                 <CheckIcon className="w-4 h-4" />
-              </button>
-              <button onClick={() => cancelEdit(idx)} className="text-white">
+              </Button>
+              <Button onClick={() => cancelEdit(idx)} variant="ghost" size="icon" className="text-white h-8 w-8">
                 <XIcon className="w-4 h-4" />
-              </button>
+              </Button>
             </>
           ) : (
             <>
               <span className="text-sm text-white w-32 truncate">{hdr.key}</span>
               <span className="text-sm text-white flex-1 truncate">{hdr.value}</span>
-              <button onClick={() => editHeader(idx)} className="text-white">
+              <Button onClick={() => editHeader(idx)} variant="ghost" size="icon" className="text-white h-8 w-8">
                 <PencilIcon className="w-4 h-4" />
-              </button>
-              <button onClick={() => removeHeader(idx)} className="text-red-400">
+              </Button>
+              <Button onClick={() => removeHeader(idx)} variant="ghost" size="icon" className="text-red-400 h-8 w-8">
                 <TrashIcon className="w-4 h-4" />
-              </button>
+              </Button>
             </>
           )}
         </div>
       ))}
-      <button onClick={addEmptyHeaderRow} className="text-sm text-sky-400 hover:text-sky-300 mt-2 w-fit">
-        + Add Header
-      </button>
+      <Button onClick={addEmptyHeaderRow} variant="ghost" size="sm" className="mt-2 w-fit">
+        <PlusIcon className="w-4 h-4" /> Add Header
+      </Button>
     </div>
   )
 }
@@ -273,38 +274,39 @@ export const SubprotocolsTab = ({ subprotocols, setWsConfig }: SubprotocolsTabPr
                 value={s.value}
                 onChange={e => updateSubprotocol(i, (e.target as HTMLInputElement).value)}
                 placeholder="Subprotocol name"
-                className="flex-1 rounded-lg bg-zinc-800 border border-zinc-600 px-2 py-1 text-sm text-white"
+                className="flex-1 text-sm"
               />
-              <button onClick={() => saveSubprotocol(i)} className="text-white">
+              <Button onClick={() => saveSubprotocol(i)} variant="ghost" size="icon" className="text-white h-8 w-8">
                 <CheckIcon className="w-4 h-4" />
-              </button>
-              <button onClick={() => cancelEdit(i)} className="text-white">
+              </Button>
+              <Button onClick={() => cancelEdit(i)} variant="ghost" size="icon" className="text-white h-8 w-8">
                 <XIcon className="w-4 h-4" />
-              </button>
+              </Button>
             </>
           ) : (
             <>
-              <span className="flex-1 truncate text-sm text-white">{s.value}</span>
-              <button onClick={() => editSubprotocol(i)} className="text-white">
+              <span className="flex-1 truncate text-sm">{s.value}</span>
+              <Button onClick={() => editSubprotocol(i)} variant="ghost" size="icon" className="text-white h-8 w-8">
                 <PencilIcon className="w-4 h-4" />
-              </button>
-              <button onClick={() => removeSubprotocol(i)} className="text-red-400">
+              </Button>
+              <Button onClick={() => removeSubprotocol(i)} variant="ghost" size="icon" className="text-red-400 h-8 w-8">
                 <TrashIcon className="w-4 h-4" />
-              </button>
+              </Button>
             </>
           )}
         </div>
       ))}
-      <button onClick={addSubprotocolRow} className="mt-2 text-sm text-sky-400 hover:text-sky-300 self-start">
+      <Button onClick={addSubprotocolRow} variant="ghost" size="sm" className="text-sky-400 hover:text-sky-300 mt-2 self-start">
         + Add Subprotocol
-      </button>
+      </Button>
     </div>
   )
 }
 
 type ConnectionState = 'disconnected' | 'connecting' | 'connected' | 'error'
 
-export function WebSocketPlayground({
+// Internal playground component that contains the actual WebSocket UI
+function WebSocketPlaygroundInternal({
   url,
   title,
   description,
@@ -478,10 +480,10 @@ export function WebSocketPlayground({
   return (
     <div className="my-6 overflow-hidden rounded-2xl">
       {/* Header */}
-      <div className="flex min-h-[calc(--spacing(12)+1px)] flex-wrap items-start gap-x-4 border-b border-zinc-700 bg-zinc-800 px-4 dark:border-zinc-800 dark:bg-transparent pb-4">
+      <div className="flex min-h-[calc(--spacing(12)+1px)] flex-wrap items-start gap-x-4 px-4 pt-2 pb-4 justify-between">
         <div className="flex items-center gap-3 pt-3">
           <Tag variant="small">WS</Tag>
-          <span className="font-mono text-sm text-white">{title || url}</span>
+          <span className="font-mono text-sm">{title || url}</span>
           <div className="flex items-center gap-2">
             <div className={`w-2 h-2 rounded-full ${connectionState === 'connected' ? 'bg-green-400' : connectionState === 'connecting' ? 'bg-yellow-400' : connectionState === 'error' ? 'bg-red-400' : 'bg-zinc-400'}`} />
             <span className={`text-xs ${getConnectionStatusColor()}`}>
@@ -490,11 +492,11 @@ export function WebSocketPlayground({
           </div>
         </div>
         <div className="flex gap-2 ml-auto pt-3">
-          <button
+          <Button
             onClick={connectWebSocket}
             disabled={connectionState === 'connecting' || connectionState === 'connected'}
             className={classNames(
-              'flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition',
+              'flex items-center gap-2',
               connectionState === 'connecting' || connectionState === 'connected'
                 ? 'bg-zinc-600 text-zinc-400 cursor-not-allowed'
                 : 'bg-green-600 text-white hover:bg-green-700'
@@ -506,34 +508,31 @@ export function WebSocketPlayground({
               <PlayButton className="h-4 w-4" />
             )}
             {connectionState === 'connecting' ? 'Connecting...' : 'Connect'}
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={disconnectWebSocket}
             disabled={connectionState === 'disconnected'}
+            variant="destructive"
             className={classNames(
-              'flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition',
-              connectionState === 'disconnected'
-                ? 'bg-zinc-600 text-zinc-400 cursor-not-allowed'
-                : 'bg-red-600 text-white hover:bg-red-700'
+              'flex items-center gap-2',
+              connectionState === 'disconnected' && 'bg-zinc-600 text-zinc-400 cursor-not-allowed'
             )}
           >
             <DisconnectButton className="h-4 w-4" />
             Disconnect
-          </button>
+          </Button>
         </div>
       </div>
 
       {description && (
-        <div className="px-4 py-3 border-b border-zinc-700 dark:border-zinc-800">
-          <p className="text-sm text-zinc-300">{description}</p>
-        </div>
+        <p className="text-sm px-4 py-3">{description}</p>
       )}
 
       <div className="flex flex-col lg:flex-row gap-4">
         {/* Configuration */}
         <div className="flex-1 min-w-0">
           <div className="flex flex-col gap-2 p-4">
-            <label className="text-sm font-medium text-white">Server</label>
+            <label className="text-sm font-medium">Server</label>
             <Dropdown
               buttonLabel={selectedServer?.description || selectedServer?.url || 'Select Server'}
               items={servers.map(server => ({ 
@@ -544,9 +543,9 @@ export function WebSocketPlayground({
             />
           </div>
 
-          <div className="border-t border-zinc-700 dark:border-zinc-800">
+          <div>
             <TabGroup selectedIndex={selectedTab} onChange={setSelectedTab}>
-              <TabList className="flex border-b border-zinc-700 dark:border-zinc-800">
+              <TabList className="flex">
                 {tabs.map((tab) => (
                   <Tab
                     key={tab.key}
@@ -554,7 +553,7 @@ export function WebSocketPlayground({
                       classNames(
                         'px-4 py-3 text-sm font-medium transition border-b-2',
                         selected
-                          ? 'border-sky-500 text-sky-400'
+                          ? 'border-brand-foreground text-brand-foreground'
                           : 'border-transparent text-zinc-400 hover:text-zinc-300'
                       )
                     }
@@ -582,7 +581,7 @@ export function WebSocketPlayground({
                 {/* Auth Tab */}
                 <TabPanel className="p-4 space-y-4">
                   <div className="flex flex-col space-y-2">
-                    <label className="text-sm font-medium text-white">Authentication Type</label>
+                    <label className="text-sm font-medium">Authentication Type</label>
                     <Dropdown
                       buttonLabel={auth.type === 'none' ? 'Select Auth Type' : auth.type.charAt(0).toUpperCase() + auth.type.slice(1)}
                       items={[
@@ -597,26 +596,26 @@ export function WebSocketPlayground({
 
                   {auth.type === 'bearer' && (
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-white">Bearer Token</label>
-                      <input
+                      <label className="text-sm font-medium">Bearer Token</label>
+                      <Input
                         type="password"
                         value={auth.token}
                         onChange={(e) => setAuth(prev => ({ ...prev, token: (e.target as HTMLInputElement).value }))}
                         placeholder="Enter bearer token..."
-                        className="w-full rounded-lg bg-zinc-800 border border-zinc-600 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:border-sky-500 focus:outline-none"
+                        className="w-full text-sm"
                       />
                     </div>
                   )}
 
                   {auth.type === 'apiKey' && (
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-white">API Key</label>
-                      <input
+                      <label className="text-sm font-medium">API Key</label>
+                      <Input
                         type="password"
                         value={auth.apiKey}
                         onChange={(e) => setAuth(prev => ({ ...prev, apiKey: (e.target as HTMLInputElement).value }))}
                         placeholder="Enter API key..."
-                        className="w-full rounded-lg bg-zinc-800 border border-zinc-600 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:border-sky-500 focus:outline-none"
+                        className="w-full text-sm"
                       />
                     </div>
                   )}
@@ -624,23 +623,23 @@ export function WebSocketPlayground({
                   {auth.type === 'basic' && (
                     <div className="space-y-4">
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-white">Username</label>
-                        <input
+                        <label className="text-sm font-medium">Username</label>
+                        <Input
                           type="text"
                           value={auth.username}
                           onChange={(e) => setAuth(prev => ({ ...prev, username: (e.target as HTMLInputElement).value }))}
                           placeholder="Enter username..."
-                          className="w-full rounded-lg bg-zinc-800 border border-zinc-600 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:border-sky-500 focus:outline-none"
+                          className="w-full text-sm"
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-sm font-medium text-white">Password</label>
-                        <input
+                        <label className="text-sm font-medium">Password</label>
+                        <Input
                           type="password"
                           value={auth.password}
                           onChange={(e) => setAuth(prev => ({ ...prev, password: (e.target as HTMLInputElement).value }))}
                           placeholder="Enter password..."
-                          className="w-full rounded-lg bg-zinc-800 border border-zinc-600 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:border-sky-500 focus:outline-none"
+                          className="w-full text-sm"
                         />
                       </div>
                     </div>
@@ -653,24 +652,22 @@ export function WebSocketPlayground({
 
         {/* Messages */}
         <div className="flex-1 min-w-0">
-          <div className="border-t lg:border-t-0 lg:border-l border-zinc-700 dark:border-zinc-800">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-700 dark:border-zinc-800">
-              <h3 className="text-sm font-semibold text-white">Messages</h3>
-              <button
+          <div>
+            <div className="flex items-center justify-between px-4 py-3">
+              <h3 className="text-sm font-semibold">Messages</h3>
+              <Button
                 onClick={clearMessages}
+                variant="ghost"
+                size="sm"
                 className="text-xs text-zinc-400 hover:text-zinc-300"
               >
                 Clear
-              </button>
+              </Button>
             </div>
             
             <div className="flex flex-col h-64 overflow-y-auto p-4 space-y-2">
               {messages.length === 0 ? (
-                <div className="text-center py-8">
-                  <div className="text-zinc-400 text-sm">
-                    Connect to start receiving messages
-                  </div>
-                </div>
+                <EmptyState icon={<MessageCircleIcon className="h-5 w-5" />} title="No messages yet" description="Connect to start receiving messages" />
               ) : (
                 messages.map((msg) => (
                   <div
@@ -709,29 +706,26 @@ export function WebSocketPlayground({
             </div>
 
             {/* Send Message */}
-            <div className="border-t border-zinc-700 dark:border-zinc-800 p-4">
+            <div className="p-4">
               <div className="flex gap-2">
-                <input
+                <Input
                   type="text"
                   value={messageInput}
                   onChange={(e) => setMessageInput((e.target as HTMLInputElement).value)}
                   onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
                   placeholder="Enter message to send..."
                   disabled={connectionState !== 'connected'}
-                  className="flex-1 rounded-lg bg-zinc-800 border border-zinc-600 px-3 py-2 text-sm text-white placeholder-zinc-400 focus:border-sky-500 focus:outline-none disabled:bg-zinc-900 disabled:text-zinc-500"
+                  className="flex-1 text-sm"
                 />
-                <button
+                <Button
                   onClick={sendMessage}
                   disabled={connectionState !== 'connected' || !messageInput.trim()}
-                  className={classNames(
-                    'px-4 py-2 rounded-lg text-sm font-medium transition',
-                    connectionState === 'connected' && messageInput.trim()
-                      ? 'bg-sky-600 text-white hover:bg-sky-700'
-                      : 'bg-zinc-600 text-zinc-400 cursor-not-allowed'
-                  )}
+                  className={classNames({
+                    'bg-sky-600 text-white hover:bg-sky-700': connectionState === 'connected' && messageInput.trim()
+                  })}
                 >
                   Send
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -739,7 +733,7 @@ export function WebSocketPlayground({
       </div>
 
       {error && (
-        <div className="border-t border-zinc-700 dark:border-zinc-800 p-4">
+        <div className="p-4">
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center rounded-full bg-rose-500/10 px-2 py-1 text-xs font-medium text-rose-400 ring-1 ring-rose-500/20">
               Error
@@ -750,6 +744,81 @@ export function WebSocketPlayground({
           </pre>
         </div>
       )}
+    </div>
+  )
+}
+
+// Main exported component with Sheet wrapper
+export function WebSocketPlayground(props: WebSocketPlaygroundProps) {
+  const [showPlayground, setShowPlayground] = useState(false)
+
+  const handleShowPlayground = () => {
+    setShowPlayground(true)
+  }
+
+  return (
+    <div className="max-w-none w-full my-6">
+      <Sheet open={showPlayground} onOpenChange={setShowPlayground} modal={true}>
+        <SheetContent side="bottom" className="h-[90vh] w-full overflow-y-auto p-8">
+          <SheetHeader className="p-0">
+            <SheetTitle>WebSocket Playground</SheetTitle>
+          </SheetHeader>
+          <WebSocketPlaygroundInternal {...props} />
+        </SheetContent>
+      </Sheet>
+
+      <Card className="overflow-hidden py-0 border-1 border-black/10">
+        <div className="flex items-center justify-between px-4 py-3">
+          <div className="flex items-center gap-3">
+            <Tag variant="small">WS</Tag>
+            <span className="font-mono text-sm">{props.title || props.url}</span>
+          </div>
+          <Button
+            onClick={handleShowPlayground}
+            className="flex items-center gap-2"
+          >
+            Try
+            <PlayButton className="h-4 w-4" />
+          </Button>
+        </div>
+
+        {props.description && (
+          <p className="text-sm px-4 py-3">{props.description}</p>
+        )}
+
+        <div className="px-4 py-3">
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium text-zinc-400">Endpoint:</span>
+              <Badge>
+                {props.servers?.[0]?.url || 'ws://localhost'}{props.url}
+              </Badge>
+            </div>
+
+            {props.subprotocols && props.subprotocols.length > 0 && (
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium text-zinc-400">Subprotocols:</span>
+                <div className="flex gap-1">
+                  {props.subprotocols.map((protocol, idx) => (
+                    <Badge key={idx}>
+                      {protocol}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {props.authType && props.authType !== 'none' && (
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium text-zinc-400">Authentication:</span>
+                <Badge>
+                  {props.authType}
+                </Badge>
+              </div>
+            )}
+          </div>
+        </div>
+      </Card>
     </div>
   )
 }

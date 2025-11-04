@@ -1,7 +1,10 @@
 import docsConfig from '../../docs/dory.json';
+import type { DoryConfig } from '../types/config';
+
+const config = docsConfig as DoryConfig;
 
 export function loadFonts() {
-  const { fonts } = docsConfig;
+  const { fonts } = config;
   if (!fonts) return;
 
   // Create a style element for the font face

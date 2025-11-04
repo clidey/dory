@@ -3,10 +3,13 @@ import { useEffect, useMemo, useState } from 'preact/hooks';
 import { Link } from 'wouter-preact';
 import { usePathname } from 'wouter-preact/use-browser-location';
 import docsConfig from '../../docs/dory.json';
-import { DarkModeToggle } from '../components/dark-mode-toggle';
+import type { DoryConfig } from '../types/config';
 import { MobileSearch, Search } from '../components/search';
 import { ALL_NAVIGATION } from '../components/store';
 import { MobileNavigation } from './mobile-navigation';
+import { ModeToggle } from '@clidey/ux';
+
+const config = docsConfig as DoryConfig;
 
 function TopLevelNavItem({ href, children, isActive }: { href: string; children: string; isActive?: boolean }) {
   return (
@@ -14,10 +17,10 @@ function TopLevelNavItem({ href, children, isActive }: { href: string; children:
       <Link
         to={href}
         className={classNames(
-          "text-sm/5 transition",
-          isActive 
-            ? "text-sky-500" 
-            : "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white"
+          "text-xs transition hover:opacity-80",
+          {
+            "text-brand-foreground": isActive,
+          },
         )}
       >
         {children}
@@ -31,7 +34,7 @@ export function Header({ className }: { className?: string }) {
   const pathname = usePathname();
 
   const { light, dark } = useMemo(() => {
-    return { light: docsConfig.logo.light, dark: docsConfig.logo.dark };
+    return { light: config.logo.light, dark: config.logo.dark };
   }, []);
 
   useEffect(() => {
@@ -60,7 +63,7 @@ export function Header({ className }: { className?: string }) {
         <div className="flex items-center grow gap-2">
           <img src={`/${light}`} alt="logo" className="w-8 hidden dark:block" />
           <img src={`/${dark}`} alt="logo" className="w-8 block dark:hidden" />
-          <h1 className="text-base lg:text-2xl font-bold">{docsConfig.name}</h1>
+          <h1 className="text-base lg:text-2xl font-bold">{config.name}</h1>
         </div>
         <nav className="hidden md:block">
           <ul role="list" className="flex items-center gap-8">
@@ -76,10 +79,10 @@ export function Header({ className }: { className?: string }) {
           </ul>
         </nav>
         <div className="hidden md:block md:h-5 md:w-px md:bg-zinc-900/10 md:dark:bg-white/15" />
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3" data-testid="header-actions">
           <MobileSearch />
           <Search />
-          <DarkModeToggle />
+          <ModeToggle data-testid="mode-toggle" />
           <MobileNavigation />
         </div>
       </div>

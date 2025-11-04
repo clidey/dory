@@ -1,124 +1,68 @@
-html {
-  background-color: #ffffff !important;
+:root {
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+
+    // Brand colors (dynamically set from dory.json via loadColors())
+    // These variables are set at runtime:
+    // --brand-primary: primary color
+    // --brand-light: light mode accent
+    // --brand-dark: dark mode accent
+    // --brand-foreground: legacy/fallback (set to primary)
+
+    // Default fallback colors (will be overridden by loadColors())
+    --brand-foreground: #0ea5e9;
+    --brand-primary: #0ea5e9;
+    --brand-light: #38bdf8;
+    --brand-dark: #0284c7;
+
+    // ShadCN/clidey/ux compatible primary color
+    // Using light color for light mode
+    --primary: var(--brand-light);
+    --primary-rgb: var(--brand-light-rgb);
 }
 
-h1, h2, h3, h4, h5, h6, p, li {
-  color: #000000 !important;
+// Dark mode overrides
+:root.dark {
+    // Use dark color for dark mode
+    --primary: var(--brand-dark);
+    --primary-rgb: var(--brand-dark-rgb);
 }
-
-.mermaid {
-  background-color: #ffffff !important;
-  color: #000000 !important;
-  font-size: 12px !important;
-}
-
-.mermaid rect {
-  fill: #f8f8f8 !important;
-  stroke: #333333 !important;
-}
-
-.mermaid p {
-  color: #000000 !important;
-}
-
-.mermaid path {
-  stroke: #555555 !important;
-}
-
-.mermaid p {
-  background-color: #f8f8f8 !important;
-  color: #000000 !important;
-}
-
-.mermaid p, .mermaid text, .mermaid text > tspan {
-  color: #000000 !important;
-  fill: #000000 !important;
-}
-
-.mermaid line {
-  stroke: #333333 !important;
-}
-
-.mermaid .note {
-  fill: #ffffcc !important;
-  stroke: #999999 !important;
-  color: #000000 !important;
-}
-
-.docucod-mdx-code {
-  background-color: #f8f8f8 !important;
-}
-
-body.dark {
-  background-color: #1e1e1e !important;
-
-  #container {
-    background-color: #1e1e1e !important;
-  }
-
-  h1, h2, h3, h4, h5, h6, p, li, th, td {
-    color: #ffffff !important;
-  }
-
-  .mermaid {
-    background-color: #1e1e1e !important; 
-    color: #ffffff !important;
-  }
   
-  .mermaid rect {
-    fill: #2a2a2a !important;
-    stroke: #aaaaaa !important;
-  }
-  
-  .mermaid p {
-    color: #ffffff !important;
-  }
-  
-  .mermaid path {
-    stroke: #cccccc !important;
-  }
-  
-  .mermaid p {
-    background-color: #2a2a2a !important;
-    color: #ffffff !important;
-  }
-  
-  .mermaid rect,
-  .mermaid polygon,
-  .mermaid circle,
-  .mermaid ellipse {
-    fill: #2a2a2a !important;
-    stroke: #444444 !important;
-  }
+article h2:first-of-type {
+    display: none;
+}
 
-  .mermaid p, .mermaid text, .mermaid text > tspan {
-    color: #ffffff !important;
-    fill: #ffffff !important;
-  }
+article hr:first-of-type {
+    display: none;
+}
 
-  .mermaid line {
-    stroke: #444444 !important;
-  }
+article img {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
 
-  .mermaid .note {
-    fill: #2a2a2a !important;
-    stroke: #444444 !important;
-    color: #ffffff !important;
-  }
-  
-  .docucod-mdx-code {
-    background-color: #2a2a2a !important;
-  }
+[data-testid="header-actions"] button,
+[data-slot="dropdown-menu-content"] {
+    border-color: rgba(0, 0, 0, 0.1);
+}
 
-  .docucod-mdx-code-group {
-    background-color: #2a2a2a !important;
-  }
+[data-slot="search-input-wrapper"] {
+    font-size: 12px;
+    outline: none;
+}
 
-  .docucod-mdx-code-group-header {
-    background-color: #2a2a2a !important;
-  }
+[data-slot="search-input"] {
+    font-size: 12px;
+}
 
-  .prism-code {
-    background-color: transparent !important;
-  }
+[data-slot="search-input-wrapper"]:focus-within {
+    outline: none !important;
+}
+
+[role="dialog"] [data-slot="search-input-wrapper"]:focus-within {
+    outline: none !important;
+    border: 0px;
+    box-shadow: none !important;
 }

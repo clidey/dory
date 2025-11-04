@@ -17,13 +17,13 @@ import {
   type JSX,
 } from 'react'
 import Highlighter from 'react-highlight-words'
-
-import { useMobileNavigation } from '../ui/mobile-navigation'
-import { useLocation } from 'wouter-preact'
+import { cn, Spinner, SearchInput as UxSearchInput } from '@clidey/ux'
 import classNames from 'classnames'
+import { useLocation } from 'wouter-preact'
+import { useMobileNavigation } from '../ui/mobile-navigation'
 import { usePathname, useSearchParams } from './hooks'
-import { ALL_NAVIGATION } from './store'
 import { search } from './search-index'
+import { ALL_NAVIGATION } from './store'
 
 type EmptyObject = Record<string, never>
 type Result = any;
@@ -89,58 +89,6 @@ function useAutocomplete({ onNavigate }: { onNavigate: () => void }) {
   return { autocomplete, autocompleteState }
 }
 
-function SearchIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
-  return (
-    <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" {...props}>
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M12.01 12a4.25 4.25 0 1 0-6.02-6 4.25 4.25 0 0 0 6.02 6Zm0 0 3.24 3.25"
-      />
-    </svg>
-  )
-}
-
-function NoResultsIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
-  return (
-    <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" {...props}>
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M12.01 12a4.237 4.237 0 0 0 1.24-3c0-.62-.132-1.207-.37-1.738M12.01 12A4.237 4.237 0 0 1 9 13.25c-.635 0-1.237-.14-1.777-.388M12.01 12l3.24 3.25m-3.715-9.661a4.25 4.25 0 0 0-5.975 5.908M4.5 15.5l11-11"
-      />
-    </svg>
-  )
-}
-
-function LoadingIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
-  const id = useId()
-
-  return (
-    <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" {...props}>
-      <circle cx="10" cy="10" r="5.5" strokeLinejoin="round" />
-      <path
-        stroke={`url(#${id})`}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M15.5 10a5.5 5.5 0 1 0-5.5 5.5"
-      />
-      <defs>
-        <linearGradient
-          id={id}
-          x1="13"
-          x2="9.5"
-          y1="9"
-          y2="15"
-          gradientUnits="userSpaceOnUse"
-        >
-          <stop stopColor="currentColor" />
-          <stop offset="1" stopColor="currentColor" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-    </svg>
-  )
-}
 
 function HighlightQuery({ text, query }: { text: string; query: string }) {
   return (
@@ -155,13 +103,11 @@ function HighlightQuery({ text, query }: { text: string; query: string }) {
 
 function SearchResult({
   result,
-  resultIndex,
   autocomplete,
   collection,
   query,
 }: {
   result: Result
-  resultIndex: number
   autocomplete: Autocomplete
   collection: AutocompleteCollection<Result>
   query: string
@@ -190,9 +136,6 @@ function SearchResult({
     <li
       className={classNames(
         'group block cursor-default px-4 py-3 aria-selected:bg-zinc-50 dark:aria-selected:bg-zinc-800/50',
-        {
-            'border-t border-zinc-100 dark:border-zinc-800': resultIndex > 0,
-        }
       )}
       aria-labelledby={`${id}-hierarchy ${id}-title`}
       {...autocomplete.getItemProps({
@@ -245,7 +188,13 @@ function SearchResults({
   if (collection.items.length === 0) {
     return (
       <div className="p-6 text-center">
-        <NoResultsIcon className="mx-auto h-5 w-5 stroke-zinc-900 dark:stroke-zinc-600" />
+        <svg className="mx-auto h-5 w-5 stroke-zinc-900 dark:stroke-zinc-600" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M12.01 12a4.237 4.237 0 0 0 1.24-3c0-.62-.132-1.207-.37-1.738M12.01 12A4.237 4.237 0 0 1 9 13.25c-.635 0-1.237-.14-1.777-.388M12.01 12l3.24 3.25m-3.715-9.661a4.25 4.25 0 0 0-5.975 5.908M4.5 15.5l11-11"
+          />
+        </svg>
         <p className="mt-2 text-xs text-zinc-700 dark:text-zinc-400">
           Nothing found for{' '}
           <strong className="font-semibold break-words text-zinc-900 dark:text-white">
@@ -259,11 +208,10 @@ function SearchResults({
 
   return (
     <ul {...autocomplete.getListProps()}>
-      {collection.items.map((result, resultIndex) => (
+      {collection.items.map((result) => (
         <SearchResult
           key={result.url}
           result={result}
-          resultIndex={resultIndex}
           autocomplete={autocomplete}
           collection={collection}
           query={query}
@@ -284,18 +232,14 @@ const SearchInput = forwardRef<
   const inputProps = autocomplete.getInputProps({ inputElement: null })
 
   return (
-    <div className="group relative flex h-12">
-      <SearchIcon className="pointer-events-none absolute top-0 left-3 h-full w-5 stroke-zinc-500" />
-      <input
+    <div className="group relative flex">
+      <UxSearchInput
         ref={inputRef}
         data-autofocus
-        className={classNames(
-          'flex-auto appearance-none bg-transparent pl-10 text-zinc-900 outline-hidden placeholder:text-zinc-500 focus:w-full focus:flex-none sm:text-sm dark:text-white [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden [&::-webkit-search-results-button]:hidden [&::-webkit-search-results-decoration]:hidden',
-          {
+        className={cn({
             'pr-11': autocompleteState.status === 'stalled',
             'pr-4': autocompleteState.status !== 'stalled',
-          }
-        )}
+        })}
         {...inputProps}
         onKeyDown={(event) => {
           if (
@@ -317,7 +261,7 @@ const SearchInput = forwardRef<
       />
       {autocompleteState.status === 'stalled' && (
         <div className="absolute inset-y-0 right-3 flex items-center">
-          <LoadingIcon className="h-5 w-5 animate-spin stroke-zinc-200 text-zinc-900 dark:stroke-zinc-800 dark:text-emerald-400" />
+          <Spinner className="h-5 w-5 animate-spin stroke-zinc-200 text-zinc-900 dark:stroke-zinc-800 dark:text-emerald-400" />
         </div>
       )}
     </div>
@@ -424,12 +368,12 @@ function SearchDialog({
 }
 
 function useSearchProps() {
-  const buttonRef = useRef<React.ElementRef<'button'>>(null)
+  const inputRef = useRef<React.ElementRef<typeof SearchInput>>(null)
   const [open, setOpen] = useState(false)
 
   return {
-    buttonProps: {
-      ref: buttonRef,
+    inputProps: {
+      ref: inputRef,
       onClick() {
         setOpen(true)
       },
@@ -439,7 +383,7 @@ function useSearchProps() {
       setOpen: useCallback(
         (open: boolean) => {
           const { width = 0, height = 0 } =
-            buttonRef.current?.getBoundingClientRect() ?? {}
+            inputRef.current?.getBoundingClientRect?.() ?? {}
           if (!open || (width !== 0 && height !== 0)) {
             setOpen(open)
           }
@@ -451,29 +395,15 @@ function useSearchProps() {
 }
 
 export function Search() {
-  const [modifierKey, setModifierKey] = useState<string>()
-  const { buttonProps, dialogProps } = useSearchProps()
-
-  useEffect(() => {
-    setModifierKey(
-      /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform) ? '⌘' : 'Ctrl ',
-    )
-  }, [])
+  const { inputProps: buttonProps, dialogProps } = useSearchProps()
 
   return (
     <div className="hidden lg:block lg:max-w-md lg:flex-auto">
-      <button
-        type="button"
-        className="hidden h-8 w-full items-center gap-2 rounded-full bg-white pr-3 pl-2 text-sm text-zinc-500 ring-1 ring-zinc-900/10 transition hover:ring-zinc-900/20 lg:flex dark:bg-white/5 dark:text-zinc-400 dark:ring-white/10 dark:ring-inset dark:hover:ring-white/20"
+      <UxSearchInput
+        aria-label="Find something..."
+        placeholder="Find something..."
         {...buttonProps}
-      >
-        <SearchIcon className="h-5 w-5 stroke-current" />
-        Can I help you find something?
-        <kbd className="ml-auto text-2xs text-zinc-400 dark:text-zinc-500">
-          <kbd className="font-sans">{modifierKey}</kbd>
-          <kbd className="font-sans">K</kbd>
-        </kbd>
-      </button>
+      />
       <Suspense fallback={null}>
         <SearchDialog className="hidden lg:block" {...dialogProps} />
       </Suspense>
@@ -483,19 +413,16 @@ export function Search() {
 
 export function MobileSearch() {
   const { close } = useMobileNavigation()
-  const { buttonProps, dialogProps } = useSearchProps()
+  const { inputProps: buttonProps, dialogProps } = useSearchProps()
 
   return (
     <div className="contents lg:hidden">
-      <button
-        type="button"
-        className="relative flex size-6 items-center justify-center rounded-md transition hover:bg-zinc-900/5 lg:hidden dark:hover:bg-white/5"
+      <UxSearchInput
+        className="text-sm"
         aria-label="Find something..."
         {...buttonProps}
-      >
-        <span className="absolute size-12 [@media(pointer:fine)]:hidden" />
-        <SearchIcon className="h-8 w-8 stroke-zinc-900 dark:stroke-white" />
-      </button>
+        placeholder="Find something..."
+      />
       <Suspense fallback={null}>
         <SearchDialog
           className="lg:hidden"

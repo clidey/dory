@@ -1,3 +1,4 @@
+import { cn } from "@clidey/ux"
 import classNames from "classnames"
 import { useState } from "preact/hooks"
 
@@ -30,9 +31,9 @@ export const p = function P(props: preact.JSX.HTMLAttributes<HTMLParagraphElemen
   return <p className="mb-2 inline-block" {...props} />
 }
 
-export function Row({ children, cols = 1 }: { children: preact.ComponentChildren, cols?: number }) {
+export function Row({ children, cols = 1, className }: { children: preact.ComponentChildren, cols?: number, className?: string }) {
   return (
-    <div className={`grid grid-cols-1 items-start gap-x-16 gap-y-10 xl:max-w-none`} style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
+    <div className={cn(`py-6 grid grid-cols-1 items-start gap-x-16 gap-y-10 xl:max-w-none`, className)} style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
       {children}
     </div>
   )

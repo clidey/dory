@@ -3,7 +3,7 @@ import { Highlight, themes } from 'prism-react-renderer'
 import { Code, CodeGroup, CodeGroupContext, supportedLanguages } from './code'
 import { MermaidRenderer } from './mermaid'
 import { Loading } from '../components/loading'
-import { useDarkMode } from '../utils/hooks'
+import { useTheme } from '@clidey/ux'
 import classNames from 'classnames'
 
 
@@ -14,7 +14,7 @@ export function Fence({
   children: string
   language: string
 }) {
-  const { isDark } = useDarkMode();
+  const isDark = useTheme().theme === 'dark';
 
   if (language === 'mermaid') {
     return (

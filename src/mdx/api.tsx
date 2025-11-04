@@ -10,6 +10,8 @@ import {
   useState,
 } from 'react'
 import { Tag } from './tag'
+import { CheckIcon } from 'lucide-react'
+import { Button, Card } from '@clidey/ux'
 
 const languageNames: Record<string, string> = {
   js: 'JavaScript',
@@ -68,8 +70,7 @@ function CopyButton({ code }: { code: string }) {
   }, [copyCount])
 
   return (
-    <button
-      type="button"
+    <Button
       className={classNames(
         'group/button absolute top-3.5 right-4 overflow-hidden rounded-full py-1 pr-3 pl-2 text-2xs font-medium opacity-0 backdrop-blur-sm transition group-hover:opacity-100 focus:opacity-100',
         copied
@@ -89,8 +90,7 @@ function CopyButton({ code }: { code: string }) {
           copied && '-translate-y-1.5 opacity-0',
         )}
       >
-        <ClipboardIcon className="h-5 w-5 fill-zinc-500/20 stroke-zinc-500 transition-colors group-hover/button:stroke-zinc-400" />
-        Copy
+        <ClipboardIcon className="h-4 w-4 fill-zinc-500/20 stroke-zinc-500 transition-colors group-hover/button:stroke-zinc-400" />
       </span>
       <span
         aria-hidden={!copied}
@@ -99,9 +99,9 @@ function CopyButton({ code }: { code: string }) {
           !copied && 'translate-y-1.5 opacity-0',
         )}
       >
-        Copied!
+        <CheckIcon className="h-4 w-4" />
       </span>
-    </button>
+    </Button>
   )
 }
 
@@ -111,7 +111,7 @@ function APIPanelHeader({ tag, label }: { tag?: string; label?: string }) {
   }
 
   return (
-    <div className="flex h-9 items-center gap-2 border-y border-t-transparent border-b-white/7.5 bg-zinc-900 px-4 dark:border-b-white/5 dark:bg-white/1">
+    <div className="flex h-9 items-center gap-2 px-4">
       {tag && (
         <div className="dark flex">
           <Tag variant="small">{tag}</Tag>
@@ -153,7 +153,7 @@ function APIPanel({
     <div className="group dark:bg-white/2.5">
       <APIPanelHeader tag={tag} label={label} />
       <div className="relative">
-        <pre className="overflow-x-auto p-4 text-xs text-white">{children}</pre>
+        <pre className="overflow-x-auto p-4 text-xs">{children}</pre>
         {/* @ts-expect-error code is not typed */}
         <CopyButton code={code} />
       </div>
@@ -177,9 +177,9 @@ function APIGroupHeader({
   }
 
   return (
-    <div className="flex min-h-[calc(--spacing(12)+1px)] flex-wrap items-start gap-x-4 border-b border-zinc-700 bg-zinc-800 px-4 dark:border-zinc-800 dark:bg-transparent">
+    <div className="flex min-h-[calc(--spacing(12)+1px)] flex-wrap items-start gap-x-4 px-4 pt-2">
       {title && (
-        <h3 className="mr-auto pt-3 text-xs font-semibold text-white">
+        <h3 className="mr-auto pt-3 text-xs font-semibold">
           {title}
         </h3>
       )}
@@ -188,7 +188,7 @@ function APIGroupHeader({
           {Children.map(children, (child, childIndex) => (
             <Tab
               className={classNames(
-                'border-b py-3 transition data-selected:not-data-focus:outline-hidden',
+                'pt-2 transition data-selected:not-data-focus:outline-hidden',
                 childIndex === selectedIndex
                   ? 'border-sky-500 text-sky-400'
                   : 'border-transparent text-zinc-400 hover:text-zinc-300',
@@ -303,8 +303,6 @@ export function APIGroup({
   const tabGroupProps = useTabGroupProps(languages)
   const hasTabs = Children.count(children) > 1
 
-  const containerClassName =
-    'my-6 overflow-hidden rounded-2xl bg-zinc-900 shadow-md dark:ring-1 dark:ring-white/10 w-full'
   const header = (
     <APIGroupHeader title={title} selectedIndex={tabGroupProps.selectedIndex}>
       {children}
@@ -315,19 +313,21 @@ export function APIGroup({
   return (
     <APIGroupContext.Provider value={true}>
       {hasTabs ? (
-        <TabGroup {...tabGroupProps} className={containerClassName}>
-          <div className="not-prose">
-            {header}
-            {panels}
-          </div>
-        </TabGroup>
+        <Card className="py-0 border-black/10 bg-none overflow-hidden mb-4">
+          <TabGroup {...tabGroupProps}>
+            <div className="not-prose">
+              {header}
+              {panels}
+            </div>
+          </TabGroup>
+        </Card>
       ) : (
-        <div className={containerClassName}>
+        <Card className="py-0 border-black/10 bg-none overflow-hidden mb-4">
           <div className="not-prose">
             {header}
             {panels}
           </div>
-        </div>
+        </Card>
       )}
     </APIGroupContext.Provider>
   )

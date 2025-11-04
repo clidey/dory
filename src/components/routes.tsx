@@ -12,7 +12,7 @@ export default function Routes() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const links = document.querySelectorAll('.docucod-navigation a');
+    const links = document.querySelectorAll('.dory-navigation a');
     const listeners: (() => void)[] = [];
     const preloaded = new Set();
   

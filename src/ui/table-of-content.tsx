@@ -114,7 +114,7 @@ export function TableOfContents() {
   }
 
   return (
-    <div className="hidden xl:sticky xl:top-[4.75rem] xl:-mr-6 xl:block xl:h-[calc(100vh-4.75rem)] xl:flex-none xl:overflow-y-auto xl:py-16 xl:pr-6">
+    <div className="hidden xl:sticky xl:top-[4.75rem] xl:-mr-6 xl:block xl:h-[calc(100vh-4.75rem)] xl:flex-none xl:overflow-y-auto xl:py-16 xl:pr-6 pl-4">
       <nav aria-labelledby="on-this-page-title" className="w-56">
         {sections.length > 0 && (
           <>
@@ -131,7 +131,7 @@ export function TableOfContents() {
                     <a
                       href={`#${section.id}`}
                       className={classNames({
-                        "text-sky-500": isActive(section),
+                        "text-brand-foreground": isActive(section),
                         "font-normal text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300": !isActive(section),
                       })}>
                       {section.title}
@@ -145,7 +145,7 @@ export function TableOfContents() {
                             href={`#${subSection.id}`}
                             className={
                               isActive(subSection)
-                                ? 'text-sky-500'
+                                ? 'text-brand-foreground'
                                 : 'hover:text-slate-600 dark:hover:text-slate-300'
                             }
                           >
