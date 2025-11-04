@@ -4,17 +4,21 @@
     "lib": ["ES2023"],
     "module": "ESNext",
     "moduleResolution": "node",
-    "allowImportingTsExtensions": true,
     "skipLibCheck": true,
-    "strict": false,
+    "strict": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "noEmit": true,
-    "noImplicitAny": false,
-    "noImplicitReturns": false,
-    "noImplicitThis": false
+    "noEmit": false,
+    "outDir": "./bin/dist",
+    "rootDir": "./bin",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true
   },
   "include": [
-    "bin/dory.ts"
+    "bin/**/*.ts"
+  ],
+  "exclude": [
+    "bin/dist"
   ]
 }

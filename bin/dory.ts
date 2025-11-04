@@ -1,6 +1,5 @@
-#!/usr/bin/env -S npx tsx
+#!/usr/bin/env node
 
-// @ts-nocheck - gang
 import { execSync } from 'child_process';
 import { existsSync, rmSync, mkdirSync, cpSync, readFileSync, readdirSync } from 'fs';
 import { resolve, dirname } from 'path';
@@ -11,95 +10,220 @@ import sirv from 'sirv';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+// Get the root directory of the Dory package
+const getDoryRoot = (): string => {
+  // In development: bin/dory.ts -> root is parent
+  // In production: bin/dist/dory.js -> root is parent of parent
+  const isDevelopment = __dirname.endsWith('bin');
+  return isDevelopment ? resolve(__dirname, '..') : resolve(__dirname, '..', '..');
+};
+
+// Get the user's current working directory
+const getUserRoot = (): string => process.cwd();
+
+interface DoryConfig {
+  name?: string;
+  description?: string;
+  navigation?: unknown;
+  [key: string]: unknown;
+}
+
+const validateDoryConfig = (config: DoryConfig): void => {
+  if (!config || typeof config !== 'object') {
+    throw new Error('Configuration must be a valid object');
+  }
+  // Add more validation as needed
+};
+
 const commands = {
   build: () => {
     console.log('🐟 Dory is ready to build your docs!');
-    
-    // Clear the docs folder if it exists
-    const docsDir = resolve(__dirname, '..', 'docs');
-    if (existsSync(docsDir)) {
-      console.log('🧹 Tidying up the workspace...');
-      rmSync(docsDir, { recursive: true, force: true });
-    }
-    
-    // Check if dory.json exists in current directory
-    const currentDir = process.cwd();
-    const doryConfigPath = resolve(currentDir, 'dory.json');
-    
+
+    const userRoot = getUserRoot();
+    const doryRoot = getDoryRoot();
+    const doryConfigPath = resolve(userRoot, 'dory.json');
+    const tempDocsDir = resolve(doryRoot, 'docs');
+    const doryDistDir = resolve(doryRoot, 'dist');
+    const userDistDir = resolve(userRoot, 'dist');
+
+    // Step 1: Validate prerequisites before making any changes
+    console.log('🔍 Validating project structure...');
+
     if (!existsSync(doryConfigPath)) {
-      console.error('❌ Oops! dory.json is missing from your project');
+      console.error('❌ dory.json not found in current directory');
+      console.error(`   Looking for: ${doryConfigPath}`);
+      console.error('   Create a dory.json file to configure your documentation site');
       process.exit(1);
     }
-    
+
     // Read and validate dory.json
+    let config: DoryConfig;
     try {
-      const config = JSON.parse(readFileSync(doryConfigPath, 'utf8'));
-      console.log(`📋 Building: ${config.name || 'Your awesome project'}`);
+      const configContent = readFileSync(doryConfigPath, 'utf8');
+      config = JSON.parse(configContent) as DoryConfig;
+      validateDoryConfig(config);
+      console.log(`📋 Building: ${config.name || 'Documentation'}`);
     } catch (error) {
-      console.error('❌ Your dory.json seems to have some issues:', error.message);
+      console.error('❌ Failed to parse dory.json:');
+      if (error instanceof Error) {
+        console.error(`   ${error.message}`);
+      }
       process.exit(1);
     }
-    
-    mkdirSync(docsDir, { recursive: true });
-    
-    console.log('📁 Gathering your project files...');
-    cpSync(doryConfigPath, resolve(docsDir, 'dory.json'));
-    
-    const copyFiles = (src, dest) => {
-      if (existsSync(src)) {
-        if (existsSync(dest)) {
-          rmSync(dest, { recursive: true, force: true });
+
+    // Check if pnpm is available
+    try {
+      execSync('pnpm --version', { stdio: 'ignore' });
+    } catch {
+      console.error('❌ pnpm is not installed');
+      console.error('   Install it with: npm install -g pnpm');
+      process.exit(1);
+    }
+
+    // Step 2: Clean up temp directories
+    console.log('🧹 Preparing workspace...');
+    if (existsSync(tempDocsDir)) {
+      rmSync(tempDocsDir, { recursive: true, force: true });
+    }
+
+    try {
+      // Step 3: Copy user files to temp docs directory
+      mkdirSync(tempDocsDir, { recursive: true });
+
+      console.log('📁 Gathering project files...');
+
+      // Define files/dirs to exclude
+      const excludeItems = new Set([
+        'node_modules',
+        'dist',
+        '.git',
+        '.github',
+        'docs',
+        '.DS_Store',
+        '.env',
+        '.env.local',
+        'pnpm-lock.yaml',
+        'package-lock.json',
+        'yarn.lock'
+      ]);
+
+      const items = readdirSync(userRoot);
+      let copiedCount = 0;
+
+      for (const item of items) {
+        if (excludeItems.has(item)) {
+          continue;
         }
-        cpSync(src, dest, { recursive: true });
+
+        const srcPath = resolve(userRoot, item);
+        const destPath = resolve(tempDocsDir, item);
+
+        try {
+          cpSync(srcPath, destPath, { recursive: true, force: true });
+          copiedCount++;
+        } catch (error) {
+          console.warn(`⚠️  Could not copy ${item}: ${error instanceof Error ? error.message : 'unknown error'}`);
+        }
       }
-    };
-    
-    // Copy all files and directories except node_modules, dist, and .git
-    const excludeDirs = ['node_modules', 'dist', '.git', 'docs', 'pnpm-lock.yaml'];
-    
-    const items = readdirSync(currentDir);
-    for (const item of items) {
-      if (!excludeDirs.includes(item)) {
-        const srcPath = resolve(currentDir, item);
-        const destPath = resolve(docsDir, item);
-        copyFiles(srcPath, destPath);
+
+      console.log(`✅ Copied ${copiedCount} items`);
+
+      // Step 4: Run the build
+      console.log('⚡ Building documentation...');
+
+      try {
+        execSync('pnpm run build', {
+          stdio: 'inherit',
+          cwd: doryRoot,
+          env: { ...process.env }
+        });
+      } catch (error) {
+        console.error('❌ Build failed');
+        console.error('   Check the error messages above for details');
+        throw error;
       }
-    }
-    
-    console.log('✅ All files gathered successfully!');
-    
-    // Run the build command
-    console.log('⚡ Magic is happening...');
-    try {
-      execSync('npm run build', { stdio: 'inherit', cwd: __dirname });
-    } catch (error) {
-      console.error('❌ Build failed:', error.message);
-      process.exit(1);
-    }
-    
-    // Check if dist folder was created
-    const distDir = resolve(__dirname, '..', 'dist');
-    if (existsSync(distDir)) {
+
+      // Step 5: Verify build output
+      console.log('🔍 Verifying build output...');
+
+      if (!existsSync(doryDistDir)) {
+        console.error('❌ Build completed but dist folder was not created');
+        console.error(`   Expected: ${doryDistDir}`);
+        process.exit(1);
+      }
+
+      const indexHtml = resolve(doryDistDir, 'index.html');
+      if (!existsSync(indexHtml)) {
+        console.error('❌ Build incomplete: index.html not found');
+        console.error('   The build may have failed silently');
+        process.exit(1);
+      }
+
+      // Check if dist has content
+      const distFiles = readdirSync(doryDistDir);
+      if (distFiles.length === 0) {
+        console.error('❌ Build completed but dist folder is empty');
+        process.exit(1);
+      }
+
       console.log('🎉 Build completed successfully!');
-      console.log('📦 Moving your docs to the right place...');
-      cpSync(distDir, resolve(currentDir, 'dist'), { recursive: true });
-      console.log('✨ Your docs are ready in the dist folder!');
-    } else {
-      console.log('⚠️  Build completed but no output found');
+
+      // Step 6: Copy dist to user's directory
+      console.log('📦 Copying build output...');
+
+      // Only copy if they're different directories
+      if (doryDistDir !== userDistDir) {
+        if (existsSync(userDistDir)) {
+          rmSync(userDistDir, { recursive: true, force: true });
+        }
+        cpSync(doryDistDir, userDistDir, { recursive: true, force: true });
+      }
+
+      console.log('✨ Documentation ready in dist/');
+
+    } finally {
+      // Step 7: Always clean up temp directories
+      console.log('🧹 Cleaning up...');
+
+      try {
+        if (existsSync(tempDocsDir)) {
+          rmSync(tempDocsDir, { recursive: true, force: true });
+        }
+        // Only clean up doryDistDir if it's different from userDistDir
+        // (in production they're different, in dev they might be the same)
+        if (doryDistDir !== userDistDir && existsSync(doryDistDir)) {
+          rmSync(doryDistDir, { recursive: true, force: true });
+        }
+      } catch (error) {
+        console.warn('⚠️  Could not clean up temp directories');
+      }
+
+      console.log('✅ Done!');
     }
-    rmSync(distDir, { recursive: true, force: true });
-    
-    // Revert docs folder back to original state
-    console.log('🧹 Cleaning up...');
-    rmSync(docsDir, { recursive: true, force: true });
-    console.log('✅ All done!');
   },
 
   preview: () => {
-    console.log('👀 Starting your docs preview...');
-    const currentDir = process.cwd();
-    const distDir = resolve(currentDir, 'dist');
+    console.log('👀 Starting docs preview...');
+
+    const userRoot = getUserRoot();
+    const distDir = resolve(userRoot, 'dist');
     let port = parseInt(process.env.PORT || '3000', 10);
+
+    // Validate dist folder exists
+    if (!existsSync(distDir)) {
+      console.error('❌ dist folder not found');
+      console.error(`   Looking for: ${distDir}`);
+      console.error('   Run "dory build" first to generate the documentation');
+      process.exit(1);
+    }
+
+    // Check if dist has content
+    const distFiles = readdirSync(distDir);
+    if (distFiles.length === 0) {
+      console.error('❌ dist folder is empty');
+      console.error('   Run "dory build" to generate documentation');
+      process.exit(1);
+    }
 
     const serve = sirv(distDir, {
       dev: false,
@@ -113,14 +237,15 @@ const commands = {
       serve(req, res);
     });
 
-    const tryPort = (currentPort: number) => {
+    const tryPort = (currentPort: number): void => {
       server.listen(currentPort)
         .on('listening', () => {
-          console.log(`🚀 Your docs are live at http://localhost:${currentPort}`);
+          console.log(`🚀 Documentation live at http://localhost:${currentPort}`);
+          console.log('   Press Ctrl+C to stop the server');
         })
-        .on('error', (err: any) => {
+        .on('error', (err: NodeJS.ErrnoException) => {
           if (err.code === 'EADDRINUSE') {
-            console.log(`⚠️  Port ${currentPort} is busy, trying ${currentPort + 1}...`);
+            console.log(`⚠️  Port ${currentPort} in use, trying ${currentPort + 1}...`);
             tryPort(currentPort + 1);
           } else {
             console.error('❌ Failed to start server:', err.message);
@@ -136,16 +261,16 @@ const commands = {
     const args = process.argv.slice(3);
     let content = '';
     let fileName = '';
-    
+
     // Parse arguments
     for (let i = 0; i < args.length; i++) {
       if (args[i] === '--content' && i + 1 < args.length) {
         content = args[i + 1];
         break;
       } else if (args[i] === '--file' && i + 1 < args.length) {
-        const filePath = args[i + 1];
+        const filePath = resolve(getUserRoot(), args[i + 1]);
         if (!existsSync(filePath)) {
-          console.error(`❌ Error: File not found: ${filePath}`);
+          console.error(`❌ File not found: ${filePath}`);
           process.exit(1);
         }
         content = readFileSync(filePath, 'utf8');
@@ -153,88 +278,115 @@ const commands = {
         break;
       }
     }
-    
+
     if (!content) {
-      console.error('❌ Error: --content or --file argument is required');
-      console.log('Usage: dory verify:content --content "<mdx-content>" | --file <path-to-mdx-file>');
+      console.error('❌ --content or --file argument is required');
+      console.log('Usage:');
+      console.log('  dory verify:content --content "<mdx-content>"');
+      console.log('  dory verify:content --file <path-to-mdx-file>');
       process.exit(1);
     }
-    
+
     try {
+      const doryRoot = getDoryRoot();
+      const processorPath = resolve(doryRoot, 'src', 'mdx', 'processor.ts');
+
+      if (!existsSync(processorPath)) {
+        console.error('❌ MDX processor not found');
+        console.error('   This feature requires Dory source files');
+        process.exit(1);
+      }
+
       // Use the shared MDX processor that matches the main build exactly
-      const { verifyMdxContent } = await import('../src/mdx/processor.ts');
+      const { verifyMdxContent } = await import(processorPath);
       const result = await verifyMdxContent(content, fileName);
-      
+
       if (!result.valid) {
         throw result.error;
       }
-      
+
       // Silent success - no output means no errors
-      
+
     } catch (error) {
       console.error('❌ MDX compilation failed:');
-      console.error(error.message);
-      
-      // Provide more detailed error information if available
-      if (error.line !== undefined && error.column !== undefined) {
-        console.error(`   at line ${error.line}, column ${error.column}`);
+      if (error instanceof Error) {
+        console.error(`   ${error.message}`);
+
+        // Provide more detailed error information if available
+        const errorWithPosition = error as Error & { line?: number; column?: number; source?: string };
+        if (errorWithPosition.line !== undefined && errorWithPosition.column !== undefined) {
+          console.error(`   at line ${errorWithPosition.line}, column ${errorWithPosition.column}`);
+        }
+        if (errorWithPosition.source) {
+          console.error('   Source:', errorWithPosition.source);
+        }
       }
-      if (error.source) {
-        console.error('   Source:', error.source);
-      }
-      
+
       process.exit(1);
     }
   },
 
   help: () => {
     console.log(`
-🐟 Dory CLI - Your Friendly Documentation Builder
+🐟 Dory CLI - Documentation Builder
 
 Usage:
-  dory <command>
+  dory <command> [options]
 
 Commands:
-  build         Build your documentation site
-                - Needs dory.json in your project
-                - Creates a beautiful dist folder
-                
-  verify:content  Verify that MDX content compiles without errors
-                  - Silent on success, shows errors on failure
-                  - Uses the same preprocessing as the main build
-                  - Accepts --content or --file arguments
-                
-  preview       Preview your built documentation
-                - Shows your docs in the browser
-                - Run build first!
-                
-  help          Show this help message
+  build            Build your documentation site
+                   Requirements: dory.json in current directory
+                   Output: dist/ folder with static site
+
+  preview          Preview built documentation
+                   Requirements: dist/ folder (run build first)
+                   Starts local server on port 3000
+
+  verify:content   Verify MDX content compilation
+                   Options: --content "<mdx>" or --file <path>
+                   Silent on success, shows errors on failure
+
+  help             Show this help message
 
 Examples:
-  dory build                                      # Build your docs
-  dory verify:content --content "# Hello World"  # Verify MDX content
-  dory verify:content --file content.mdx         # Verify MDX from file
-  dory preview                                    # Preview your docs
+  dory build
+  dory preview
+  dory verify:content --content "# Hello World"
+  dory verify:content --file docs/intro.mdx
+
+For more information, visit: https://github.com/clidey/dory
 `);
   }
 };
 
+type CommandName = keyof typeof commands;
+
 // Parse command line arguments
 const command = process.argv[2];
 
-async function runCommand() {
+async function runCommand(): Promise<void> {
   if (!command || command === 'help' || command === '--help' || command === '-h') {
     commands.help();
-  } else if (commands[command]) {
-    await commands[command]();
+    return;
+  }
+
+  if (command in commands) {
+    await commands[command as CommandName]();
   } else {
     console.error(`❌ Unknown command: ${command}`);
-    console.log('Run "dory help" for usage information');
+    console.log('   Run "dory help" for available commands');
     process.exit(1);
   }
 }
 
-runCommand().catch((error) => {
-  console.error('❌ Command failed:', error.message);
+runCommand().catch((error: unknown) => {
+  console.error('❌ Command failed');
+  if (error instanceof Error) {
+    console.error(`   ${error.message}`);
+    if (error.stack && process.env.DEBUG) {
+      console.error('\nStack trace:');
+      console.error(error.stack);
+    }
+  }
   process.exit(1);
 });
