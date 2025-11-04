@@ -1,7 +1,7 @@
 {
   "name": "@clidey/dory",
   "private": false,
-  "version": "0.24.0",
+  "version": "0.23.0",
   "type": "module",
   "description": "A CLI tool for building and previewing documentation sites",
   "keywords": [
@@ -12,7 +12,7 @@
     "static-site"
   ],
   "bin": {
-    "dory": "./bin/dist/dory.js"
+    "dory": "./bin/dory.ts"
   },
   "repository": {
     "type": "git",
@@ -26,11 +26,9 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "npm run build:cli && tsc -b && vite build",
-    "build:cli": "tsc -p tsconfig.bin.json",
+    "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "publish": "npm run build && npm publish --access public",
-    "prepublishOnly": "npm run build"
+    "publish": "npm publish --access public"
   },
   "dependencies": {
     "@algolia/autocomplete-core": "^1.19.2",
