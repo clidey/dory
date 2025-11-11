@@ -11,6 +11,7 @@ import { docsAssetsPlugin } from './src/plugins/docs-assets';
 import { getMdxConfig } from './src/config/mdx';
 
 export default defineConfig(({ command }) => ({
+  base: process.env.VITE_BASE_URL || '/',
   plugins: [
     // SINGLE SOURCE OF TRUTH: All MDX preprocessing happens in src/mdx/processor.ts
     unifiedMdxPreprocessor(),

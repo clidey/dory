@@ -83,19 +83,21 @@ let preloadedFrontMatter: Record<string, any>[] | null = null;
 // Preload frontmatter from JSON file (optimized approach)
 export async function preloadFrontmatter() {
     if (preloadedFrontMatter) return; // Already loaded
-    
+
     try {
-        const response = await fetch('/frontmatter.json');
+        const baseUrl = import.meta.env.BASE_URL || '/';
+        const frontmatterUrl = `${baseUrl}frontmatter.json`.replace(/\/+/g, '/').replace(':/', '://');
+        const response = await fetch(frontmatterUrl);
         if (response.ok) {
             preloadedFrontMatter = await response.json();
             if (preloadedFrontMatter) {
                 completeFrontMatter = [...preloadedFrontMatter];
-                
+
                 // Update navigation titles from preloaded data
                 for (const fm of preloadedFrontMatter) {
                     updateNavigationTitle(fm.path, fm.title);
                 }
-                
+
                 // Add to search index
                 await addPreloadedContentToSearch();
             }

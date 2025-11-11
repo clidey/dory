@@ -39,6 +39,25 @@ const commands = {
   build: () => {
     console.log('🐟 Dory is ready to build your docs!');
 
+    // Parse CLI arguments
+    const args = process.argv.slice(3);
+    let baseUrl = '/';
+
+    for (let i = 0; i < args.length; i++) {
+      if (args[i] === '--baseUrl' && i + 1 < args.length) {
+        baseUrl = args[i + 1];
+        // Ensure baseUrl starts and ends with /
+        if (!baseUrl.startsWith('/')) {
+          baseUrl = '/' + baseUrl;
+        }
+        if (!baseUrl.endsWith('/')) {
+          baseUrl = baseUrl + '/';
+        }
+        console.log(`📍 Using base URL: ${baseUrl}`);
+        break;
+      }
+    }
+
     const userRoot = getUserRoot();
     const doryRoot = getDoryRoot();
     const doryConfigPath = resolve(userRoot, 'dory.json');
@@ -152,7 +171,7 @@ const commands = {
         execSync('pnpm run build', {
           stdio: 'inherit',
           cwd: doryRoot,
-          env: { ...process.env }
+          env: { ...process.env, VITE_BASE_URL: baseUrl }
         });
       } catch (error) {
         console.error('❌ Build failed');
@@ -246,6 +265,25 @@ const commands = {
   preview: () => {
     console.log('👀 Starting docs preview...');
 
+    // Parse CLI arguments
+    const args = process.argv.slice(3);
+    let baseUrl = '/';
+
+    for (let i = 0; i < args.length; i++) {
+      if (args[i] === '--baseUrl' && i + 1 < args.length) {
+        baseUrl = args[i + 1];
+        // Ensure baseUrl starts and ends with /
+        if (!baseUrl.startsWith('/')) {
+          baseUrl = '/' + baseUrl;
+        }
+        if (!baseUrl.endsWith('/')) {
+          baseUrl = baseUrl + '/';
+        }
+        console.log(`📍 Serving at base URL: ${baseUrl}`);
+        break;
+      }
+    }
+
     const userRoot = getUserRoot();
     const distDir = resolve(userRoot, 'dist');
     let port = parseInt(process.env.PORT || '3000', 10);
@@ -275,13 +313,22 @@ const commands = {
     });
 
     const server = createServer((req, res) => {
+      // Handle baseUrl by stripping it from the request URL
+      let url = req.url || '/';
+      if (baseUrl !== '/' && url.startsWith(baseUrl)) {
+        url = url.slice(baseUrl.length - 1); // Keep the leading /
+        req.url = url;
+      }
       serve(req, res);
     });
 
     const tryPort = (currentPort: number): void => {
       server.listen(currentPort)
         .on('listening', () => {
-          console.log(`🚀 Documentation live at http://localhost:${currentPort}`);
+          const url = baseUrl === '/'
+            ? `http://localhost:${currentPort}`
+            : `http://localhost:${currentPort}${baseUrl}`;
+          console.log(`🚀 Documentation live at ${url}`);
           console.log('   Press Ctrl+C to stop the server');
         })
         .on('error', (err: NodeJS.ErrnoException) => {
@@ -378,10 +425,15 @@ Commands:
   build            Build your documentation site
                    Requirements: dory.json in current directory
                    Output: dist/ folder with static site
+                   Options:
+                     --baseUrl <path>  Base URL for deployment (e.g., /docs/)
+                                      Useful for reverse proxy deployments
 
   preview          Preview built documentation
                    Requirements: dist/ folder (run build first)
                    Starts local server on port 3000
+                   Options:
+                     --baseUrl <path>  Base URL matching the build (e.g., /docs/)
 
   verify:content   Verify MDX content compilation
                    Options: --content "<mdx>" or --file <path>
@@ -391,7 +443,9 @@ Commands:
 
 Examples:
   dory build
+  dory build --baseUrl /docs/
   dory preview
+  dory preview --baseUrl /docs/
   dory verify:content --content "# Hello World"
   dory verify:content --file docs/intro.mdx
 
