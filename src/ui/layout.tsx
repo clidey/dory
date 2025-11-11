@@ -83,28 +83,61 @@ export default function Layout({ children }: LayoutProps) {
     });
   }, [pathname]);
 
-  const { title: group, group: title } = useMemo(() => {
-    const group = ALL_NAVIGATION.flatMap((tab) => 
-      tab.groups.find((group) => 
+  const { title: group, group: title, page } = useMemo(() => {
+    const group = ALL_NAVIGATION.flatMap((tab) =>
+      tab.groups.find((group) =>
         group.pages.some((page) => page.href === pathname)
       )
     );
     const page = completeFrontMatter.find((page) => page.path === pathname);
 
-    useEffect(() => {
-      if (page?.title) {
-        document.title = page.title;
-      }
-      if (page?.description) {
-        const metaDescription = document.querySelector('meta[name="description"]');
-        if (metaDescription) {
-          metaDescription.setAttribute('content', page.description);
-        }
-      }
-    }, [page]);
-
-    return { group: group[0]?.title, title: page?.title,  };
+    return { group: group[0]?.title, title: page?.title, page };
   }, [pathname, loading]);
+
+  // Update document title and meta tags when page changes
+  useEffect(() => {
+    if (page?.title) {
+      document.title = page.title;
+
+      // Update Open Graph title
+      const ogTitle = document.querySelector('meta[property="og:title"]');
+      if (ogTitle) {
+        ogTitle.setAttribute('content', page.title);
+      }
+
+      // Update Twitter title
+      const twitterTitle = document.querySelector('meta[name="twitter:title"]');
+      if (twitterTitle) {
+        twitterTitle.setAttribute('content', page.title);
+      }
+    }
+
+    if (page?.description) {
+      // Update standard meta description
+      const metaDescription = document.querySelector('meta[name="description"]');
+      if (metaDescription) {
+        metaDescription.setAttribute('content', page.description);
+      }
+
+      // Update Open Graph description
+      const ogDescription = document.querySelector('meta[property="og:description"]');
+      if (ogDescription) {
+        ogDescription.setAttribute('content', page.description);
+      }
+
+      // Update Twitter description
+      const twitterDescription = document.querySelector('meta[name="twitter:description"]');
+      if (twitterDescription) {
+        twitterDescription.setAttribute('content', page.description);
+      }
+    }
+
+    // Update canonical URL
+    const ogUrl = document.querySelector('meta[property="og:url"]');
+    if (ogUrl) {
+      ogUrl.setAttribute('content', window.location.href);
+    }
+  }, [page]);
 
   const tab = useMemo(() => {
     return completeFrontMatter.find((page) => page.path === pathname);

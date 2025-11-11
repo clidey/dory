@@ -8,6 +8,7 @@ import { llmTxtDevServer } from './src/plugins/llm-txt-dev-server';
 import { frontmatterGenerator } from './src/plugins/frontmatter-generator';
 import { frontmatterDevServer } from './src/plugins/frontmatter-dev-server';
 import { docsAssetsPlugin } from './src/plugins/docs-assets';
+import { htmlMetadataInjector } from './src/plugins/html-metadata-injector';
 import { getMdxConfig } from './src/config/mdx';
 
 export default defineConfig(({ command }) => ({
@@ -22,6 +23,7 @@ export default defineConfig(({ command }) => ({
     frontmatterGenerator(),
     frontmatterDevServer(),
     docsAssetsPlugin(),
+    htmlMetadataInjector(),
   ],
   resolve: {
     alias: {
