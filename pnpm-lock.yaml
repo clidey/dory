@@ -46,10 +46,10 @@ importers:
         version: 3.1.0(acorn@8.15.0)(rollup@4.41.1)
       '@preact/preset-vite':
         specifier: ^2.10.1
-        version: 2.10.1(@babel/core@7.27.4)(preact@10.26.8)(vite@6.3.5(@types/node@24.0.12)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.89.2)(tsx@4.20.4))
+        version: 2.10.1(@babel/core@7.27.4)(preact@10.26.8)(vite@6.3.5(@types/node@24.0.12)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.89.2)(terser@5.44.1)(tsx@4.20.4))
       '@tailwindcss/vite':
         specifier: ^4.1.16
-        version: 4.1.16(vite@6.3.5(@types/node@24.0.12)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.89.2)(tsx@4.20.4))
+        version: 4.1.16(vite@6.3.5(@types/node@24.0.12)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.89.2)(terser@5.44.1)(tsx@4.20.4))
       '@types/react-highlight-words':
         specifier: ^0.20.0
         version: 0.20.0
@@ -112,10 +112,10 @@ importers:
         version: 5.0.0
       vite:
         specifier: ^6.3.5
-        version: 6.3.5(@types/node@24.0.12)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.89.2)(tsx@4.20.4)
+        version: 6.3.5(@types/node@24.0.12)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.89.2)(terser@5.44.1)(tsx@4.20.4)
       vite-plugin-mdx:
         specifier: ^3.6.1
-        version: 3.6.1(@mdx-js/mdx@3.1.0(acorn@8.15.0))(vite@6.3.5(@types/node@24.0.12)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.89.2)(tsx@4.20.4))
+        version: 3.6.1(@mdx-js/mdx@3.1.0(acorn@8.15.0))(vite@6.3.5(@types/node@24.0.12)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.89.2)(terser@5.44.1)(tsx@4.20.4))
       wouter-preact:
         specifier: ^3.7.1
         version: 3.7.1(preact@10.26.8)
@@ -123,6 +123,9 @@ importers:
       '@types/node':
         specifier: ^24.0.12
         version: 24.0.12
+      terser:
+        specifier: ^5.44.1
+        version: 5.44.1
 
 packages:
 
@@ -551,6 +554,9 @@ packages:
   '@jridgewell/set-array@1.2.1':
     resolution: {integrity: sha512-R8gLRTZeyp03ymzP/6Lil/28tGeGEzhx1q2k703KGWRAI1VdvPIXdG70VJc2pAMw3NA6JKL5hhFu1sJX0Mnn/A==}
     engines: {node: '>=6.0.0'}
+
+  '@jridgewell/source-map@0.3.11':
+    resolution: {integrity: sha512-ZMp1V8ZFcPG5dIWnQLr3NSI1MiCU7UETdS/A0G8V/XWHvJv3ZsFqutJn1Y5RPmAPX6F3BiE397OqveU/9NCuIA==}
 
   '@jridgewell/sourcemap-codec@1.5.0':
     resolution: {integrity: sha512-gv3ZRaISU3fjPAgNsriBRqGWQL6quFx04YMPW/zD8XMLsU32mhCCbfbO6KZFLjvYpCZ8zyDEgqsgf+PwPaM7GQ==}
@@ -1566,6 +1572,9 @@ packages:
   buffer-builder@0.2.0:
     resolution: {integrity: sha512-7VPMEPuYznPSoR21NE1zvd2Xna6c/CloiZCfcMXR1Jny6PjX0N4Nsa38zcBFo/FMK+BlA+FLKbJCQ0i2yxp+Xg==}
 
+  buffer-from@1.1.2:
+    resolution: {integrity: sha512-E+XQCRwSbaaiChtv6k6Dwgc+bx+Bs6vuKJHHl5kox/BaKbhiXzqQOwK4cO22yElGp2OCmjwVhT3HmxgyPGnJfQ==}
+
   camelcase-keys@7.0.2:
     resolution: {integrity: sha512-Rjs1H+A9R+Ig+4E/9oyB66UC5Mj9Xq3N//vcLf2WzgdTi/3gUu3Z9KoqmlrEG4VuuLK8wJHofxzdQXz/knhiYg==}
     engines: {node: '>=12'}
@@ -1635,6 +1644,9 @@ packages:
 
   comma-separated-tokens@2.0.3:
     resolution: {integrity: sha512-Fu4hJdvzeylCfQPp9SGWidpzrMs7tTrlu6Vb8XGaRGck8QSNZJJp538Wrb60Lax4fPwR64ViY468OIUTbRlGZg==}
+
+  commander@2.20.3:
+    resolution: {integrity: sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==}
 
   commander@7.2.0:
     resolution: {integrity: sha512-QrWXB+ZQSVPmIWIhtEO9H+gwHaMGYiF5ChvoJ+K9ZGHG/sVsa6yiesAD1GC/x46sET00Xlwo1u49RVVVzvcSkw==}
@@ -3027,6 +3039,13 @@ packages:
     resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
     engines: {node: '>=0.10.0'}
 
+  source-map-support@0.5.21:
+    resolution: {integrity: sha512-uBHU3L3czsIyYXKX88fdrGovxdSCoTGDRZ6SYXtSRxLZUzHg5P/66Ht6uoUlHu9EZod+inXhKo3qQgwXUT/y1w==}
+
+  source-map@0.6.1:
+    resolution: {integrity: sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==}
+    engines: {node: '>=0.10.0'}
+
   source-map@0.7.4:
     resolution: {integrity: sha512-l3BikUxvPOcn5E74dZiq5BGsTb5yEwhaTSzccU6t4sDOH8NWJCstKO5QT2CvtFoK6F0saL7p9xHAqHOlCPJygA==}
     engines: {node: '>= 8'}
@@ -3105,6 +3124,11 @@ packages:
   tapable@2.2.2:
     resolution: {integrity: sha512-Re10+NauLTMCudc7T5WLFLAwDhQ0JWdrMK+9B2M8zR5hRExKmsRDCBA7/aV/pNJFltmBFO5BAMlQFi/vq3nKOg==}
     engines: {node: '>=6'}
+
+  terser@5.44.1:
+    resolution: {integrity: sha512-t/R3R/n0MSwnnazuPpPNVO60LX0SKL45pyl9YlvxIdkH0Of7D5qM2EVe+yASRIlY5pZ73nclYJfNANGWPwFDZw==}
+    engines: {node: '>=10'}
+    hasBin: true
 
   tiny-invariant@1.3.3:
     resolution: {integrity: sha512-+FbBPE1o9QAYvviau/qC5SE3caw21q3xkvWKBtja5vgqOWIHHJ3ioaq1VPfn/Szqctz2bU/oYeKd9/z5BL+PVg==}
@@ -3816,6 +3840,11 @@ snapshots:
 
   '@jridgewell/set-array@1.2.1': {}
 
+  '@jridgewell/source-map@0.3.11':
+    dependencies:
+      '@jridgewell/gen-mapping': 0.3.8
+      '@jridgewell/trace-mapping': 0.3.25
+
   '@jridgewell/sourcemap-codec@1.5.0': {}
 
   '@jridgewell/sourcemap-codec@1.5.5': {}
@@ -3879,18 +3908,18 @@ snapshots:
 
   '@polka/url@1.0.0-next.29': {}
 
-  '@preact/preset-vite@2.10.1(@babel/core@7.27.4)(preact@10.26.8)(vite@6.3.5(@types/node@24.0.12)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.89.2)(tsx@4.20.4))':
+  '@preact/preset-vite@2.10.1(@babel/core@7.27.4)(preact@10.26.8)(vite@6.3.5(@types/node@24.0.12)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.89.2)(terser@5.44.1)(tsx@4.20.4))':
     dependencies:
       '@babel/core': 7.27.4
       '@babel/plugin-transform-react-jsx': 7.27.1(@babel/core@7.27.4)
       '@babel/plugin-transform-react-jsx-development': 7.27.1(@babel/core@7.27.4)
-      '@prefresh/vite': 2.4.7(preact@10.26.8)(vite@6.3.5(@types/node@24.0.12)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.89.2)(tsx@4.20.4))
+      '@prefresh/vite': 2.4.7(preact@10.26.8)(vite@6.3.5(@types/node@24.0.12)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.89.2)(terser@5.44.1)(tsx@4.20.4))
       '@rollup/pluginutils': 4.2.1
       babel-plugin-transform-hook-names: 1.0.2(@babel/core@7.27.4)
       debug: 4.4.1
       kolorist: 1.8.0
-      vite: 6.3.5(@types/node@24.0.12)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.89.2)(tsx@4.20.4)
-      vite-prerender-plugin: 0.5.10(vite@6.3.5(@types/node@24.0.12)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.89.2)(tsx@4.20.4))
+      vite: 6.3.5(@types/node@24.0.12)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.89.2)(terser@5.44.1)(tsx@4.20.4)
+      vite-prerender-plugin: 0.5.10(vite@6.3.5(@types/node@24.0.12)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.89.2)(terser@5.44.1)(tsx@4.20.4))
     transitivePeerDependencies:
       - preact
       - supports-color
@@ -3903,7 +3932,7 @@ snapshots:
 
   '@prefresh/utils@1.2.0': {}
 
-  '@prefresh/vite@2.4.7(preact@10.26.8)(vite@6.3.5(@types/node@24.0.12)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.89.2)(tsx@4.20.4))':
+  '@prefresh/vite@2.4.7(preact@10.26.8)(vite@6.3.5(@types/node@24.0.12)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.89.2)(terser@5.44.1)(tsx@4.20.4))':
     dependencies:
       '@babel/core': 7.27.4
       '@prefresh/babel-plugin': 0.5.1
@@ -3911,7 +3940,7 @@ snapshots:
       '@prefresh/utils': 1.2.0
       '@rollup/pluginutils': 4.2.1
       preact: 10.26.8
-      vite: 6.3.5(@types/node@24.0.12)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.89.2)(tsx@4.20.4)
+      vite: 6.3.5(@types/node@24.0.12)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.89.2)(terser@5.44.1)(tsx@4.20.4)
     transitivePeerDependencies:
       - supports-color
 
@@ -4595,12 +4624,12 @@ snapshots:
       '@tailwindcss/oxide-win32-arm64-msvc': 4.1.16
       '@tailwindcss/oxide-win32-x64-msvc': 4.1.16
 
-  '@tailwindcss/vite@4.1.16(vite@6.3.5(@types/node@24.0.12)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.89.2)(tsx@4.20.4))':
+  '@tailwindcss/vite@4.1.16(vite@6.3.5(@types/node@24.0.12)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.89.2)(terser@5.44.1)(tsx@4.20.4))':
     dependencies:
       '@tailwindcss/node': 4.1.16
       '@tailwindcss/oxide': 4.1.16
       tailwindcss: 4.1.16
-      vite: 6.3.5(@types/node@24.0.12)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.89.2)(tsx@4.20.4)
+      vite: 6.3.5(@types/node@24.0.12)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.89.2)(terser@5.44.1)(tsx@4.20.4)
 
   '@tanstack/react-virtual@3.13.9(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
     dependencies:
@@ -4837,6 +4866,8 @@ snapshots:
 
   buffer-builder@0.2.0: {}
 
+  buffer-from@1.1.2: {}
+
   camelcase-keys@7.0.2:
     dependencies:
       camelcase: 6.3.0
@@ -4908,6 +4939,8 @@ snapshots:
   colorjs.io@0.5.2: {}
 
   comma-separated-tokens@2.0.3: {}
+
+  commander@2.20.3: {}
 
   commander@7.2.0: {}
 
@@ -6628,6 +6661,13 @@ snapshots:
 
   source-map-js@1.2.1: {}
 
+  source-map-support@0.5.21:
+    dependencies:
+      buffer-from: 1.1.2
+      source-map: 0.6.1
+
+  source-map@0.6.1: {}
+
   source-map@0.7.4: {}
 
   space-separated-tokens@2.0.2: {}
@@ -6694,6 +6734,13 @@ snapshots:
   tailwindcss@4.1.16: {}
 
   tapable@2.2.2: {}
+
+  terser@5.44.1:
+    dependencies:
+      '@jridgewell/source-map': 0.3.11
+      acorn: 8.15.0
+      commander: 2.20.3
+      source-map-support: 0.5.21
 
   tiny-invariant@1.3.3: {}
 
@@ -6872,16 +6919,16 @@ snapshots:
       d3-time: 3.1.0
       d3-timer: 3.0.1
 
-  vite-plugin-mdx@3.6.1(@mdx-js/mdx@3.1.0(acorn@8.15.0))(vite@6.3.5(@types/node@24.0.12)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.89.2)(tsx@4.20.4)):
+  vite-plugin-mdx@3.6.1(@mdx-js/mdx@3.1.0(acorn@8.15.0))(vite@6.3.5(@types/node@24.0.12)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.89.2)(terser@5.44.1)(tsx@4.20.4)):
     dependencies:
       '@alloc/quick-lru': 5.2.0
       '@mdx-js/mdx': 3.1.0(acorn@8.15.0)
       esbuild: 0.13.8
       resolve: 1.22.10
       unified: 9.2.2
-      vite: 6.3.5(@types/node@24.0.12)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.89.2)(tsx@4.20.4)
+      vite: 6.3.5(@types/node@24.0.12)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.89.2)(terser@5.44.1)(tsx@4.20.4)
 
-  vite-prerender-plugin@0.5.10(vite@6.3.5(@types/node@24.0.12)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.89.2)(tsx@4.20.4)):
+  vite-prerender-plugin@0.5.10(vite@6.3.5(@types/node@24.0.12)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.89.2)(terser@5.44.1)(tsx@4.20.4)):
     dependencies:
       kolorist: 1.8.0
       magic-string: 0.30.17
@@ -6889,9 +6936,9 @@ snapshots:
       simple-code-frame: 1.3.0
       source-map: 0.7.4
       stack-trace: 1.0.0-pre2
-      vite: 6.3.5(@types/node@24.0.12)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.89.2)(tsx@4.20.4)
+      vite: 6.3.5(@types/node@24.0.12)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.89.2)(terser@5.44.1)(tsx@4.20.4)
 
-  vite@6.3.5(@types/node@24.0.12)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.89.2)(tsx@4.20.4):
+  vite@6.3.5(@types/node@24.0.12)(jiti@2.6.1)(lightningcss@1.30.2)(sass-embedded@1.89.2)(terser@5.44.1)(tsx@4.20.4):
     dependencies:
       esbuild: 0.25.5
       fdir: 6.4.5(picomatch@4.0.2)
@@ -6905,6 +6952,7 @@ snapshots:
       jiti: 2.6.1
       lightningcss: 1.30.2
       sass-embedded: 1.89.2
+      terser: 5.44.1
       tsx: 4.20.4
 
   vscode-jsonrpc@8.2.0: {}

@@ -13,9 +13,19 @@ const __dirname = dirname(__filename);
 // Get the root directory of the Dory package
 const getDoryRoot = (): string => {
   // In development: bin/dory.ts -> root is parent
-  // In production: bin/dist/dory.js -> root is parent of parent
+  // In production (local): bin/dist/dory.js -> root is parent of parent
+  // In production (installed): node_modules/@clidey/dory/bin/dist/dory.js -> root is parent of parent
   const isDevelopment = __dirname.endsWith('bin');
-  return isDevelopment ? resolve(__dirname, '..') : resolve(__dirname, '..', '..');
+  const isLocalDist = __dirname.endsWith(resolve('bin', 'dist'));
+
+  if (isDevelopment) {
+    return resolve(__dirname, '..');
+  } else if (isLocalDist) {
+    return resolve(__dirname, '..', '..');
+  } else {
+    // Installed package: node_modules/@clidey/dory/bin/dist/dory.js
+    return resolve(__dirname, '..', '..');
+  }
 };
 
 // Get the user's current working directory
@@ -198,45 +208,128 @@ const commands = {
 
       console.log('✨ Documentation ready in dist/');
 
+      // Step 6.5: Build embed files
+      console.log('📦 Building embed files...');
+
+      try {
+        // Build embed loader
+        console.log('   Building embed loader...');
+        execSync('pnpm exec vite build -c vite.config.embed-loader.ts', {
+          stdio: 'inherit',
+          cwd: doryRoot,
+          env: { ...process.env }
+        });
+
+        // Build embed widget
+        console.log('   Building embed widget...');
+        execSync('pnpm exec vite build -c vite.config.embed-widget.ts', {
+          stdio: 'inherit',
+          cwd: doryRoot,
+          env: { ...process.env }
+        });
+
+        // Build embed app
+        console.log('   Building embed app...');
+        execSync('pnpm exec vite build -c vite.config.embed-app.ts', {
+          stdio: 'inherit',
+          cwd: doryRoot,
+          env: { ...process.env }
+        });
+
+        // Copy embed files to user's dist if different
+        if (doryDistDir !== userDistDir) {
+          const embedFiles = ['embed.js', 'embed-widget.js', 'embed-app.js', 'embed.css'];
+          embedFiles.forEach(file => {
+            const srcPath = resolve(doryDistDir, file);
+            const destPath = resolve(userDistDir, file);
+            if (existsSync(srcPath)) {
+              cpSync(srcPath, destPath, { force: true });
+            }
+          });
+
+          // Copy any chunk files (embed-*.js)
+          const files = readdirSync(doryDistDir);
+          files.forEach(file => {
+            if (file.startsWith('embed-') && file.endsWith('.js')) {
+              const srcPath = resolve(doryDistDir, file);
+              const destPath = resolve(userDistDir, file);
+              cpSync(srcPath, destPath, { force: true });
+            }
+          });
+        }
+
+        console.log('✨ Embed files built successfully!');
+        console.log('');
+        console.log('   📝 Add to your site:');
+        console.log('   <script src="https://your-docs.com/embed.js"></script>');
+        console.log('   <button onclick="DoryDocs.open()">Help</button>');
+        console.log('');
+
+      } catch (error) {
+        console.warn('⚠️  Embed build failed, but main build succeeded');
+        console.warn('   Your documentation site is still available at dist/');
+        if (error instanceof Error) {
+          console.warn(`   Error: ${error.message}`);
+        }
+      }
+
     } finally {
       // Step 7: Always clean up temp directories and restore backup
       console.log('🧹 Cleaning up...');
 
-      try {
-        // Remove the temporary docs directory
-        if (existsSync(tempDocsDir)) {
-          rmSync(tempDocsDir, { recursive: true, force: true });
-        }
+      // First priority: Restore the original docs directory if it existed
+      if (docsExistedBefore && existsSync(docsBackupDir)) {
+        console.log('📦 Restoring original docs directory...');
 
-        // Restore the original docs directory if it existed before
-        if (docsExistedBefore && existsSync(docsBackupDir)) {
-          console.log('📦 Restoring original docs directory...');
+        let restoredSuccessfully = false;
+        try {
+          // Remove the temporary docs directory
+          if (existsSync(tempDocsDir)) {
+            rmSync(tempDocsDir, { recursive: true, force: true });
+          }
+
+          // Restore from backup
           cpSync(docsBackupDir, tempDocsDir, { recursive: true, force: true });
-          rmSync(docsBackupDir, { recursive: true, force: true });
-        }
+          restoredSuccessfully = true;
 
-        // Only clean up doryDistDir if it's different from userDistDir
-        // (in production they're different, in dev they might be the same)
+          // Only delete the backup after successful restoration
+          rmSync(docsBackupDir, { recursive: true, force: true });
+        } catch (error) {
+          console.error('❌ Failed to restore docs directory!');
+          console.error(`   Backup is preserved at: ${docsBackupDir}`);
+          console.error('   You can manually restore by running:');
+          console.error(`   cp -r "${docsBackupDir}" "${tempDocsDir}"`);
+
+          if (error instanceof Error) {
+            console.error(`   Error: ${error.message}`);
+          }
+
+          // Critical: Don't delete the backup if restoration failed
+          if (!restoredSuccessfully) {
+            console.error('   ⚠️  Your original docs are safe in the backup directory');
+          }
+        }
+      } else if (docsExistedBefore && !existsSync(docsBackupDir)) {
+        console.warn('⚠️  Warning: Original docs directory existed but backup not found');
+        console.warn(`   Expected backup at: ${docsBackupDir}`);
+      } else {
+        // No docs existed before, just clean up the temporary directory
+        try {
+          if (existsSync(tempDocsDir)) {
+            rmSync(tempDocsDir, { recursive: true, force: true });
+          }
+        } catch (error) {
+          console.warn('⚠️  Could not remove temporary docs directory');
+        }
+      }
+
+      // Clean up doryDistDir if it's different from userDistDir
+      try {
         if (doryDistDir !== userDistDir && existsSync(doryDistDir)) {
           rmSync(doryDistDir, { recursive: true, force: true });
         }
       } catch (error) {
-        console.warn('⚠️  Could not clean up temp directories');
-        // Try to restore backup even if cleanup failed
-        if (docsExistedBefore && existsSync(docsBackupDir)) {
-          console.log('🔄 Attempting to restore backup...');
-          try {
-            if (existsSync(tempDocsDir)) {
-              rmSync(tempDocsDir, { recursive: true, force: true });
-            }
-            cpSync(docsBackupDir, tempDocsDir, { recursive: true, force: true });
-            rmSync(docsBackupDir, { recursive: true, force: true });
-          } catch (restoreError) {
-            console.error('❌ Failed to restore docs backup!');
-            console.error(`   Backup location: ${docsBackupDir}`);
-            console.error('   You may need to manually restore your docs directory');
-          }
-        }
+        console.warn('⚠️  Could not clean up dory dist directory');
       }
 
       console.log('✅ Done!');

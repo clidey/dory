@@ -1,10 +1,11 @@
 'use client'
 
-import { Sheet, SheetContent, Button } from '@clidey/ux'
+import { Sheet, SheetContent, Button, ModeToggle } from '@clidey/ux'
 import { createContext, Suspense, useCallback, useContext, useRef, useState } from 'react'
 
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import { Navigation } from '../components/navigation'
+import { useIsEmbedded } from '../components/hooks'
 
 const IsInsideMobileNavigationContext = createContext(false)
 
@@ -31,9 +32,10 @@ export function useMobileNavigation() {
 }
 
 export function MobileNavigation() {
-  const isInsideMobileNavigation = useIsInsideMobileNavigation()
-  const { isOpen, open, close } = useMobileNavigation()
+  const isInsideMobileNavigation = useIsInsideMobileNavigation();
+  const { isOpen, open, close } = useMobileNavigation();
   const ToggleIcon = isOpen ? XMarkIcon : Bars3Icon;
+  const isEmbedded = useIsEmbedded();
 
   return (
     <IsInsideMobileNavigationContext.Provider value={true}>
@@ -55,6 +57,12 @@ export function MobileNavigation() {
           <Suspense fallback={null}>
             <SheetContent side="left" className="w-full sm:max-w-sm p-8 overflow-y-auto flex flex-col justify-between">
               <Navigation />
+              {
+                isEmbedded &&
+                <div className="flex items-center justify-end">
+                  <ModeToggle data-testid="mode-toggle" />
+                </div>
+              }
             </SheetContent>
           </Suspense>
         )}

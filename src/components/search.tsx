@@ -21,7 +21,7 @@ import { cn, Spinner, SearchInput as UxSearchInput } from '@clidey/ux'
 import classNames from 'classnames'
 import { useLocation } from 'wouter-preact'
 import { useMobileNavigation } from '../ui/mobile-navigation'
-import { usePathname, useSearchParams } from './hooks'
+import { useIsEmbedded, usePathname, useSearchParams } from './hooks'
 import { search } from './search-index'
 import { ALL_NAVIGATION } from './store'
 
@@ -395,10 +395,16 @@ function useSearchProps() {
 }
 
 export function Search() {
-  const { inputProps: buttonProps, dialogProps } = useSearchProps()
+  const { inputProps: buttonProps, dialogProps } = useSearchProps();
+  const isEmbedded = useIsEmbedded();
 
   return (
-    <div className="hidden lg:block lg:max-w-md lg:flex-auto">
+    <div
+      className={cn("hidden lg:block lg:max-w-md lg:flex-auto", {
+        "[&_input]:hidden [&_svg]:mr-0 cursor-pointer": isEmbedded,
+      })}
+      onClick={isEmbedded ? buttonProps.onClick : undefined}
+    >
       <UxSearchInput
         aria-label="Find something..."
         placeholder="Find something..."
@@ -414,9 +420,16 @@ export function Search() {
 export function MobileSearch() {
   const { close } = useMobileNavigation()
   const { inputProps: buttonProps, dialogProps } = useSearchProps()
+  const isEmbedded = useIsEmbedded();
 
   return (
-    <div className="contents lg:hidden">
+    <div
+      className={cn({
+        "contents": !isEmbedded,
+        "[&_input]:hidden [&_svg]:mr-0 cursor-pointer": isEmbedded,
+      }, "lg:hidden")}
+      onClick={isEmbedded ? buttonProps.onClick : undefined}
+    >
       <UxSearchInput
         className="text-sm"
         aria-label="Find something..."

@@ -28,7 +28,8 @@ export function TableOfContents() {
       let currentSection: Section | null = null
 
       headings.forEach((heading) => {
-        // Check if heading is visible
+        // Check if heading is a valid Element and is visible
+        if (!(heading instanceof Element)) return
         const style = window.getComputedStyle(heading)
         if (style.display === 'none' || style.visibility === 'hidden') return
 

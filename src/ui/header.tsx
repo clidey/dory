@@ -8,6 +8,7 @@ import { MobileSearch, Search } from '../components/search';
 import { ALL_NAVIGATION } from '../components/store';
 import { MobileNavigation } from './mobile-navigation';
 import { ModeToggle } from '@clidey/ux';
+import { useIsEmbedded } from '../components/hooks';
 
 const config = docsConfig as DoryConfig;
 
@@ -32,6 +33,7 @@ function TopLevelNavItem({ href, children, isActive }: { href: string; children:
 export function Header({ className }: { className?: string }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
+  const isEmbedded = useIsEmbedded();
 
   const { light, dark } = useMemo(() => {
     return { light: config.logo.light, dark: config.logo.dark };
@@ -82,7 +84,10 @@ export function Header({ className }: { className?: string }) {
         <div className="flex items-center gap-3" data-testid="header-actions">
           <MobileSearch />
           <Search />
-          <ModeToggle data-testid="mode-toggle" />
+          {
+            !isEmbedded &&
+            <ModeToggle data-testid="mode-toggle" />
+          }
           <MobileNavigation />
         </div>
       </div>

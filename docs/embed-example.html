@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dory Embedded Documentation Example</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 800px;
+      background: white;
+      border-radius: 1rem;
+      padding: 3rem;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: #1f2937;
+    }
+
+    p {
+      font-size: 1.125rem;
+      color: #6b7280;
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    button {
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-primary {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #2563eb;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-secondary {
+      background: #f3f4f6;
+      color: #374151;
+    }
+
+    .btn-secondary:hover {
+      background: #e5e7eb;
+    }
+
+    .code-block {
+      background: #1f2937;
+      color: #f9fafb;
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 2rem;
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 0.875rem;
+      line-height: 1.6;
+    }
+
+    .status {
+      padding: 1rem;
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      border-radius: 0.5rem;
+      color: #166534;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🐟 Dory Embedded Documentation</h1>
+    <p>
+      This example demonstrates how to embed Dory documentation in your application.
+    </p>
+
+    <div id="status" class="status" style="display: none;"></div>
+
+    <div class="buttons">
+      <button class="btn-primary" onclick="DoryDocs.open()">
+        📚 Open Documentation
+      </button>
+      <button class="btn-secondary" onclick="DoryDocs.open('/features')">
+        ⚡ Open Features
+      </button>
+      <button class="btn-secondary" onclick="DoryDocs.toggle()">
+        🔄 Toggle
+      </button>
+    </div>
+
+    <h2 style="margin-top: 2rem; margin-bottom: 1rem; color: #1f2937;">Integration Code</h2>
+    <div class="code-block">
+&lt;script src="http://localhost:3000/dist/embed.js"&gt;&lt;/script&gt;
+
+&lt;script&gt;
+  DoryDocs.init({
+    baseUrl: 'http://localhost:3000',
+    position: 'right',
+    width: 600,
+    closeOnEscape: true,
+  });
+&lt;/script&gt;
+
+&lt;button onclick="DoryDocs.open()"&gt;Help&lt;/button&gt;
+    </div>
+  </div>
+
+  <!-- Load Dory Embed Script -->
+  <script src="http://localhost:3000/dist/embed.js"></script>
+
+  <!-- Initialize Dory -->
+  <script>
+    window.addEventListener('dory:ready', () => {
+      const status = document.getElementById('status');
+      status.style.display = 'block';
+      status.textContent = '✅ DoryDocs loaded and ready!';
+
+      DoryDocs.init({
+        baseUrl: 'http://localhost:3000',
+        position: 'right',
+        width: 400,
+        theme: 'inherit',
+        closeOnEscape: true,
+        closeOnOverlayClick: true,
+        onOpen: () => {
+          console.log('Docs opened');
+          status.textContent = '📖 Documentation opened';
+        },
+        onClose: () => {
+          console.log('Docs closed');
+          status.textContent = '✅ DoryDocs ready';
+        },
+      });
+    });
+
+    if (window.DoryDocs) {
+      window.dispatchEvent(new Event('dory:ready'));
+    }
+  </script>
+</body>
+</html>

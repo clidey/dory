@@ -26,3 +26,11 @@ export const useSearchParams = () => {
 
   return searchParams;
 };
+
+/**
+ * Custom hook to check if the app is in embedded mode
+ */
+export const useIsEmbedded = () => {
+  const searchParams = useSearchParams();
+  return searchParams.get('embedded') === 'true';
+};

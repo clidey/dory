@@ -12,6 +12,8 @@ import { Loading } from '../components/loading';
 import Dropdown from '../components/dropdown';
 import { useNotification } from '../components/notification';
 import { SparkleIcon } from 'lucide-react';
+import { useIsEmbedded } from '../components/hooks';
+import { cn } from '@clidey/ux';
 
 interface LayoutProps {
   children: ComponentChildren;
@@ -25,6 +27,7 @@ export default function Layout({ children }: LayoutProps) {
   const [loading, setLoading] = useState(true);
   const [pathname] = useLocation();
   const { showNotification } = useNotification();
+  const isEmbedded = useIsEmbedded();
 
   const handleOpenMDX = useCallback(() => {
     window.open(`${window.location.origin}${pathname}.mdx`, '_blank');
@@ -178,13 +181,21 @@ export default function Layout({ children }: LayoutProps) {
   return (
     <div className="flex w-full flex-col">
       <Header />
-      <div id="container" className="relative flex w-full max-w-8xl sm:px-2 lg:px-8">
-        <div className="hidden lg:relative lg:block lg:flex-none">
+      <div id="container" className={cn("relative flex w-full", {
+        "max-w-8xl sm:px-2 lg:px-8": !isEmbedded,
+        "px-0": isEmbedded,
+      })}>
+        <div className={cn("hidden lg:relative lg:block lg:flex-none", {
+          "lg:hidden": isEmbedded,
+        })}>
           <div className="sticky top-[4.75rem] -ml-0.5 h-[calc(100vh-4.75rem)] w-64 overflow-x-hidden overflow-y-auto py-16 pr-8 pl-0.5 xl:w-72 xl:pr-16">
             <Navigation />
           </div>
         </div>
-        <main className="flex px-4 py-16 sm:px-6 lg:px-8 grow">
+        <main className={cn("flex grow max-w-full", {
+          "px-4 py-16 sm:px-6 lg:px-8": !isEmbedded,
+          "p-8": isEmbedded,
+        })}>
           <div className="min-w-0 w-full">
             <article className="h-full flex flex-1 flex-col">
               <div className="flex justify-between items-start">
@@ -206,7 +217,7 @@ export default function Layout({ children }: LayoutProps) {
                 }
               </div>
               <div className="flex-1 min-h-[calc(100vh-2rem)]">
-                {openAPIJSON && tab && "openapi" in tab && method && path ? 
+                {openAPIJSON && tab && "openapi" in tab && method && path ?
                   <OpenAPI openAPIJson={JSON.parse(openAPIJSON)} method={method} path={path} />
                  : asyncAPIJSON && tab && "asyncapi" in tab && operation && channel ?
                   <AsyncAPI asyncAPIJson={JSON.parse(asyncAPIJSON)} operation={operation} channel={channel} />
@@ -216,7 +227,7 @@ export default function Layout({ children }: LayoutProps) {
             </article>
           </div>
           {
-            openAPIJSON == null && asyncAPIJSON == null &&
+            openAPIJSON == null && asyncAPIJSON == null && !isEmbedded &&
             <TableOfContents />
           }
         </main>

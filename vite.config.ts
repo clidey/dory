@@ -9,11 +9,13 @@ import { frontmatterGenerator } from './src/plugins/frontmatter-generator';
 import { frontmatterDevServer } from './src/plugins/frontmatter-dev-server';
 import { docsAssetsPlugin } from './src/plugins/docs-assets';
 import { htmlMetadataInjector } from './src/plugins/html-metadata-injector';
+import { htmlFilesMiddleware } from './src/plugins/html-files-middleware';
 import { getMdxConfig } from './src/config/mdx';
 
 export default defineConfig(({ command }) => ({
   plugins: [
     // SINGLE SOURCE OF TRUTH: All MDX preprocessing happens in src/mdx/processor.ts
+    htmlFilesMiddleware(), // Must be first to intercept HTML file requests
     unifiedMdxPreprocessor(),
     preact(),
     mdx(getMdxConfig(command === 'serve')),

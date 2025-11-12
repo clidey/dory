@@ -37,6 +37,47 @@ export interface DoryNavigation {
   tabs: DoryNavigationTab[];
 }
 
+export interface DoryEmbedConfig {
+  enabled?: boolean;
+  version?: string;
+  defaults?: {
+    position?: 'left' | 'right' | 'bottom';
+    width?: number;
+    height?: string;
+    theme?: 'light' | 'dark' | 'inherit';
+    showOverlay?: boolean;
+    closeOnEscape?: boolean;
+    closeOnOverlayClick?: boolean;
+  };
+  branding?: {
+    showLogo?: boolean;
+    showName?: boolean;
+    customCSS?: string;
+  };
+  features?: {
+    search?: boolean;
+    toc?: boolean;
+    codeBlocks?: boolean;
+    mermaid?: boolean;
+    katex?: boolean;
+    apiPlayground?: boolean;
+    darkMode?: boolean;
+  };
+  analytics?: {
+    enabled?: boolean;
+    trackEvents?: string[];
+  };
+  security?: {
+    allowedOrigins?: string[];
+    corsEnabled?: boolean;
+  };
+  performance?: {
+    lazyLoadImages?: boolean;
+    prefetchPages?: boolean;
+    cacheStrategy?: 'cache-first' | 'network-first';
+  };
+}
+
 export interface DoryConfig {
   name: string;
   favicon: string;
@@ -44,4 +85,5 @@ export interface DoryConfig {
   fonts?: DoryFonts;
   navigation: DoryNavigation;
   logo: DoryLogo;
+  embed?: DoryEmbedConfig;
 }
