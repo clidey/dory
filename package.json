@@ -1,7 +1,7 @@
 {
   "name": "@clidey/dory",
   "private": false,
-  "version": "0.30.0",
+  "version": "0.32.0",
   "type": "module",
   "description": "A CLI tool for building and previewing documentation sites",
   "keywords": [
@@ -15,7 +15,17 @@
     "dory": "./bin/dist/dory.js"
   },
   "files": [
-    "bin/dist/**/*"
+    "bin/dist/**/*",
+    "bin/dory.ts",
+    "src/**/*",
+    "index.html",
+    "tsconfig.json",
+    "tsconfig.node.json",
+    "tsconfig.app.json",
+    "tsconfig.bin.json",
+    "vite.config.ts",
+    "vite.config.embed-loader.ts",
+    "vite.config.embed-widget.ts"
   ],
   "repository": {
     "type": "git",
@@ -31,10 +41,10 @@
     "dev": "vite",
     "build": "npm run build:cli && tsc -b && vite build",
     "build:cli": "tsc -p tsconfig.bin.json",
-    "build:embed": "npm run build:embed:loader && npm run build:embed:widget && npm run build:embed:app",
+    "build:docs": "tsc -b && vite build",
+    "build:embed": "npm run build:embed:loader && npm run build:embed:widget",
     "build:embed:loader": "vite build -c vite.config.embed-loader.ts",
     "build:embed:widget": "vite build -c vite.config.embed-widget.ts",
-    "build:embed:app": "vite build -c vite.config.embed-app.ts",
     "preview": "vite preview",
     "publish": "npm run build && npm publish --access public --no-git-checks",
     "prepublishOnly": "echo 'Skipping prepublishOnly - build handled by publish script'"

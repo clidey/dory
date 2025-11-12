@@ -159,7 +159,7 @@ const commands = {
       console.log('⚡ Building documentation...');
 
       try {
-        execSync('pnpm run build', {
+        execSync('pnpm run build:docs', {
           stdio: 'inherit',
           cwd: doryRoot,
           env: { ...process.env }
@@ -228,17 +228,9 @@ const commands = {
           env: { ...process.env }
         });
 
-        // Build embed app
-        console.log('   Building embed app...');
-        execSync('pnpm exec vite build -c vite.config.embed-app.ts', {
-          stdio: 'inherit',
-          cwd: doryRoot,
-          env: { ...process.env }
-        });
-
         // Copy embed files to user's dist if different
         if (doryDistDir !== userDistDir) {
-          const embedFiles = ['embed.js', 'embed-widget.js', 'embed-app.js', 'embed.css'];
+          const embedFiles = ['embed.js', 'embed-widget.js', 'embed.css'];
           embedFiles.forEach(file => {
             const srcPath = resolve(doryDistDir, file);
             const destPath = resolve(userDistDir, file);
