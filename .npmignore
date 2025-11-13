@@ -3,3 +3,13 @@ k8s/
 assets/
 .claude/
 .github/
+bin/dory.ts
+bin/**/*.ts
+tsconfig.json
+tsconfig.*.json
+docs/
+*.md
+!README.md
+.git
+.gitignore
+node_modules/

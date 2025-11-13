@@ -31,6 +31,25 @@ const getDoryRoot = (): string => {
 // Get the user's current working directory
 const getUserRoot = (): string => process.cwd();
 
+// Detect which package manager is available (prefer pnpm for speed, fallback to npm)
+const getPackageManager = (): { run: string; exec: string } => {
+  try {
+    execSync('pnpm --version', { stdio: 'ignore' });
+    return { run: 'pnpm run', exec: 'pnpm exec' };
+  } catch {
+    try {
+      execSync('npm --version', { stdio: 'ignore' });
+      return { run: 'npm run', exec: 'npx' };
+    } catch {
+      console.error('❌ No package manager found');
+      console.error('   Install npm or pnpm to use Dory');
+      console.error('   npm: https://nodejs.org/');
+      console.error('   pnpm: npm install -g pnpm');
+      process.exit(1);
+    }
+  }
+};
+
 interface DoryConfig {
   name?: string;
   description?: string;
@@ -82,14 +101,8 @@ const commands = {
       process.exit(1);
     }
 
-    // Check if pnpm is available
-    try {
-      execSync('pnpm --version', { stdio: 'ignore' });
-    } catch {
-      console.error('❌ pnpm is not installed');
-      console.error('   Install it with: npm install -g pnpm');
-      process.exit(1);
-    }
+    // Detect package manager
+    const pm = getPackageManager();
 
     // Step 2: Backup existing docs directory if it exists
     console.log('🧹 Preparing workspace...');
@@ -159,7 +172,7 @@ const commands = {
       console.log('⚡ Building documentation...');
 
       try {
-        execSync('pnpm run build:docs', {
+        execSync(`${pm.run} build:docs`, {
           stdio: 'inherit',
           cwd: doryRoot,
           env: { ...process.env }
@@ -214,7 +227,7 @@ const commands = {
       try {
         // Build embed loader
         console.log('   Building embed loader...');
-        execSync('pnpm exec vite build -c vite.config.embed-loader.ts', {
+        execSync(`${pm.exec} vite build -c vite.config.embed-loader.ts`, {
           stdio: 'inherit',
           cwd: doryRoot,
           env: { ...process.env }
@@ -222,7 +235,7 @@ const commands = {
 
         // Build embed widget
         console.log('   Building embed widget...');
-        execSync('pnpm exec vite build -c vite.config.embed-widget.ts', {
+        execSync(`${pm.exec} vite build -c vite.config.embed-widget.ts`, {
           stdio: 'inherit',
           cwd: doryRoot,
           env: { ...process.env }
@@ -452,6 +465,22 @@ const commands = {
     }
   },
 
+  version: () => {
+    const doryRoot = getDoryRoot();
+    const packageJsonPath = resolve(doryRoot, 'package.json');
+
+    try {
+      const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'));
+      console.log(`🐟 Dory v${packageJson.version}`);
+    } catch (error) {
+      console.error('❌ Failed to read version information');
+      if (error instanceof Error) {
+        console.error(`   ${error.message}`);
+      }
+      process.exit(1);
+    }
+  },
+
   help: () => {
     console.log(`
 🐟 Dory CLI - Documentation Builder
@@ -472,6 +501,8 @@ Commands:
                    Options: --content "<mdx>" or --file <path>
                    Silent on success, shows errors on failure
 
+  version          Show Dory version
+
   help             Show this help message
 
 Examples:
@@ -479,6 +510,7 @@ Examples:
   dory preview
   dory verify:content --content "# Hello World"
   dory verify:content --file docs/intro.mdx
+  dory version
 
 For more information, visit: https://github.com/clidey/dory
 `);

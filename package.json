@@ -1,7 +1,7 @@
 {
   "name": "@clidey/dory",
   "private": false,
-  "version": "0.32.0",
+  "version": "0.33.0",
   "type": "module",
   "description": "A CLI tool for building and previewing documentation sites",
   "keywords": [
@@ -15,14 +15,9 @@
     "dory": "./bin/dist/dory.js"
   },
   "files": [
-    "bin/dist/**/*",
-    "bin/dory.ts",
-    "src/**/*",
+    "bin/dist",
+    "src",
     "index.html",
-    "tsconfig.json",
-    "tsconfig.node.json",
-    "tsconfig.app.json",
-    "tsconfig.bin.json",
     "vite.config.ts",
     "vite.config.embed-loader.ts",
     "vite.config.embed-widget.ts"
