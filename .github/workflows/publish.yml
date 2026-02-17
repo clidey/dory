@@ -5,7 +5,7 @@ on:
 
 permissions:
   id-token: write  # Required for OIDC
-  contents: read
+  contents: write  # Required for creating releases
 
 jobs:
   publish:
@@ -17,4 +17,12 @@ jobs:
         with:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
+
       - run: npm publish
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="v$(node -p "require('./package.json').version")"
+          gh release create "$VERSION" --generate-notes --title "$VERSION"
