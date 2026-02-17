@@ -327,7 +327,8 @@ export function APIPlayground({
   const [isLoading, setIsLoading] = useState(false)
   const [response, setResponse] = useState<ResponseData | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const isDark = useTheme().theme === 'dark';
+  const { theme } = useTheme();
+  const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
   const [selectedServer, setSelectedServer] = useState<Server | null>(servers?.[0] || null)
   
   // Request configuration state

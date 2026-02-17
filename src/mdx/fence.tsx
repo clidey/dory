@@ -14,7 +14,8 @@ export function Fence({
   children: string
   language: string
 }) {
-  const isDark = useTheme().theme === 'dark';
+  const { theme } = useTheme();
+  const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
   if (language === 'mermaid') {
     return (

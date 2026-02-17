@@ -1,11 +1,21 @@
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 import { useEffect, useRef, useState } from 'react'
 
+function extractText(node: React.ReactNode): string {
+  if (typeof node === 'string') return node;
+  if (typeof node === 'number') return String(node);
+  if (!node) return '';
+  if (Array.isArray(node)) return node.map(extractText).join('');
+  if (typeof node === 'object' && 'props' in node) return extractText((node as any).props.children);
+  return '';
+}
+
 interface LatexProps {
-  children: string
+  children: React.ReactNode
 }
 
 export function Latex({ children }: LatexProps) {
+  const expression = extractText(children).trim();
   const containerRef = useRef<HTMLDivElement>(null)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -26,7 +36,7 @@ export function Latex({ children }: LatexProps) {
 
         if (!mounted || !containerRef.current) return
 
-        katex.render(children, containerRef.current, {
+        katex.render(expression, containerRef.current, {
           displayMode: true,
           throwOnError: false,
         })
@@ -45,7 +55,7 @@ export function Latex({ children }: LatexProps) {
     return () => {
       mounted = false
     }
-  }, [children])
+  }, [expression])
 
   if (error) {
     return (

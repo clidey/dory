@@ -109,7 +109,7 @@ export async function preloadFrontmatter() {
 async function addPreloadedContentToSearch() {
     if (!preloadedFrontMatter) return;
     
-    const mdxFiles = import.meta.glob<{ default: string }>('../../docs/**/*.mdx', { query: 'raw' });
+    const mdxFiles = import.meta.glob<{ default: string }>('../../docs/**/*.mdx', { query: '?raw' });
     const fileEntries = Object.entries(mdxFiles);
 
     await Promise.all(
@@ -141,7 +141,7 @@ export async function loadMDXFrontMatterForPath(pathname: string) {
     if (completeFrontMatter.find(fm => fm.path === pathname)) return;
 
     // Fallback to dynamic loading
-    const mdxFiles = import.meta.glob<{ default: string }>('../../docs/**/*.mdx', { query: 'raw' });
+    const mdxFiles = import.meta.glob<{ default: string }>('../../docs/**/*.mdx', { query: '?raw' });
     const fileEntries = Object.entries(mdxFiles);
 
     const fileEntry = fileEntries.find(([path]) => pathFromFilename(path) === pathname);
@@ -167,7 +167,7 @@ export async function loadAllMDXFrontMatter(pathname: string) {
     }
 
     // Fallback to dynamic loading
-    const mdxFiles = import.meta.glob<{ default: string }>('../../docs/**/*.mdx', { query: 'raw' });
+    const mdxFiles = import.meta.glob<{ default: string }>('../../docs/**/*.mdx', { query: '?raw' });
     const fileEntries = Object.entries(mdxFiles);
 
     const remainingEntries = fileEntries.filter(([path]) => pathFromFilename(path) !== pathname);
