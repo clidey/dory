@@ -13,6 +13,7 @@ import Dropdown from '../components/dropdown';
 import { useNotification } from '../components/notification';
 import { SparkleIcon } from 'lucide-react';
 import { useIsEmbedded } from '../components/hooks';
+import { ErrorBoundary } from '../components/error-boundary';
 import { cn } from '@clidey/ux';
 
 interface LayoutProps {
@@ -140,6 +141,52 @@ export default function Layout({ children }: LayoutProps) {
     if (ogUrl) {
       ogUrl.setAttribute('content', window.location.href);
     }
+
+    // Add/update canonical link
+    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+    if (!canonical) {
+      canonical = document.createElement('link');
+      canonical.setAttribute('rel', 'canonical');
+      document.head.appendChild(canonical);
+    }
+    canonical.setAttribute('href', `${window.location.origin}${window.location.pathname}`);
+
+    // Add/update JSON-LD structured data
+    const structuredData = {
+      '@context': 'https://schema.org',
+      '@graph': [
+        {
+          '@type': 'Article',
+          'headline': page?.title || document.title,
+          'description': page?.description || '',
+        },
+        {
+          '@type': 'BreadcrumbList',
+          'itemListElement': [
+            {
+              '@type': 'ListItem',
+              'position': 1,
+              'name': 'Home',
+              'item': window.location.origin
+            },
+            ...(page?.title ? [{
+              '@type': 'ListItem',
+              'position': 2,
+              'name': page.title,
+              'item': window.location.href
+            }] : [])
+          ]
+        }
+      ]
+    };
+
+    let ldScript = document.querySelector('script[type="application/ld+json"]');
+    if (!ldScript) {
+      ldScript = document.createElement('script');
+      ldScript.setAttribute('type', 'application/ld+json');
+      document.head.appendChild(ldScript);
+    }
+    ldScript.textContent = JSON.stringify(structuredData);
   }, [page]);
 
   const tab = useMemo(() => {
@@ -217,11 +264,22 @@ export default function Layout({ children }: LayoutProps) {
                 }
               </div>
               <div className="flex-1 min-h-[calc(100vh-2rem)]">
-                {openAPIJSON && tab && "openapi" in tab && method && path ?
-                  <OpenAPI openAPIJson={JSON.parse(openAPIJSON)} method={method} path={path} />
-                 : asyncAPIJSON && tab && "asyncapi" in tab && operation && channel ?
-                  <AsyncAPI asyncAPIJson={JSON.parse(asyncAPIJSON)} operation={operation} channel={channel} />
-                 : children}
+                <ErrorBoundary fallback={(error) => (
+                  <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
+                    <p className="text-lg font-semibold text-red-700 dark:text-red-300 mb-2">
+                      This page failed to render
+                    </p>
+                    <pre className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-md p-3 max-w-md overflow-auto">
+                      {error.message}
+                    </pre>
+                  </div>
+                )}>
+                  {openAPIJSON && tab && "openapi" in tab && method && path ?
+                    <OpenAPI openAPIJson={JSON.parse(openAPIJSON)} method={method} path={path} />
+                   : asyncAPIJSON && tab && "asyncapi" in tab && operation && channel ?
+                    <AsyncAPI asyncAPIJson={JSON.parse(asyncAPIJSON)} operation={operation} channel={channel} />
+                   : children}
+                </ErrorBoundary>
               </div>
               <PrevNextLinks />
             </article>

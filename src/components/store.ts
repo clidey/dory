@@ -2,7 +2,7 @@ import type { ComponentType } from 'preact';
 import { type RouteComponentProps } from 'wouter-preact';
 import docsConfig from '../../docs/dory.json' with { type: 'json' };
 import type { DoryConfig } from '../types/config';
-import { searchIndex } from './search-index';
+import { addToSearchIndex } from './search-index';
 
 const config = docsConfig as DoryConfig;
 
@@ -116,16 +116,15 @@ async function addPreloadedContentToSearch() {
         preloadedFrontMatter.map(async (fm) => {
             const fileEntry = fileEntries.find(([filePath]) => pathFromFilename(filePath) === fm.path);
             if (fileEntry) {
-                const [, loader] = fileEntry;
-                const rawContent = (await loader()).default;
-                const { content } = parseFrontMatter(rawContent);
-                
-                searchIndex.add({
-                    url: fm.path,
-                    title: fm.title || '',
-                    content,
-                    pageTitle: fm.title || ''
-                });
+                try {
+                    const [, loader] = fileEntry;
+                    const rawContent = (await loader()).default;
+                    const { content } = parseFrontMatter(rawContent);
+
+                    await addToSearchIndex(fm.path, { title: fm.title }, content);
+                } catch (error) {
+                    console.warn(`Failed to index ${fm.path}:`, error);
+                }
             }
         })
     );
@@ -154,12 +153,7 @@ export async function loadMDXFrontMatterForPath(pathname: string) {
     const filename = pathFromFilename(path);
 
     updateNavigationTitle(filename, data.title);
-    searchIndex.add({
-        url: filename,
-        title: data.title || '',
-        content,
-        pageTitle: data.title || ''
-    });
+    await addToSearchIndex(filename, data, content);
 
     const frontmatterItem = { ...data, path: filename };
     completeFrontMatter = [...completeFrontMatter, frontmatterItem];
@@ -186,12 +180,7 @@ export async function loadAllMDXFrontMatter(pathname: string) {
             const filename = pathFromFilename(path);
 
             updateNavigationTitle(filename, data.title);
-            searchIndex.add({
-                url: filename,
-                title: data.title || '',
-                content,
-                pageTitle: data.title || ''
-            });
+            await addToSearchIndex(filename, data, content);
 
             newFrontmatter.push({ ...data, path: filename });
         })

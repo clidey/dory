@@ -11,7 +11,14 @@ interface FrontmatterGeneratorOptions {
 function getNavigationOrder(docsDir: string): string[] {
   const doryJsonPath = path.join(docsDir, 'dory.json');
   if (!fs.existsSync(doryJsonPath)) return [];
-  const doryJson = JSON.parse(fs.readFileSync(doryJsonPath, 'utf-8'));
+  let doryJson;
+  try {
+    doryJson = JSON.parse(fs.readFileSync(doryJsonPath, 'utf-8'));
+  } catch (error) {
+    const detail = error instanceof SyntaxError ? error.message : String(error);
+    console.error(`Failed to parse ${doryJsonPath}: ${detail}`);
+    return [];
+  }
   const order: string[] = [];
 
   function walkPages(pages: any[]) {

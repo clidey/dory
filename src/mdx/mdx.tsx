@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'preact/hooks';
+import { lazy, Suspense } from 'preact/compat';
 import { usePathname } from 'wouter-preact/use-browser-location';
 import { completeFrontMatter } from '../components/store';
+import { Loading } from '../components/loading';
 
 export { h1, h2, h3, h4, h5, h6, p, Row, Col, Anchor as a, Image as img } from './text';
 export { Code as code, CodeGroup } from './code';
@@ -17,10 +19,23 @@ export { ResponseField, Properties, Property } from './open-api';
 export { Steps, Step } from './step';
 export { Table as table, Th as th, Td as td } from './table';
 export { UnorderedList as ul, OrderedList as ol, ListItem as li } from './list';
-export { APIPlayground } from './api-playground';
-export { WebSocketPlayground } from './websocket-playground';
 export { AsyncAPI } from './async-api';
 export { Source } from './source';
+
+// Lazy-loaded heavy components — only downloaded when a page uses them
+const LazyAPIPlayground = lazy(() => import('./api-playground').then(m => ({ default: m.APIPlayground })));
+export const APIPlayground = (props: any) => (
+  <Suspense fallback={<Loading />}>
+    <LazyAPIPlayground {...props} />
+  </Suspense>
+);
+
+const LazyWebSocketPlayground = lazy(() => import('./websocket-playground').then(m => ({ default: m.WebSocketPlayground })));
+export const WebSocketPlayground = (props: any) => (
+  <Suspense fallback={<Loading />}>
+    <LazyWebSocketPlayground {...props} />
+  </Suspense>
+);
 
 export const wrapper = ({ children }: { children: preact.ComponentChildren }) => {
   const ref = useRef<HTMLDivElement>(null);

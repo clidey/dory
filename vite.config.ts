@@ -10,6 +10,11 @@ import { frontmatterDevServer } from './src/plugins/frontmatter-dev-server';
 import { docsAssetsPlugin } from './src/plugins/docs-assets';
 import { htmlMetadataInjector } from './src/plugins/html-metadata-injector';
 import { htmlFilesMiddleware } from './src/plugins/html-files-middleware';
+import { analyticsInjector } from './src/plugins/analytics-injector';
+import { cspGenerator } from './src/plugins/csp-generator';
+import { sitemapGenerator } from './src/plugins/sitemap-generator';
+import { robotsGenerator } from './src/plugins/robots-generator';
+import { prerender } from './src/plugins/prerender';
 import { getMdxConfig } from './src/config/mdx';
 
 export default defineConfig(({ command }) => ({
@@ -26,6 +31,11 @@ export default defineConfig(({ command }) => ({
     frontmatterDevServer(),
     docsAssetsPlugin(),
     htmlMetadataInjector(),
+    analyticsInjector(),
+    cspGenerator(),
+    sitemapGenerator(),
+    robotsGenerator(),
+    prerender(),
   ],
   resolve: {
     alias: {
@@ -34,6 +44,19 @@ export default defineConfig(({ command }) => ({
     }
   },
   publicDir: false, // Don't use a public directory since we need to import from docs
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-preact': ['preact', 'preact/compat', 'preact/hooks'],
+          'vendor-ui': ['@clidey/ux', '@headlessui/react'],
+          'vendor-icons': ['lucide-react'],
+          'katex': ['katex'],
+          'flexsearch': ['flexsearch'],
+        }
+      }
+    }
+  },
   server: {
     allowedHosts: true,
     port: 3000,

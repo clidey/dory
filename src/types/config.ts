@@ -78,12 +78,21 @@ export interface DoryEmbedConfig {
   };
 }
 
+export interface DoryAnalytics {
+  posthog?: {
+    token: string;
+    apiHost?: string;
+  };
+}
+
 export interface DoryConfig {
   name: string;
   favicon: string;
+  url?: string;
   colors?: DoryColors;
   fonts?: DoryFonts;
   navigation: DoryNavigation;
   logo: DoryLogo;
   embed?: DoryEmbedConfig;
+  analytics?: DoryAnalytics;
 }

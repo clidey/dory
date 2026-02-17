@@ -3,6 +3,7 @@
 import { execSync } from 'child_process';
 import { existsSync, rmSync, mkdirSync, cpSync, readFileSync, readdirSync } from 'fs';
 import { resolve, dirname } from 'path';
+import { tmpdir } from 'os';
 import { fileURLToPath } from 'url';
 import { createServer } from 'http';
 import sirv from 'sirv';
@@ -30,6 +31,19 @@ const getDoryRoot = (): string => {
 
 // Get the user's current working directory
 const getUserRoot = (): string => process.cwd();
+
+// Count files recursively in a directory (for backup verification)
+const countFiles = (dir: string): number => {
+  let count = 0;
+  for (const item of readdirSync(dir, { withFileTypes: true })) {
+    if (item.isDirectory()) {
+      count += countFiles(resolve(dir, item.name));
+    } else {
+      count++;
+    }
+  }
+  return count;
+};
 
 // Detect which package manager is available (prefer pnpm for speed, fallback to npm)
 const getPackageManager = (): { run: string; exec: string } => {
@@ -72,7 +86,6 @@ const commands = {
     const doryRoot = getDoryRoot();
     const doryConfigPath = resolve(userRoot, 'dory.json');
     const tempDocsDir = resolve(doryRoot, 'docs');
-    const docsBackupDir = resolve(doryRoot, '.docs-backup');
     const doryDistDir = resolve(doryRoot, 'dist');
     const userDistDir = resolve(userRoot, 'dist');
 
@@ -104,16 +117,26 @@ const commands = {
     // Detect package manager
     const pm = getPackageManager();
 
-    // Step 2: Backup existing docs directory if it exists
+    // Step 2: Backup existing docs directory to a safe temp location
     console.log('🧹 Preparing workspace...');
     const docsExistedBefore = existsSync(tempDocsDir);
+    const safeBackupDir = docsExistedBefore
+      ? resolve(tmpdir(), `dory-backup-${Date.now()}`)
+      : null;
 
-    if (docsExistedBefore) {
+    if (docsExistedBefore && safeBackupDir) {
       console.log('💾 Backing up existing docs directory...');
-      if (existsSync(docsBackupDir)) {
-        rmSync(docsBackupDir, { recursive: true, force: true });
+      cpSync(tempDocsDir, safeBackupDir, { recursive: true, force: true });
+
+      // Verify backup integrity by comparing file counts
+      const origCount = countFiles(tempDocsDir);
+      const backupCount = countFiles(safeBackupDir);
+      if (origCount !== backupCount) {
+        console.error(`❌ Backup verification failed (expected ${origCount} files, got ${backupCount})`);
+        console.error(`   Backup location: ${safeBackupDir}`);
+        process.exit(1);
       }
-      cpSync(tempDocsDir, docsBackupDir, { recursive: true, force: true });
+
       rmSync(tempDocsDir, { recursive: true, force: true });
     }
 
@@ -279,46 +302,37 @@ const commands = {
       }
 
     } finally {
-      // Step 7: Always clean up temp directories and restore backup
+      // Step 7: Always clean up and restore backup
       console.log('🧹 Cleaning up...');
 
-      // First priority: Restore the original docs directory if it existed
-      if (docsExistedBefore && existsSync(docsBackupDir)) {
+      if (docsExistedBefore && safeBackupDir && existsSync(safeBackupDir)) {
         console.log('📦 Restoring original docs directory...');
 
-        let restoredSuccessfully = false;
         try {
-          // Remove the temporary docs directory
           if (existsSync(tempDocsDir)) {
             rmSync(tempDocsDir, { recursive: true, force: true });
           }
 
-          // Restore from backup
-          cpSync(docsBackupDir, tempDocsDir, { recursive: true, force: true });
-          restoredSuccessfully = true;
+          cpSync(safeBackupDir, tempDocsDir, { recursive: true, force: true });
 
-          // Only delete the backup after successful restoration
-          rmSync(docsBackupDir, { recursive: true, force: true });
+          // Verify restoration succeeded before deleting backup
+          const restoredCount = countFiles(tempDocsDir);
+          const backupCount = countFiles(safeBackupDir);
+          if (restoredCount === backupCount) {
+            rmSync(safeBackupDir, { recursive: true, force: true });
+          } else {
+            console.warn(`⚠️  Restore verification mismatch — backup preserved at: ${safeBackupDir}`);
+          }
         } catch (error) {
           console.error('❌ Failed to restore docs directory!');
-          console.error(`   Backup is preserved at: ${docsBackupDir}`);
+          console.error(`   Backup is preserved at: ${safeBackupDir}`);
           console.error('   You can manually restore by running:');
-          console.error(`   cp -r "${docsBackupDir}" "${tempDocsDir}"`);
-
+          console.error(`   cp -r "${safeBackupDir}" "${tempDocsDir}"`);
           if (error instanceof Error) {
             console.error(`   Error: ${error.message}`);
           }
-
-          // Critical: Don't delete the backup if restoration failed
-          if (!restoredSuccessfully) {
-            console.error('   ⚠️  Your original docs are safe in the backup directory');
-          }
         }
-      } else if (docsExistedBefore && !existsSync(docsBackupDir)) {
-        console.warn('⚠️  Warning: Original docs directory existed but backup not found');
-        console.warn(`   Expected backup at: ${docsBackupDir}`);
-      } else {
-        // No docs existed before, just clean up the temporary directory
+      } else if (!docsExistedBefore) {
         try {
           if (existsSync(tempDocsDir)) {
             rmSync(tempDocsDir, { recursive: true, force: true });
