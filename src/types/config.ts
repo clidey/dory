@@ -87,8 +87,11 @@ export interface DoryAnalytics {
 
 export interface DoryConfig {
   name: string;
-  favicon: string;
+  title?: string;
+  description?: string;
+  image?: string;
   url?: string;
+  favicon: string;
   colors?: DoryColors;
   fonts?: DoryFonts;
   navigation: DoryNavigation;

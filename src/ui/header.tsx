@@ -69,15 +69,20 @@ export function Header({ className }: { className?: string }) {
         </div>
         <nav className="hidden md:block">
           <ul role="list" className="flex items-center gap-8">
-            {ALL_NAVIGATION.map((tab) => (
-              <TopLevelNavItem 
-                key={tab.title} 
-                href={tab.groups[0].pages[0].href}
-                isActive={pathname.startsWith(`/${tab.groups[0].pages[0].href.split('/')[1]}`)}
-              >
-                {tab.title}
-              </TopLevelNavItem>
-            ))}
+            {ALL_NAVIGATION.map((tab) => {
+              const isActive = tab.groups.some(group =>
+                group.pages.some(page => page.href === pathname)
+              );
+              return (
+                <TopLevelNavItem
+                  key={tab.title}
+                  href={tab.groups[0].pages[0].href}
+                  isActive={isActive}
+                >
+                  {tab.title}
+                </TopLevelNavItem>
+              );
+            })}
           </ul>
         </nav>
         <div className="hidden md:block md:h-5 md:w-px md:bg-zinc-900/10 md:dark:bg-white/15" />

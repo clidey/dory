@@ -47,21 +47,27 @@ export default function Routes() {
   useEffect(() => {
     setLoading(true);
     const loadRoutes = async () => {
-      // For root path, load the first navigation page
-      const targetPath = pathname === '/' ? ALL_NAVIGATION[0].groups[0].pages[0].href : pathname;
-      
-      const entries = await Promise.all(
-        Object.entries(ALL_PAGES).filter(([path]) => path === targetPath).map(async ([path, loader]) => {
-          const module = await loader();
-          const routePath = pathname === '/' ? '/' : pathFromFilename(path);
-          return {
-            path: routePath,
-            component: module.default,
-          };
-        })
-      );  
-      setRoutes(entries);
-      setLoading(false);
+      try {
+        // For root path, load the first navigation page
+        const targetPath = pathname === '/' ? ALL_NAVIGATION[0].groups[0].pages[0].href : pathname;
+
+        const entries = await Promise.all(
+          Object.entries(ALL_PAGES).filter(([path]) => path === targetPath).map(async ([path, loader]) => {
+            const module = await loader();
+            const routePath = pathname === '/' ? '/' : pathFromFilename(path);
+            return {
+              path: routePath,
+              component: module.default,
+            };
+          })
+        );
+        setRoutes(entries);
+      } catch (error) {
+        console.error('Failed to load route:', error);
+        setRoutes([]);
+      } finally {
+        setLoading(false);
+      }
     };
 
     loadRoutes();

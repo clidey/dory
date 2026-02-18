@@ -23,6 +23,8 @@ export function htmlMetadataInjector(): Plugin {
         const siteName = config.name || 'Documentation';
         const defaultTitle = config.title || siteName;
         const defaultDescription = config.description || `${siteName} - Technical Documentation`;
+        const siteUrl = config.url || '';
+        const siteImage = config.image || './docs/favicon.svg';
 
         // Replace title
         html = html.replace(
@@ -54,6 +56,20 @@ export function htmlMetadataInjector(): Plugin {
           `<meta property="og:site_name" content="${siteName}" />`
         );
 
+        // Replace Open Graph image
+        html = html.replace(
+          /<meta property="og:image" content=".*?" \/>/,
+          `<meta property="og:image" content="${siteImage}" />`
+        );
+
+        // Replace Open Graph URL
+        if (siteUrl) {
+          html = html.replace(
+            /<meta property="og:url" content=".*?" \/>/,
+            `<meta property="og:url" content="${siteUrl}" />`
+          );
+        }
+
         // Replace Twitter title
         html = html.replace(
           /<meta name="twitter:title" content=".*?" \/>/,
@@ -64,6 +80,12 @@ export function htmlMetadataInjector(): Plugin {
         html = html.replace(
           /<meta name="twitter:description" content=".*?" \/>/,
           `<meta name="twitter:description" content="${defaultDescription}" />`
+        );
+
+        // Replace Twitter image
+        html = html.replace(
+          /<meta name="twitter:image" content=".*?" \/>/,
+          `<meta name="twitter:image" content="${siteImage}" />`
         );
 
         return html;
