@@ -391,20 +391,23 @@ const commands = {
     });
 
     const tryPort = (currentPort: number): void => {
-      server.listen(currentPort)
-        .on('listening', () => {
-          console.log(`🚀 Documentation live at http://localhost:${currentPort}`);
-          console.log('   Press Ctrl+C to stop the server');
-        })
-        .on('error', (err: NodeJS.ErrnoException) => {
-          if (err.code === 'EADDRINUSE') {
-            console.log(`⚠️  Port ${currentPort} in use, trying ${currentPort + 1}...`);
-            tryPort(currentPort + 1);
-          } else {
-            console.error('❌ Failed to start server:', err.message);
-            process.exit(1);
-          }
-        });
+      server.on('error', (err: NodeJS.ErrnoException) => {
+        if (err.code === 'EADDRINUSE') {
+          console.log(`⚠️  Port ${currentPort} in use, trying ${currentPort + 1}...`);
+          server.close(); // Close the failed attempt
+          tryPort(currentPort + 1);
+        } else {
+          console.error('❌ Failed to start server:', err.message);
+          process.exit(1);
+        }
+      });
+
+      server.on('listening', () => {
+        console.log(`🚀 Documentation live at http://localhost:${currentPort}`);
+        console.log('   Press Ctrl+C to stop the server');
+      });
+
+      server.listen(currentPort);
     };
 
     tryPort(port);
