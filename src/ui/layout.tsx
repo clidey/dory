@@ -1,8 +1,8 @@
 import type { ComponentChildren } from 'preact';
 import { useCallback, useEffect, useMemo, useState } from 'preact/hooks';
-import { useLocation } from 'wouter-preact';
 import { Navigation } from '../components/navigation';
 import { ALL_NAVIGATION, ALL_OPENAPI, completeFrontMatter, loadMDXFrontMatterForPath, loadAllMDXFrontMatter, ALL_PAGES, pathFromFilename, preloadFrontmatter, ALL_ASYNCAPI } from '../components/store';
+import { usePathname } from '../components/hooks';
 import { OpenAPI } from '../mdx/open-api';
 import { AsyncAPI } from '../mdx/async-api';
 import { Header } from './header';
@@ -26,7 +26,7 @@ const prompt = (pathname: string) => `Please read and analyze the content from t
 
 export default function Layout({ children }: LayoutProps) {
   const [loading, setLoading] = useState(true);
-  const [pathname] = useLocation();
+  const pathname = usePathname();
   const { showNotification } = useNotification();
   const isEmbedded = useIsEmbedded();
 

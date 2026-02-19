@@ -1,7 +1,7 @@
 import classNames from 'classnames';
 import { useEffect, useMemo, useState } from 'preact/hooks';
 import { Link } from 'wouter-preact';
-import { usePathname } from 'wouter-preact/use-browser-location';
+import { usePathname } from '../components/hooks';
 import docsConfig from '../../docs/dory.json' with { type: 'json' };
 import type { DoryConfig } from '../types/config';
 import { MobileSearch, Search } from '../components/search';

@@ -2,11 +2,29 @@ import { useEffect, useState } from 'preact/hooks';
 import { useLocation } from 'wouter-preact';
 
 /**
- * Custom hook to get the current pathname
+ * Strips trailing slash from a pathname (except root "/").
+ */
+function normalizePathname(pathname: string): string {
+  if (pathname !== '/' && pathname.endsWith('/')) {
+    return pathname.slice(0, -1);
+  }
+  return pathname;
+}
+
+/**
+ * Custom hook to get the current pathname, normalized to strip trailing slashes.
  */
 export const usePathname = () => {
   const [pathname] = useLocation();
-  return pathname;
+  const normalized = normalizePathname(pathname);
+
+  useEffect(() => {
+    if (pathname !== normalized) {
+      window.history.replaceState(null, '', normalized + window.location.search + window.location.hash);
+    }
+  }, [pathname, normalized]);
+
+  return normalized;
 };
 
 /**

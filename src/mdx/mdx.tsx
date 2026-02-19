@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'preact/hooks';
 import { lazy, Suspense } from 'preact/compat';
-import { usePathname } from 'wouter-preact/use-browser-location';
+import { usePathname } from '../components/hooks';
 import { completeFrontMatter } from '../components/store';
 import { Loading } from '../components/loading';
 
