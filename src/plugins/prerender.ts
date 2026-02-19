@@ -3,10 +3,9 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs';
 import { resolve } from 'path';
 
 /**
- * Generates per-route HTML files with page-specific meta tags at build time.
- * This is NOT full SSR — the Preact app still hydrates client-side.
- * It provides correct <title>, <meta>, canonical, and JSON-LD per route
- * so crawlers see unique, meaningful HTML for each documentation page.
+ * Generates per-route HTML files with page-specific meta tags and JSON-LD
+ * at build time. The SSR step (render-routes.mjs) later injects rendered
+ * content into these files.
  */
 export function prerender(): Plugin {
   let config: ResolvedConfig;
@@ -70,12 +69,10 @@ export function prerender(): Plugin {
             /<meta property="og:description" content=".*?" \/>/,
             `<meta property="og:description" content="${escapeAttr(description)}" />`
           );
-          if (fullUrl) {
-            html = html.replace(
-              /<meta property="og:url" content=".*?" \/>/,
-              `<meta property="og:url" content="${escapeAttr(fullUrl)}" />`
-            );
-          }
+          html = html.replace(
+            /<meta property="og:url" content=".*?" \/>/,
+            `<meta property="og:url" content="${escapeAttr(fullUrl)}" />`
+          );
 
           // Replace Twitter tags
           html = html.replace(
@@ -87,13 +84,46 @@ export function prerender(): Plugin {
             `<meta name="twitter:description" content="${escapeAttr(description)}" />`
           );
 
-          // Add canonical link
-          if (!html.includes('rel="canonical"')) {
-            html = html.replace(
-              '</head>',
-              `  <link rel="canonical" href="${escapeAttr(fullUrl)}" />\n  </head>`
-            );
-          }
+          // Update canonical link (always replace, never skip)
+          html = html.replace(
+            /<link rel="canonical" href=".*?" \/>/,
+            `<link rel="canonical" href="${escapeAttr(fullUrl)}" />`
+          );
+
+          // Inject JSON-LD structured data
+          const jsonLd = JSON.stringify({
+            '@context': 'https://schema.org',
+            '@graph': [
+              {
+                '@type': 'Article',
+                'headline': title,
+                'description': description,
+                ...(fullUrl ? { 'url': fullUrl } : {}),
+              },
+              {
+                '@type': 'BreadcrumbList',
+                'itemListElement': [
+                  {
+                    '@type': 'ListItem',
+                    'position': 1,
+                    'name': 'Home',
+                    ...(baseUrl ? { 'item': baseUrl } : {}),
+                  },
+                  {
+                    '@type': 'ListItem',
+                    'position': 2,
+                    'name': title,
+                    ...(fullUrl ? { 'item': fullUrl } : {}),
+                  }
+                ]
+              }
+            ]
+          });
+
+          html = html.replace(
+            '</head>',
+            `  <script type="application/ld+json">${jsonLd}</script>\n  </head>`
+          );
 
           // Write to route directory
           const routeDir = resolve(outDir, routePath.replace(/^\//, ''));

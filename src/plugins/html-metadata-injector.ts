@@ -3,14 +3,13 @@ import { readFileSync, existsSync } from 'fs';
 import { resolve } from 'path';
 
 /**
- * Vite plugin that injects site metadata from dory.json into index.html
- * This provides proper defaults before JavaScript hydrates the page
+ * Vite plugin that injects site metadata from dory.json into index.html.
+ * Provides proper defaults before JavaScript hydrates the page.
  */
 export function htmlMetadataInjector(): Plugin {
   return {
     name: 'html-metadata-injector',
     transformIndexHtml(html) {
-      // Read dory.json configuration
       const doryJsonPath = resolve(process.cwd(), 'docs', 'dory.json');
 
       if (!existsSync(doryJsonPath)) {
@@ -24,7 +23,13 @@ export function htmlMetadataInjector(): Plugin {
         const defaultTitle = config.title || siteName;
         const defaultDescription = config.description || `${siteName} - Technical Documentation`;
         const siteUrl = config.url || '';
-        const siteImage = config.image || './docs/favicon.svg';
+        const twitterHandle = config.twitter || '';
+
+        // Resolve image to absolute URL
+        const rawImage = config.image || '';
+        const siteImage = rawImage && siteUrl && !rawImage.startsWith('http')
+          ? `${siteUrl}${rawImage.startsWith('/') ? '' : '/'}${rawImage}`
+          : rawImage;
 
         // Replace title
         html = html.replace(
@@ -38,31 +43,25 @@ export function htmlMetadataInjector(): Plugin {
           `<meta name="description" content="${defaultDescription}" />`
         );
 
-        // Replace Open Graph title
+        // Replace Open Graph tags
         html = html.replace(
           /<meta property="og:title" content=".*?" \/>/,
           `<meta property="og:title" content="${defaultTitle}" />`
         );
-
-        // Replace Open Graph description
         html = html.replace(
           /<meta property="og:description" content=".*?" \/>/,
           `<meta property="og:description" content="${defaultDescription}" />`
         );
-
-        // Replace Open Graph site name
         html = html.replace(
           /<meta property="og:site_name" content=".*?" \/>/,
           `<meta property="og:site_name" content="${siteName}" />`
         );
-
-        // Replace Open Graph image
-        html = html.replace(
-          /<meta property="og:image" content=".*?" \/>/,
-          `<meta property="og:image" content="${siteImage}" />`
-        );
-
-        // Replace Open Graph URL
+        if (siteImage) {
+          html = html.replace(
+            /<meta property="og:image" content=".*?" \/>/,
+            `<meta property="og:image" content="${siteImage}" />`
+          );
+        }
         if (siteUrl) {
           html = html.replace(
             /<meta property="og:url" content=".*?" \/>/,
@@ -70,23 +69,37 @@ export function htmlMetadataInjector(): Plugin {
           );
         }
 
-        // Replace Twitter title
+        // Replace Twitter tags
         html = html.replace(
           /<meta name="twitter:title" content=".*?" \/>/,
           `<meta name="twitter:title" content="${defaultTitle}" />`
         );
-
-        // Replace Twitter description
         html = html.replace(
           /<meta name="twitter:description" content=".*?" \/>/,
           `<meta name="twitter:description" content="${defaultDescription}" />`
         );
-
-        // Replace Twitter image
+        if (siteImage) {
+          html = html.replace(
+            /<meta name="twitter:image" content=".*?" \/>/,
+            `<meta name="twitter:image" content="${siteImage}" />`
+          );
+        }
         html = html.replace(
-          /<meta name="twitter:image" content=".*?" \/>/,
-          `<meta name="twitter:image" content="${siteImage}" />`
+          /<meta name="twitter:site" content=".*?" \/>/,
+          `<meta name="twitter:site" content="${twitterHandle}" />`
         );
+        html = html.replace(
+          /<meta name="twitter:creator" content=".*?" \/>/,
+          `<meta name="twitter:creator" content="${twitterHandle}" />`
+        );
+
+        // Set canonical URL for the base page
+        if (siteUrl) {
+          html = html.replace(
+            /<link rel="canonical" href=".*?" \/>/,
+            `<link rel="canonical" href="${siteUrl}" />`
+          );
+        }
 
         return html;
       } catch (error) {

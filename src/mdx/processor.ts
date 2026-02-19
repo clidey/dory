@@ -33,6 +33,15 @@ export async function preprocessMdxContent(
       processedContent = processedContent.slice(frontMatterMatch[0].length);
     }
 
+    // Step 0b: Strip stray ```yaml metadata blocks that follow frontmatter.
+    // Some content generators produce a second YAML block (```yaml...---) after
+    // the frontmatter. This is a broken code fence (closed with --- instead of ```)
+    // that leaks metadata into the rendered page.
+    const yamlBlockMatch = processedContent.match(/^```yaml\n([\s\S]*?)\n---\n?/);
+    if (yamlBlockMatch) {
+      processedContent = processedContent.slice(yamlBlockMatch[0].length);
+    }
+
     // Step 1: Apply preprocessor (handles MDX tags, code blocks, etc.)
     const preprocessor = preprocessMdxTags();
     

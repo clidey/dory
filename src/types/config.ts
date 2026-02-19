@@ -91,6 +91,7 @@ export interface DoryConfig {
   description?: string;
   image?: string;
   url?: string;
+  twitter?: string;
   favicon: string;
   colors?: DoryColors;
   fonts?: DoryFonts;

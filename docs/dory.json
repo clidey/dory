@@ -1,5 +1,9 @@
 {
   "name": "Docucod",
+  "url": "https://docucod.com",
+  "description": "Docucod generates and maintains up-to-date documentation from your codebase.",
+  "image": "/og-card.png",
+  "twitter": "@ClideyOfficial",
   "favicon": "./favicon.svg",
   "colors": {
     "primary": "#0ea5e9",
