@@ -83,21 +83,24 @@ let preloadedFrontMatter: Record<string, any>[] | null = null;
 // Preload frontmatter from JSON file (optimized approach)
 export async function preloadFrontmatter() {
     if (preloadedFrontMatter) return; // Already loaded
-    
+
     try {
         const response = await fetch('/frontmatter.json');
         if (response.ok) {
             preloadedFrontMatter = await response.json();
             if (preloadedFrontMatter) {
                 completeFrontMatter = [...preloadedFrontMatter];
-                
+
                 // Update navigation titles from preloaded data
                 for (const fm of preloadedFrontMatter) {
                     updateNavigationTitle(fm.path, fm.title);
                 }
-                
-                // Add to search index
-                await addPreloadedContentToSearch();
+
+                // Build search index in the background — don't block page rendering.
+                // Each page's raw MDX is fetched individually, so for large sites this
+                // can be hundreds of requests. We batch them to avoid overwhelming the
+                // browser's connection pool.
+                addPreloadedContentToSearch();
             }
         }
     } catch (error) {
@@ -105,29 +108,34 @@ export async function preloadFrontmatter() {
     }
 }
 
-// Add preloaded content to search index
+// Add preloaded content to search index (runs in background, never blocks rendering)
 async function addPreloadedContentToSearch() {
     if (!preloadedFrontMatter) return;
-    
+
     const mdxFiles = import.meta.glob<{ default: string }>('../../docs/**/*.mdx', { query: '?raw' });
     const fileEntries = Object.entries(mdxFiles);
 
-    await Promise.all(
-        preloadedFrontMatter.map(async (fm) => {
-            const fileEntry = fileEntries.find(([filePath]) => pathFromFilename(filePath) === fm.path);
-            if (fileEntry) {
-                try {
-                    const [, loader] = fileEntry;
-                    const rawContent = (await loader()).default;
-                    const { content } = parseFrontMatter(rawContent);
+    // Index in batches to avoid firing hundreds of requests at once
+    const BATCH_SIZE = 10;
+    for (let i = 0; i < preloadedFrontMatter.length; i += BATCH_SIZE) {
+        const batch = preloadedFrontMatter.slice(i, i + BATCH_SIZE);
+        await Promise.all(
+            batch.map(async (fm) => {
+                const fileEntry = fileEntries.find(([filePath]) => pathFromFilename(filePath) === fm.path);
+                if (fileEntry) {
+                    try {
+                        const [, loader] = fileEntry;
+                        const rawContent = (await loader()).default;
+                        const { content } = parseFrontMatter(rawContent);
 
-                    await addToSearchIndex(fm.path, { title: fm.title }, content);
-                } catch (error) {
-                    console.warn(`Failed to index ${fm.path}:`, error);
+                        await addToSearchIndex(fm.path, { title: fm.title }, content);
+                    } catch (error) {
+                        console.warn(`Failed to index ${fm.path}:`, error);
+                    }
                 }
-            }
-        })
-    );
+            })
+        );
+    }
 }
 
 // Load frontmatter for a specific pathname (optimized with fallback)
