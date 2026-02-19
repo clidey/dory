@@ -96,11 +96,9 @@ export async function preloadFrontmatter() {
                     updateNavigationTitle(fm.path, fm.title);
                 }
 
-                // Build search index in the background — don't block page rendering.
-                // Each page's raw MDX is fetched individually, so for large sites this
-                // can be hundreds of requests. We batch them to avoid overwhelming the
-                // browser's connection pool.
-                addPreloadedContentToSearch();
+                // Build search index in the background after the page has fully rendered.
+                // Delay avoids competing with the route chunk for network connections.
+                setTimeout(() => addPreloadedContentToSearch(), 2000);
             }
         }
     } catch (error) {
