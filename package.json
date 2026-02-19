@@ -17,8 +17,10 @@
   "files": [
     "bin/dist",
     "src",
+    "scripts",
     "index.html",
     "vite.config.ts",
+    "vite.config.ssr.ts",
     "vite.config.embed-loader.ts",
     "vite.config.embed-widget.ts"
   ],
@@ -34,9 +36,9 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "npm run build:cli && tsc -b && vite build",
+    "build": "npm run build:cli && tsc -b && npm run build:docs",
     "build:cli": "tsc -p tsconfig.bin.json",
-    "build:docs": "vite build",
+    "build:docs": "vite build && vite build --config vite.config.ssr.ts && node scripts/render-routes.mjs",
     "build:embed": "npm run build:embed:loader && npm run build:embed:widget",
     "build:embed:loader": "vite build -c vite.config.embed-loader.ts",
     "build:embed:widget": "vite build -c vite.config.embed-widget.ts",
@@ -69,6 +71,7 @@
     "mermaid": "11.12.2",
     "motion": "12.34.0",
     "preact": "10.28.3",
+    "preact-render-to-string": "6.6.5",
     "prism-react-renderer": "2.4.1",
     "react-highlight-words": "0.21.0",
     "remark-gfm": "4.0.1",

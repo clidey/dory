@@ -11,7 +11,6 @@ import { docsAssetsPlugin } from './src/plugins/docs-assets';
 import { htmlMetadataInjector } from './src/plugins/html-metadata-injector';
 import { htmlFilesMiddleware } from './src/plugins/html-files-middleware';
 import { analyticsInjector } from './src/plugins/analytics-injector';
-import { cspGenerator } from './src/plugins/csp-generator';
 import { sitemapGenerator } from './src/plugins/sitemap-generator';
 import { robotsGenerator } from './src/plugins/robots-generator';
 import { prerender } from './src/plugins/prerender';
@@ -32,7 +31,6 @@ export default defineConfig(({ command }) => ({
     docsAssetsPlugin(),
     htmlMetadataInjector(),
     analyticsInjector(),
-    cspGenerator(),
     sitemapGenerator(),
     robotsGenerator(),
     prerender(),

@@ -27,7 +27,7 @@ export function unifiedMdxPreprocessor(): Plugin {
       // Return the preprocessed content
       // The actual MDX compilation will be handled by @mdx-js/rollup plugin
       return {
-        code: result.processedContent || code,
+        code: result.processedContent ?? code,
         map: null
       };
     }

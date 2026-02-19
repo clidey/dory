@@ -25,12 +25,19 @@ export async function preprocessMdxContent(
   error?: Error;
 }> {
   try {
+    // Step 0: Strip YAML frontmatter before any processing.
+    // Frontmatter is parsed separately by the frontmatter-generator plugin.
+    let processedContent = content;
+    const frontMatterMatch = processedContent.match(/^---\n([\s\S]*?)\n---\n?/);
+    if (frontMatterMatch) {
+      processedContent = processedContent.slice(frontMatterMatch[0].length);
+    }
+
     // Step 1: Apply preprocessor (handles MDX tags, code blocks, etc.)
     const preprocessor = preprocessMdxTags();
-    let processedContent = content;
     
     if (preprocessor.transform) {
-      const result = preprocessor.transform(content, fileName);
+      const result = preprocessor.transform(processedContent, fileName);
       if (result && typeof result === 'object' && result.code) {
         processedContent = result.code;
       } else if (typeof result === 'string') {

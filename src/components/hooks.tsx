@@ -31,7 +31,9 @@ export const usePathname = () => {
  * Custom hook to get the URL search params as a URLSearchParams instance
  */
 export const useSearchParams = () => {
-  const [searchParams, setSearchParams] = useState(new URLSearchParams(window.location.search));
+  const [searchParams, setSearchParams] = useState(
+    typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams()
+  );
 
   useEffect(() => {
     const handlePopState = () => {
