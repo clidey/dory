@@ -36,7 +36,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "npm run build:cli && tsc -b && npm run build:docs",
+    "build": "npm run build:cli && tsc -b",
     "build:cli": "tsc -p tsconfig.bin.json",
     "build:docs": "vite build && vite build --config vite.config.ssr.ts && node scripts/render-routes.mjs",
     "build:embed": "npm run build:embed:loader && npm run build:embed:widget",
