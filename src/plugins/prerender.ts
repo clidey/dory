@@ -90,6 +90,14 @@ export function prerender(): Plugin {
             `<link rel="canonical" href="${escapeAttr(fullUrl)}" />`
           );
 
+          // Inject per-page robots directive if specified in frontmatter
+          if (page.robots) {
+            html = html.replace(
+              '</head>',
+              `  <meta name="robots" content="${escapeAttr(page.robots)}" />\n  </head>`
+            );
+          }
+
           // Inject JSON-LD structured data
           const jsonLd = JSON.stringify({
             '@context': 'https://schema.org',
