@@ -1,0 +1,122 @@
+---
+title: 'Source Links'
+description: 'Link directly to source code files on GitHub, GitLab, or Bitbucket with optional line ranges.'
+---
+
+# Source Links
+
+The `<Source>` component renders styled links that point directly to source code on your repository host. It supports GitHub, GitLab, and Bitbucket with optional line range anchors.
+
+## Basic Usage
+
+Link to a single file:
+
+```mdx
+<Source
+  url="https://github.com/clidey/dory"
+  branch="main"
+  paths={[{ path: "src/mdx/code.tsx" }]}
+/>
+```
+
+**Output:**
+
+<Source
+  url="https://github.com/clidey/dory"
+  branch="main"
+  paths={[{ path: "src/mdx/code.tsx" }]}
+/>
+
+## Multiple Files
+
+Link to multiple files at once:
+
+```mdx
+<Source
+  url="https://github.com/clidey/dory"
+  branch="main"
+  paths={[
+    { path: "src/mdx/accordion.tsx" },
+    { path: "src/mdx/callout.tsx" },
+    { path: "src/mdx/card.tsx" }
+  ]}
+/>
+```
+
+**Output:**
+
+<Source
+  url="https://github.com/clidey/dory"
+  branch="main"
+  paths={[
+    { path: "src/mdx/accordion.tsx" },
+    { path: "src/mdx/callout.tsx" },
+    { path: "src/mdx/card.tsx" }
+  ]}
+/>
+
+## With Line Range
+
+Link to a specific range of lines:
+
+```mdx
+<Source
+  url="https://github.com/clidey/dory"
+  branch="main"
+  paths={[{ path: "src/mdx/code.tsx", range: "1-50" }]}
+/>
+```
+
+**Output:**
+
+<Source
+  url="https://github.com/clidey/dory"
+  branch="main"
+  paths={[{ path: "src/mdx/code.tsx", range: "1-50" }]}
+/>
+
+## Platform Support
+
+| Platform | URL Format | Line Anchor Format |
+| --- | --- | --- |
+| GitHub | `github.com/owner/repo` | `#L{start}-L{end}` |
+| GitLab | `gitlab.com/owner/repo` | `#L{range}` |
+| Bitbucket | `bitbucket.org/owner/repo` | `#lines-{start}:{end}` |
+
+Dory automatically detects the platform from the URL and formats the link accordingly.
+
+## Use Case: Inline Source References
+
+Source links are ideal for documentation that references implementation details:
+
+```mdx
+The MDX preprocessing pipeline is defined here:
+
+<Source
+  url="https://github.com/clidey/dory"
+  branch="main"
+  paths={[{ path: "src/mdx/processor.ts" }]}
+/>
+
+This file is the single source of truth for MDX compilation settings.
+```
+
+**Output:**
+
+The MDX preprocessing pipeline is defined here:
+
+<Source
+  url="https://github.com/clidey/dory"
+  branch="main"
+  paths={[{ path: "src/mdx/processor.ts" }]}
+/>
+
+This file is the single source of truth for MDX compilation settings.
+
+## Props Reference
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `url` | `string` | — | Base URL of the repository (e.g. `https://github.com/owner/repo`). |
+| `branch` | `string` | `"main"` | Branch name. |
+| `paths` | `Array<{ path: string, range?: string }>` | — | Files to link. `range` format: `"start-end"` (e.g. `"10-50"`). |

@@ -1,44 +1,45 @@
 ---
 title: 'Introduction'
-description: 'Welcome to Docucod and Dory documentation'
+description: 'Dory is a static documentation site generator for modern teams. Build beautiful docs from MDX files with zero configuration.'
 ---
 
 # Introduction
 
-## Welcome to Docucod and Dory
-
-This documentation is powered by two complementary tools:
-
-1. **Docucod** - An AI-powered documentation assistant that automatically generates and maintains documentation
-2. **Dory** - A lightweight static site generator specifically designed to deploy dory-generated documentation
-
-## What is Docucod?
-
-Docucod analyzes your codebase and automatically:
-- Generates comprehensive documentation
-- Updates existing documentation when code changes
-- Maintains consistent style and formatting
-- Ensures accuracy and completeness
-
 ## What is Dory?
 
-Dory is a lightweight static site generator built for developers who want fast, clean, and customizable documentation. It was created specifically to deploy dory-generated documentation with:
+Dory is a **static site generator built for technical documentation**. It turns MDX files and a single `dory.json` config into a fast, beautiful documentation site — with zero boilerplate.
 
-- 🧠 **Simple** — Drop in `.mdx` files and configure one `dory.json`
-- ⚡ **Fast** — Instant hot reload in dev, quick static builds for prod
-- 🌐 **Portable** — No SSR, no lock-in, deploy anywhere
-- 🧩 **Flexible** — Hackable theme, readable codebase, minimal magic
+<CardGroup cols={2}>
+  <Card title="Simple" icon="sparkles" description="Drop in .mdx files, configure one dory.json. No framework knowledge needed." />
+  <Card title="Fast" icon="zap" description="Instant hot reload in dev. Quick static builds optimized for production." />
+  <Card title="Portable" icon="globe" description="No SSR, no vendor lock-in. Deploy anywhere that serves static files." />
+  <Card title="Rich Components" icon="layout-dashboard" description="24 built-in MDX components: code blocks, diagrams, API playgrounds, and more." />
+</CardGroup>
 
-## Documentation Structure
+## Key Features
 
-This documentation is organized to help you:
-- Get started quickly with both Docucod and Dory
-- Understand core concepts and features
-- Follow best practices and examples
-- Find detailed API references
+<Steps>
+  <Step title="Write MDX files">
+    Create `.mdx` files in your docs directory. Use standard Markdown with any of Dory's 24 built-in components for rich content.
+  </Step>
+  <Step title="Configure dory.json">
+    Set your site name, colors, fonts, logo, and navigation structure in a single `dory.json` file.
+  </Step>
+  <Step title="Run the CLI">
+    Use `dory build` to generate a static site or `dory preview` to serve a built site on port 3000.
+  </Step>
+  <Step title="Deploy anywhere">
+    The output is plain HTML, CSS, and JS — deploy to Netlify, Vercel, S3, GitHub Pages, or any static host.
+  </Step>
+</Steps>
 
-Let's begin exploring Docucod and Dory's capabilities!
+## Navigation
 
-<br/>
-<br/>
-<br/>
+Use the sidebar to explore Dory's documentation:
+
+<CardGroup cols={2}>
+  <Card title="Installation" href="/getting-started/installation" icon="package" description="Install Dory and set up your first project in minutes." />
+  <Card title="Quick Start" href="/getting-started/quick-start" icon="rocket" description="Go from zero to a live documentation site in 5 minutes." />
+  <Card title="Components" href="/components/overview" icon="layers" description="Browse all 24 built-in MDX components with live demos." />
+  <Card title="Configuration" href="/configuration/dory-json" icon="settings" description="Full reference for the dory.json configuration file." />
+</CardGroup>

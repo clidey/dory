@@ -1,0 +1,107 @@
+---
+title: 'Quick Start'
+description: 'Build your first Dory documentation site in 5 minutes.'
+---
+
+# Quick Start
+
+This guide walks you through creating a documentation site from scratch.
+
+## 1. Create Your Project
+
+Create a new folder for your documentation. Inside it, you'll place your `dory.json` config and your `.mdx` content files.
+
+## 2. Create dory.json
+
+Create a `dory.json` file with your site configuration:
+
+```json
+{
+  "name": "My Docs",
+  "description": "Documentation for my project.",
+  "favicon": "./favicon.svg",
+  "colors": {
+    "primary": "#6366f1",
+    "light": "#818cf8",
+    "dark": "#4f46e5"
+  },
+  "logo": {
+    "light": "./logo/logo.svg",
+    "dark": "./logo/logo.svg"
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": ["introduction"]
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+## 3. Create Your First Page
+
+Create `introduction.mdx`:
+
+```mdx
+---
+title: 'Introduction'
+description: 'Welcome to my documentation.'
+---
+
+# Introduction
+
+Welcome to my docs! This site is built with **Dory**.
+
+<Note>
+  You can use any of Dory's built-in components in your pages.
+</Note>
+
+## Features
+
+<CardGroup cols={2}>
+  <Card title="Fast" icon="zap" description="Instant builds and lightning-fast page loads." />
+  <Card title="Flexible" icon="layers" description="Mix Markdown with rich components." />
+</CardGroup>
+```
+
+## 4. Add a Logo
+
+Create a `logo/` folder inside your docs directory and add your SVG logo files there.
+
+<Tip>
+  If you don't have a logo yet, create a simple SVG placeholder. Dory will render it in the header and sidebar.
+</Tip>
+
+## 5. Build the Site
+
+```bash
+dory build
+```
+
+This generates a static site in the `dist/` directory.
+
+## 6. Preview the Site
+
+```bash
+dory preview
+```
+
+Open [http://localhost:3000](http://localhost:3000) to see your documentation.
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Configuration" href="/getting-started/configuration" icon="settings" description="Customize colors, fonts, navigation, and more." />
+  <Card title="Components" href="/components/overview" icon="layout-dashboard" description="Browse all available built-in components." />
+  <Card title="Theming" href="/configuration/theming" icon="palette" description="Apply your brand colors and typography." />
+  <Card title="Deploy" href="/configuration/dory-json" icon="rocket" description="Deploy your docs to any static host." />
+</CardGroup>

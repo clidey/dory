@@ -1,0 +1,78 @@
+---
+title: 'Images'
+description: 'Clickable images with fullscreen modal overlay using the img component.'
+---
+
+# Images
+
+Images in Dory support click-to-fullscreen functionality. Clicking any image opens it in a fullscreen modal overlay with a dark background.
+
+## Basic Usage
+
+Use standard Markdown image syntax:
+
+```mdx
+![Dory logo](./assets/dory.jpeg)
+```
+
+**Output:**
+
+![Dory logo](./assets/dory.jpeg)
+
+## HTML img Tag
+
+You can also use the HTML `<img>` tag for more control:
+
+```mdx
+<img src="./assets/dory.jpeg" alt="Dory logo" className="w-32 h-32 object-cover rounded" />
+```
+
+**Output:**
+
+<img src="./assets/dory.jpeg" alt="Dory logo" className="w-32 h-32 object-cover rounded" />
+
+## Fullscreen Behavior
+
+When a user clicks an image:
+1. A fullscreen overlay appears with a black semi-transparent background
+2. The image is displayed centered at full size
+3. Clicking anywhere on the overlay closes it
+
+This is useful for screenshots, diagrams, and any image where detail matters.
+
+## Images in Columns
+
+Images can be combined with `<Row>` and `<Col>` for side-by-side layouts:
+
+```mdx
+<Row>
+  <Col>
+    **Light Mode**
+
+    ![Light mode](./assets/light-mode.png)
+  </Col>
+  <Col>
+    **Dark Mode**
+
+    ![Dark mode](./assets/dark-mode.png)
+  </Col>
+</Row>
+```
+
+## Best Practices
+
+<Note>
+  Store images in the `assets/` directory inside your docs folder. Reference them with relative paths from the MDX file location (e.g. `./assets/image.png`).
+</Note>
+
+<Tip>
+  Use SVG images where possible — they scale perfectly at any size and the fullscreen mode will display them at full resolution without any blurriness.
+</Tip>
+
+## Props
+
+| Attribute | Type | Description |
+| --- | --- | --- |
+| `src` | `string` | Image URL or path. |
+| `alt` | `string` | Alt text for accessibility. |
+| `className` | `string` | CSS classes for sizing and styling. |

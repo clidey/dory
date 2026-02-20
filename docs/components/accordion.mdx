@@ -1,0 +1,110 @@
+---
+title: 'Accordion'
+description: 'Collapsible content sections with optional icons, grouped together with AccordionGroup.'
+---
+
+# Accordion
+
+Accordions hide content until the user expands it — ideal for FAQs, optional details, or long reference sections.
+
+## Basic Usage
+
+```mdx
+<AccordionGroup>
+  <Accordion title="What is Dory?">
+    Dory is a static site generator for technical documentation.
+    It turns MDX files and a dory.json config into a fast, beautiful docs site.
+  </Accordion>
+</AccordionGroup>
+```
+
+<AccordionGroup>
+  <Accordion title="What is Dory?">
+    Dory is a static site generator for technical documentation.
+    It turns MDX files and a `dory.json` config into a fast, beautiful docs site.
+  </Accordion>
+</AccordionGroup>
+
+## Multiple Items
+
+Only one accordion can be open at a time.
+
+```mdx
+<AccordionGroup>
+  <Accordion title="How do I install Dory?">
+    Install globally with npm: `npm install -g @clidey/dory`
+  </Accordion>
+  <Accordion title="Which languages are supported?">
+    Dory supports 20+ languages: Python, TypeScript, Go, Rust, Java, Ruby, PHP, and more.
+  </Accordion>
+  <Accordion title="Can I deploy to GitHub Pages?">
+    Yes. Run `dory build` and upload the `dist/` directory to your GitHub Pages branch.
+  </Accordion>
+  <Accordion title="Does Dory support dark mode?">
+    Yes. Dory follows the user's OS preference automatically.
+    You can set custom colors for each mode in `dory.json`.
+  </Accordion>
+</AccordionGroup>
+```
+
+<AccordionGroup>
+  <Accordion title="How do I install Dory?">
+    Install globally with npm: `npm install -g @clidey/dory`
+  </Accordion>
+  <Accordion title="Which languages are supported?">
+    Dory supports 20+ languages: Python, TypeScript, Go, Rust, Java, Ruby, PHP, and more.
+  </Accordion>
+  <Accordion title="Can I deploy to GitHub Pages?">
+    Yes. Run `dory build` and upload the `dist/` directory to your GitHub Pages branch.
+  </Accordion>
+  <Accordion title="Does Dory support dark mode?">
+    Yes. Dory follows the user's OS preference automatically.
+    You can set custom colors for each mode in `dory.json`.
+  </Accordion>
+</AccordionGroup>
+
+## With Icons
+
+Add a `icon` prop using any Lucide icon name:
+
+```mdx
+<AccordionGroup>
+  <Accordion title="Authentication" icon="lock">
+    All API requests require a Bearer token in the Authorization header.
+  </Accordion>
+  <Accordion title="Rate Limiting" icon="gauge">
+    The default limit is 1000 requests per hour per API key.
+  </Accordion>
+  <Accordion title="Error Handling" icon="alert-triangle">
+    All errors return a consistent JSON body with an error code and message.
+  </Accordion>
+</AccordionGroup>
+```
+
+<AccordionGroup>
+  <Accordion title="Authentication" icon="lock">
+    All API requests require a Bearer token in the `Authorization` header.
+  </Accordion>
+  <Accordion title="Rate Limiting" icon="gauge">
+    The default limit is 1000 requests per hour per API key. Exceeding this returns a `429 Too Many Requests` response.
+  </Accordion>
+  <Accordion title="Error Handling" icon="alert-triangle">
+    All errors return a consistent JSON body with an `error` code and `message` field.
+  </Accordion>
+</AccordionGroup>
+
+## Props Reference
+
+### AccordionGroup Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `children` | `ReactNode` | One or more `Accordion` components. |
+
+### Accordion Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `title` | `string` | Heading text shown when collapsed. |
+| `icon` | `string` | Optional Lucide icon name (e.g. `"lock"`, `"gauge"`). |
+| `children` | `ReactNode` | Content revealed when expanded. Supports full MDX. |

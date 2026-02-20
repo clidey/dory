@@ -1,0 +1,126 @@
+---
+title: 'Mermaid Diagrams'
+description: 'Render flowcharts, sequence diagrams, ER diagrams, and more using Mermaid syntax in code blocks.'
+---
+
+# Mermaid Diagrams
+
+Use fenced code blocks with the `mermaid` language identifier to render diagrams. Dory automatically detects mermaid syntax and renders it using the [Mermaid](https://mermaid.js.org) library.
+
+**Syntax:**
+
+```
+```mermaid
+flowchart TD
+    A[Start] --> B[End]
+```
+```
+
+## Flowchart
+
+```mermaid
+flowchart TD
+    A[User writes MDX] --> B[dory build]
+    B --> C{Build successful?}
+    C -->|Yes| D[Static site in dist/]
+    C -->|No| E[Fix errors]
+    E --> B
+    D --> F[Deploy to hosting]
+```
+
+## Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API
+    participant Database
+
+    Client->>API: POST /api/users
+    API->>Database: INSERT user
+    Database-->>API: user_id
+    API-->>Client: 201 Created
+```
+
+## Entity Relationship Diagram
+
+```mermaid
+erDiagram
+    USER {
+        string id PK
+        string email
+        string name
+        datetime created_at
+    }
+    WORKSPACE {
+        string id PK
+        string name
+        string owner_id FK
+    }
+    DOCUMENT {
+        string id PK
+        string title
+        string workspace_id FK
+    }
+    USER ||--o{ WORKSPACE : owns
+    WORKSPACE ||--o{ DOCUMENT : contains
+```
+
+## State Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> Disconnected
+    Disconnected --> Connecting: connect()
+    Connecting --> Connected: WebSocket open
+    Connecting --> Error: Connection failed
+    Connected --> Disconnected: disconnect()
+    Connected --> Error: Connection lost
+    Error --> Connecting: retry
+    Error --> [*]: give up
+```
+
+## Git Graph
+
+```mermaid
+gitGraph
+    commit id: "Initial commit"
+    branch feature/auth
+    checkout feature/auth
+    commit id: "Add OAuth"
+    commit id: "Add JWT"
+    checkout main
+    merge feature/auth
+    commit id: "v1.0.0"
+```
+
+## Pie Chart
+
+```mermaid
+pie title Documentation Page Types
+    "Getting Started" : 4
+    "Components" : 17
+    "Playgrounds" : 2
+    "Configuration" : 6
+```
+
+## Supported Diagram Types
+
+| Type | Identifier | Description |
+| --- | --- | --- |
+| Flowchart | `flowchart` | Process flows and decision trees |
+| Sequence | `sequenceDiagram` | Interaction between participants |
+| Class | `classDiagram` | Object-oriented class structures |
+| State | `stateDiagram-v2` | State machine transitions |
+| ER Diagram | `erDiagram` | Database entity relationships |
+| Git Graph | `gitGraph` | Git branch history |
+| Gantt | `gantt` | Project timelines |
+| Pie Chart | `pie` | Proportional data |
+
+## Fullscreen Mode
+
+Click any rendered diagram to view it fullscreen. This is useful for complex diagrams that are hard to read at the default size.
+
+<Note>
+  Mermaid diagrams are lazy-loaded. The first render on a page may take a moment while the Mermaid library initializes.
+</Note>

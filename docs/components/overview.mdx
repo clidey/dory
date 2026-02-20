@@ -1,0 +1,76 @@
+---
+title: 'Components Overview'
+description: 'All 24 built-in MDX components in Dory — from basic typography to interactive API playgrounds.'
+---
+
+# Components Overview
+
+Dory ships with **24 built-in MDX components** you can use directly in `.mdx` files without any imports. Components range from basic typography helpers to full interactive API testing tools.
+
+## Content Components
+
+<CardGroup cols={2}>
+  <Card title="Typography" href="/components/typography" icon="type" description="Headings, paragraphs, inline code, and anchor links." />
+  <Card title="Code Blocks" href="/components/code-blocks" icon="code-2" description="Syntax-highlighted code with multi-language tabs and copy button." />
+  <Card title="Callouts" href="/components/callouts" icon="alert-circle" description="Note, Warning, Info, Tip, and Check callout boxes." />
+  <Card title="Cards" href="/components/cards" icon="layout-grid" description="Linked and informational cards in responsive grid layouts." />
+</CardGroup>
+
+## Structure Components
+
+<CardGroup cols={2}>
+  <Card title="Accordion" href="/components/accordion" icon="chevrons-down-up" description="Collapsible content sections with optional icons." />
+  <Card title="Expandable" href="/components/expandable" icon="maximize-2" description="Expandable sections for nested properties and response fields." />
+  <Card title="Steps" href="/components/steps" icon="list-ordered" description="Numbered step-by-step guides with visual connectors." />
+  <Card title="Tables" href="/components/tables" icon="table" description="Responsive tables with styled headers and cells." />
+</CardGroup>
+
+## Media & Visual Components
+
+<CardGroup cols={2}>
+  <Card title="Mermaid Diagrams" href="/components/mermaid" icon="git-branch" description="Flowcharts, sequence diagrams, ER diagrams, and more." />
+  <Card title="LaTeX Math" href="/components/latex" icon="sigma" description="Render mathematical expressions using KaTeX." />
+  <Card title="Images" href="/components/images" icon="image" description="Clickable images with fullscreen modal overlay." />
+  <Card title="Icons" href="/components/icons" icon="star" description="Inline Lucide and FontAwesome icons." />
+</CardGroup>
+
+## Utility Components
+
+<CardGroup cols={2}>
+  <Card title="Lists" href="/components/lists" icon="list" description="Styled unordered and ordered lists." />
+  <Card title="Tags" href="/components/tags" icon="tag" description="HTTP method badges and custom color tags." />
+  <Card title="Layout" href="/components/layout" icon="columns-2" description="Row and Col for multi-column grid layouts." />
+  <Card title="Source Links" href="/components/source" icon="git-pull-request" description="Direct links to source code on GitHub, GitLab, or Bitbucket." />
+</CardGroup>
+
+## Interactive Playgrounds
+
+<CardGroup cols={2}>
+  <Card title="API Playground" href="/playgrounds/api-playground" icon="play-circle" description="Interactive HTTP request testing with headers, auth, and response display." />
+  <Card title="WebSocket Playground" href="/playgrounds/websocket-playground" icon="activity" description="Live WebSocket connection tester with message history." />
+</CardGroup>
+
+## Using Components
+
+All components are available in `.mdx` files without any imports:
+
+```mdx
+---
+title: 'My Page'
+---
+
+# My Page
+
+<Note>
+  This is a note callout — no import needed.
+</Note>
+
+<CardGroup cols={2}>
+  <Card title="Getting Started" icon="rocket" description="Set up your project." />
+  <Card title="Configuration" icon="settings" description="Customize your site." />
+</CardGroup>
+```
+
+<Note>
+  All components are built into Dory. You never need to install or import anything — just use them directly in your pages.
+</Note>

@@ -1,0 +1,158 @@
+---
+title: 'Typography'
+description: 'Headings, paragraphs, inline code, anchors, and layout helpers for text-heavy pages.'
+---
+
+# Typography
+
+Dory provides standard Markdown typography plus a few layout helpers for rich text pages.
+
+## Headings
+
+Headings use standard Markdown syntax. All headings are automatically added to the table of contents.
+
+```mdx
+# Heading 1
+## Heading 2
+### Heading 3
+#### Heading 4
+##### Heading 5
+###### Heading 6
+```
+
+**Output:**
+
+# Heading 1
+## Heading 2
+### Heading 3
+#### Heading 4
+##### Heading 5
+###### Heading 6
+
+---
+
+## Paragraphs
+
+Standard Markdown paragraphs are styled with consistent spacing.
+
+This is a paragraph. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+
+This is a second paragraph, separated by a blank line.
+
+---
+
+## Inline Code
+
+Use backticks for inline `code`. This is styled distinctly from surrounding text.
+
+```mdx
+Use backticks for inline `code`.
+```
+
+---
+
+## Links
+
+Use standard Markdown link syntax for hyperlinks:
+
+```mdx
+[Visit the Dory site](https://dory.clidey.com)
+```
+
+**Output:** [Visit the Dory site](https://dory.clidey.com)
+
+---
+
+## Horizontal Rule
+
+Use `---` for a horizontal divider:
+
+```mdx
+---
+```
+
+**Output:**
+
+---
+
+## Line Break
+
+Use `<br/>` to insert explicit line breaks without starting a new paragraph:
+
+```mdx
+First line<br/>Second line on a new line
+```
+
+---
+
+## Bold and Italic
+
+```mdx
+**Bold text** and *italic text* and ***bold italic***.
+```
+
+**Bold text** and *italic text* and ***bold italic***.
+
+---
+
+## Row and Col
+
+Use `<Row>` and `<Col>` to create multi-column layouts for prose content:
+
+```mdx
+<Row>
+  <Col>
+    **Left column content**
+
+    This text appears on the left side.
+  </Col>
+  <Col>
+    **Right column content**
+
+    This text appears on the right side.
+  </Col>
+</Row>
+```
+
+**Output:**
+
+<Row>
+  <Col>
+    **Left column content**
+
+    This text appears on the left side.
+  </Col>
+  <Col>
+    **Right column content**
+
+    This text appears on the right side.
+  </Col>
+</Row>
+
+### Row Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `cols` | `number` | `1` | Number of columns in the grid. |
+| `className` | `string` | — | Additional CSS classes. |
+
+### Col Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `sticky` | `boolean` | `false` | Makes the column sticky on large screens (`xl:sticky top-24`). Useful for code/example columns. |
+| `rows` | `number` | `1` | Number of CSS grid rows this column spans. |
+| `gap` | `number` | `4` | Spacing between items inside the column. |
+
+### Sticky Column Example
+
+```mdx
+<Row>
+  <Col>
+    Long prose content that scrolls...
+  </Col>
+  <Col sticky>
+    Code example that stays visible while scrolling.
+  </Col>
+</Row>
+```

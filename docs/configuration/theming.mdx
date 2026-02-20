@@ -1,0 +1,88 @@
+---
+title: 'Theming'
+description: 'Customize your documentation site colors for light and dark mode using the colors config.'
+---
+
+# Theming
+
+Dory uses three brand colors defined in `dory.json` to theme your documentation site. Both light and dark modes are supported.
+
+## Color Configuration
+
+```json
+"colors": {
+  "primary": "#6366f1",
+  "light": "#818cf8",
+  "dark": "#4f46e5"
+}
+```
+
+| Field | Description |
+| --- | --- |
+| `primary` | Base brand color. Applied to active navigation items, links, and accent elements. |
+| `light` | Lighter shade. Used for hover states and accents in light mode. |
+| `dark` | Darker shade. Used for hover states and accents in dark mode. |
+
+These three colors control the entire look of your site — active sidebar items, links, buttons, card borders, and more.
+
+## Dark Mode
+
+Dory automatically follows the user's OS/browser dark mode preference. No configuration required — it works out of the box.
+
+The `light` and `dark` color fields let you fine-tune how your brand color appears on light and dark backgrounds respectively.
+
+<Tip>
+  For best results: choose a `light` shade that's slightly lighter than `primary`, and a `dark` shade that's slightly darker. This ensures good contrast on both backgrounds.
+</Tip>
+
+## Color Palettes
+
+Some well-tested palettes:
+
+<AccordionGroup>
+  <Accordion title="Indigo (default)" icon="palette">
+    ```json
+    "colors": {
+      "primary": "#6366f1",
+      "light": "#818cf8",
+      "dark": "#4f46e5"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Sky Blue" icon="palette">
+    ```json
+    "colors": {
+      "primary": "#0ea5e9",
+      "light": "#38bdf8",
+      "dark": "#0284c7"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Emerald Green" icon="palette">
+    ```json
+    "colors": {
+      "primary": "#10b981",
+      "light": "#34d399",
+      "dark": "#059669"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Rose" icon="palette">
+    ```json
+    "colors": {
+      "primary": "#f43f5e",
+      "light": "#fb7185",
+      "dark": "#e11d48"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Violet" icon="palette">
+    ```json
+    "colors": {
+      "primary": "#8b5cf6",
+      "light": "#a78bfa",
+      "dark": "#7c3aed"
+    }
+    ```
+  </Accordion>
+</AccordionGroup>

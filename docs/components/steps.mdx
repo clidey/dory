@@ -1,0 +1,114 @@
+---
+title: 'Steps'
+description: 'Numbered step-by-step guides with visual connectors between steps.'
+---
+
+# Steps
+
+Use `<Steps>` and `<Step>` to present multi-step processes with numbered indicators and a vertical connection line.
+
+## Basic Steps
+
+```mdx
+<Steps>
+  <Step title="Install Dory">
+    Install the CLI globally with npm or pnpm.
+  </Step>
+  <Step title="Create dory.json">
+    Create a configuration file in your docs directory.
+  </Step>
+  <Step title="Write your first page">
+    Create introduction.mdx with frontmatter and content.
+  </Step>
+  <Step title="Build and preview">
+    Run the CLI to build and preview your site.
+  </Step>
+</Steps>
+```
+
+<Steps>
+  <Step title="Install Dory">
+    Install the CLI globally: `npm install -g @clidey/dory`
+  </Step>
+  <Step title="Create dory.json">
+    Create a configuration file with your site name, colors, and navigation structure.
+  </Step>
+  <Step title="Write your first page">
+    Create `introduction.mdx` with a frontmatter block (`title`, `description`) and your content.
+  </Step>
+  <Step title="Build and preview">
+    Run `dory build` then `dory preview` to see your site at `http://localhost:3000`.
+  </Step>
+</Steps>
+
+## Steps with Rich Content
+
+Each `<Step>` supports full MDX content including callouts and inline code:
+
+```mdx
+<Steps>
+  <Step title="Generate an API key">
+    Log in to your dashboard and navigate to Settings > API Keys.
+
+    Store the key securely — it is shown only once.
+  </Step>
+  <Step title="Configure authentication">
+    Add your API key to the Authorization header on every request.
+  </Step>
+  <Step title="Make your first request">
+    Test the connection with a simple GET request to verify your credentials.
+  </Step>
+</Steps>
+```
+
+<Steps>
+  <Step title="Generate an API key">
+    Log in to your dashboard and navigate to **Settings → API Keys**.
+
+    <Warning>
+      API keys are shown only once. Copy it immediately and store it securely.
+    </Warning>
+  </Step>
+  <Step title="Configure authentication">
+    Add your API key to the `Authorization` header: `Authorization: Bearer YOUR_API_KEY`
+  </Step>
+  <Step title="Make your first request">
+    Test the connection with `GET /api/v1/me` to verify your credentials work.
+
+    <Check>
+      If you see your user object, authentication is working correctly.
+    </Check>
+  </Step>
+</Steps>
+
+## Authentication Setup Example
+
+<Steps>
+  <Step title="Create an account">
+    Sign up at the dashboard. Verify your email to activate your account.
+  </Step>
+  <Step title="Install the SDK">
+    Install the client library for your language: `npm install @example/sdk`
+  </Step>
+  <Step title="Initialize the client">
+    Import and configure the SDK with your API key from the dashboard.
+  </Step>
+  <Step title="Make your first API call">
+    Call any endpoint to verify the integration is working correctly.
+  </Step>
+</Steps>
+
+## Props Reference
+
+### Steps Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `children` | `ReactNode` | One or more `Step` components. |
+
+### Step Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `title` | `string` | Step heading shown next to the step number. |
+| `children` | `ReactNode` | Step content. Supports full MDX. |

@@ -1,0 +1,98 @@
+---
+title: 'WebSocket Playground'
+description: 'Interactive WebSocket connection tester with real-time message history built into your documentation.'
+---
+
+# WebSocket Playground
+
+The `<WebSocketPlayground>` component embeds a fully interactive WebSocket client inside your documentation. Readers can open connections, send messages, and observe responses in real time.
+
+## Live Demo
+
+Connect to a public WebSocket echo server — it sends back whatever you send:
+
+<WebSocketPlayground
+  url="wss://echo.websocket.org"
+  title="Echo Server"
+  description="Connect to a public WebSocket echo server. Any message you send will be echoed back immediately."
+  servers={[
+    { url: "wss://echo.websocket.org", description: "Public echo server" }
+  ]}
+/>
+
+## With Subprotocols
+
+<WebSocketPlayground
+  url="wss://echo.websocket.org"
+  title="Echo with Subprotocols"
+  description="Demonstrates subprotocol negotiation. The echo server accepts any subprotocol."
+  subprotocols={["chat", "json-protocol"]}
+  servers={[
+    { url: "wss://echo.websocket.org", description: "Echo server" }
+  ]}
+/>
+
+## Usage in MDX
+
+```mdx
+<WebSocketPlayground
+  url="wss://api.example.com/ws"
+  title="Real-time Events"
+  description="Subscribe to live events from the API."
+  subprotocols={["events-v1"]}
+  headers={{
+    "X-Client-Version": "2.0"
+  }}
+  authType="bearer"
+  servers={[
+    { url: "wss://api.example.com/ws", description: "Production" },
+    { url: "wss://staging.api.example.com/ws", description: "Staging" }
+  ]}
+/>
+```
+
+## Features
+
+<CardGroup cols={2}>
+  <Card title="Live Connection" icon="activity" description="Real WebSocket connection with connect/disconnect controls and live status indicator." />
+  <Card title="Message History" icon="message-square" description="Timestamped message log with color-coded sent, received, error, and system messages." />
+  <Card title="Subprotocols" icon="layers" description="Configure and negotiate WebSocket subprotocols." />
+  <Card title="Authentication" icon="lock" description="Supports Bearer token, API key, Basic auth, and custom headers." />
+  <Card title="Multiple Servers" icon="server" description="Switch between server environments (production, staging, local)." />
+  <Card title="Custom Headers" icon="list" description="Add custom headers to the WebSocket handshake request." />
+</CardGroup>
+
+## Message Types
+
+Messages in the log are color-coded:
+
+| Type | Color | Description |
+| --- | --- | --- |
+| Sent | Sky blue | Messages you send to the server |
+| Received | Green | Messages received from the server |
+| Error | Red | Connection errors and protocol errors |
+| System | Zinc/gray | Connect, disconnect, and status events |
+
+## Testing JSON APIs
+
+For WebSocket APIs that use JSON messages, send structured messages like:
+
+```json
+{ "type": "subscribe", "channel": "updates" }
+```
+
+```json
+{ "type": "message", "content": "Hello!", "room": "general" }
+```
+
+## Props Reference
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `url` | `string` | Yes | WebSocket URL (`ws://` or `wss://`). |
+| `title` | `string` | No | Display title. |
+| `description` | `string` | No | Description shown above the playground. |
+| `subprotocols` | `string[]` | No | Pre-configured WebSocket subprotocols. |
+| `headers` | `Record<string, string>` | No | Pre-populated handshake headers. |
+| `authType` | `'bearer' \| 'apiKey' \| 'basic' \| 'none'` | No | Authentication method. |
+| `servers` | `Array<{ url, description, protocol? }>` | No | Server environment options. |

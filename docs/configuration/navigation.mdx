@@ -1,0 +1,178 @@
+---
+title: 'Navigation'
+description: 'Configure the sidebar navigation using tabs, groups, and pages in dory.json.'
+---
+
+# Navigation
+
+The `navigation` object in `dory.json` defines the sidebar structure. Navigation is organized into three levels: **tabs**, **groups**, and **pages**.
+
+## Structure
+
+```json
+"navigation": {
+  "tabs": [
+    {
+      "tab": "Documentation",
+      "groups": [
+        {
+          "group": "Getting Started",
+          "pages": [
+            "introduction",
+            "installation",
+            "quick-start"
+          ]
+        },
+        {
+          "group": "Components",
+          "pages": [
+            "components/overview",
+            "components/code-blocks"
+          ]
+        }
+      ]
+    },
+    {
+      "tab": "API Reference",
+      "groups": [
+        {
+          "group": "Endpoints",
+          "pages": [
+            "api/users",
+            "api/workspaces"
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+## Tabs
+
+Tabs appear at the top of the sidebar. Use multiple tabs to separate major sections of your documentation.
+
+```json
+{
+  "tab": "Documentation",
+  "groups": [...]
+}
+```
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `tab` | `string` | Tab label shown in the sidebar header. |
+| `groups` | `Group[]` | Navigation groups within this tab. |
+
+## Groups
+
+Groups are collapsible sections within a tab. They appear as labeled sections in the sidebar.
+
+```json
+{
+  "group": "Getting Started",
+  "pages": ["introduction", "installation"]
+}
+```
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `group` | `string` | Group label. |
+| `pages` | `string[]` | List of page paths within the group. |
+
+## Pages
+
+Pages are references to MDX files. Use paths **relative to the docs directory root**, without the `.mdx` extension.
+
+```json
+"pages": [
+  "introduction",
+  "getting-started/installation",
+  "components/code-blocks"
+]
+```
+
+A path like `"components/code-blocks"` maps to `docs/components/code-blocks.mdx`.
+
+<Note>
+  Page paths are case-sensitive and must exactly match the filename (without `.mdx`). Use lowercase with hyphens for consistency.
+</Note>
+
+## Single-Tab Setup
+
+For smaller documentation sites, one tab is enough:
+
+```json
+"navigation": {
+  "tabs": [
+    {
+      "tab": "Docs",
+      "groups": [
+        {
+          "group": "Overview",
+          "pages": ["introduction"]
+        },
+        {
+          "group": "Guides",
+          "pages": ["guides/setup", "guides/deployment"]
+        }
+      ]
+    }
+  ]
+}
+```
+
+## Multi-Tab Setup
+
+Separate documentation types with multiple tabs:
+
+```json
+"navigation": {
+  "tabs": [
+    {
+      "tab": "Guides",
+      "groups": [
+        {
+          "group": "Getting Started",
+          "pages": ["introduction", "installation"]
+        }
+      ]
+    },
+    {
+      "tab": "API Reference",
+      "groups": [
+        {
+          "group": "Users",
+          "pages": ["api/create-user", "api/get-user", "api/delete-user"]
+        }
+      ]
+    },
+    {
+      "tab": "SDKs",
+      "groups": [
+        {
+          "group": "Client Libraries",
+          "pages": ["sdks/javascript", "sdks/python", "sdks/go"]
+        }
+      ]
+    }
+  ]
+}
+```
+
+## Page Frontmatter
+
+Each MDX page should include frontmatter with `title` and `description`. These are used for the page title, meta tags, and breadcrumbs:
+
+```mdx
+---
+title: 'Installation'
+description: 'Install and configure Dory for your project.'
+---
+
+# Installation
+```
+
+<Tip>
+  Keep `title` concise (2–5 words). The `description` is used for SEO meta tags and appears in search results, so make it a full sentence.
+</Tip>

@@ -1,0 +1,122 @@
+---
+title: 'Callouts'
+description: 'Highlight important information with Note, Warning, Info, Tip, Check, and custom Callout components.'
+---
+
+# Callouts
+
+Callouts draw attention to important information. Dory provides five pre-configured callout types plus a generic `Callout` component for custom types.
+
+## Note
+
+Use `<Note>` for supplementary information:
+
+```mdx
+<Note>
+  This feature requires Node.js 18 or later. Check your version with `node --version`.
+</Note>
+```
+
+**Output:**
+
+<Note>
+  This feature requires Node.js 18 or later. Check your version with `node --version`.
+</Note>
+
+## Warning
+
+Use `<Warning>` for critical caveats or destructive actions:
+
+```mdx
+<Warning>
+  This action is **irreversible**. All data in the selected namespace will be permanently deleted.
+</Warning>
+```
+
+**Output:**
+
+<Warning>
+  This action is **irreversible**. All data in the selected namespace will be permanently deleted.
+</Warning>
+
+## Info
+
+Use `<Info>` for contextual information:
+
+```mdx
+<Info>
+  Rate limiting applies to all API endpoints. The default limit is 1000 requests per hour per API key.
+</Info>
+```
+
+**Output:**
+
+<Info>
+  Rate limiting applies to all API endpoints. The default limit is 1000 requests per hour per API key.
+</Info>
+
+## Tip
+
+Use `<Tip>` for helpful hints and best practices:
+
+```mdx
+<Tip>
+  Enable response caching to reduce API calls. Cache keys are scoped to the authenticated user.
+</Tip>
+```
+
+**Output:**
+
+<Tip>
+  Enable response caching to reduce API calls. Cache keys are scoped to the authenticated user.
+</Tip>
+
+## Check
+
+Use `<Check>` for success states, confirmations, or completed items:
+
+```mdx
+<Check>
+  Your API key has been generated and is ready to use. Store it securely — it won't be shown again.
+</Check>
+```
+
+**Output:**
+
+<Check>
+  Your API key has been generated and is ready to use. Store it securely — it won't be shown again.
+</Check>
+
+## Custom Callout
+
+Use `<Callout>` with a `type` and `title` for full control:
+
+```mdx
+<Callout type="warning" title="Breaking Change in v2.0">
+  The `authenticate()` method signature has changed. Update your integration before upgrading.
+</Callout>
+```
+
+**Output:**
+
+<Callout type="warning" title="Breaking Change in v2.0">
+  The `authenticate()` method signature has changed. Update your integration before upgrading.
+</Callout>
+
+### Callout Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `type` | `'note' \| 'warning' \| 'info' \| 'tip' \| 'check'` | `'note'` | Determines the color scheme and icon. |
+| `title` | `string` | — | Optional title displayed above the content. |
+| `children` | `ReactNode` | — | Callout body content. Supports MDX. |
+
+## Callout Types Reference
+
+| Component | Color | Icon | Use Case |
+| --- | --- | --- | --- |
+| `<Note>` | Emerald | Info | Supplementary information |
+| `<Warning>` | Amber | Alert Triangle | Destructive or risky actions |
+| `<Info>` | Blue | Info Circle | Contextual facts |
+| `<Tip>` | Green | Lightbulb | Helpful hints, best practices |
+| `<Check>` | Purple | Check Circle | Success states, confirmations |

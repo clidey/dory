@@ -1,0 +1,106 @@
+---
+title: 'Tags'
+description: 'HTTP method badges and custom color tags for labeling content.'
+---
+
+# Tags
+
+The `<Tag>` component renders colored badges. It has built-in support for HTTP methods and supports custom colors.
+
+## HTTP Method Tags
+
+Tags automatically apply the correct color for HTTP methods:
+
+```mdx
+<Tag>GET</Tag>
+<Tag>POST</Tag>
+<Tag>PUT</Tag>
+<Tag>DELETE</Tag>
+```
+
+<Tag>GET</Tag> <Tag>POST</Tag> <Tag>PUT</Tag> <Tag>DELETE</Tag>
+
+## HTTP Method Colors
+
+| Method | Color |
+| --- | --- |
+| `GET` | Emerald (green) |
+| `POST` | Sky (blue) |
+| `PUT` | Amber (yellow) |
+| `DELETE` | Rose (red) |
+
+## Custom Colors
+
+Use the `color` prop for non-HTTP-method tags:
+
+```mdx
+<Tag color="emerald">Stable</Tag>
+<Tag color="sky">Beta</Tag>
+<Tag color="amber">Deprecated</Tag>
+<Tag color="rose">Breaking</Tag>
+<Tag color="zinc">Internal</Tag>
+```
+
+<Tag color="emerald">Stable</Tag> <Tag color="sky">Beta</Tag> <Tag color="amber">Deprecated</Tag> <Tag color="rose">Breaking</Tag> <Tag color="zinc">Internal</Tag>
+
+## Tag Variants
+
+The `variant` prop controls padding size:
+
+```mdx
+<Tag variant="medium">Default size</Tag>
+<Tag variant="small">Compact</Tag>
+```
+
+<Tag variant="medium">Default size</Tag> <Tag variant="small">Compact</Tag>
+
+## Tags in API Reference
+
+Tags are commonly used in API reference documentation to label HTTP methods:
+
+```mdx
+**GET** `/api/users` — Retrieve a list of all users.
+
+**POST** `/api/users` — Create a new user.
+
+**DELETE** `/api/users/:id` — Permanently delete a user.
+```
+
+Or with the Tag component on its own line:
+
+```mdx
+<Tag>GET</Tag>
+
+`/api/users` — Retrieve a list of all users.
+```
+
+## Version and Status Tags
+
+```mdx
+**Authentication** <Tag color="emerald">v2.0</Tag>
+
+The new authentication system uses OAuth 2.0 with PKCE.
+```
+
+**Authentication** <Tag color="emerald">v2.0</Tag>
+
+The new authentication system uses OAuth 2.0 with PKCE.
+
+```mdx
+**Legacy Auth** <Tag color="amber">Deprecated</Tag>
+
+The API key authentication method is deprecated and will be removed in v3.0.
+```
+
+**Legacy Auth** <Tag color="amber">Deprecated</Tag>
+
+The API key authentication method is deprecated and will be removed in v3.0.
+
+## Props Reference
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `children` | `string` | — | Tag label text (e.g. `"GET"`, `"Beta"`). |
+| `color` | `string` | Auto-detected | Badge color: `emerald`, `sky`, `amber`, `rose`, `zinc`. HTTP methods auto-apply color. |
+| `variant` | `string` | `'medium'` | Padding size: `medium` or `small`. |
+| `className` | `string` | — | Additional CSS classes. |

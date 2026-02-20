@@ -1,0 +1,179 @@
+---
+title: 'Expandable'
+description: 'Expandable sections for API response fields, nested properties, and schema documentation.'
+---
+
+# Expandable
+
+The `Expandable` component and its companion components (`ResponseField`, `Properties`, `Property`) are designed for documenting API response schemas and nested data structures.
+
+## Expandable
+
+A collapsible section with a title and optional icon:
+
+```mdx
+<Expandable title="Response Body">
+  The response includes the following fields:
+
+  - `id` — Unique identifier
+  - `name` — Display name
+  - `created_at` — ISO 8601 timestamp
+</Expandable>
+```
+
+**Output:**
+
+<Expandable title="Response Body">
+  The response includes the following fields:
+
+  - `id` — Unique identifier
+  - `name` — Display name
+  - `created_at` — ISO 8601 timestamp
+</Expandable>
+
+## Expandable with Icon
+
+```mdx
+<Expandable title="Advanced Options" icon="settings-2">
+  These options are optional and have sensible defaults.
+
+  - `timeout` — Request timeout in milliseconds (default: `5000`)
+  - `retries` — Number of retries on failure (default: `3`)
+</Expandable>
+```
+
+**Output:**
+
+<Expandable title="Advanced Options" icon="settings-2">
+  These options are optional and have sensible defaults.
+
+  - `timeout` — Request timeout in milliseconds (default: `5000`)
+  - `retries` — Number of retries on failure (default: `3`)
+</Expandable>
+
+## ResponseField
+
+Document a single API response field with its type and description:
+
+```mdx
+<ResponseField name="id" type="string" required>
+  Unique identifier for the resource. Format: UUID v4.
+</ResponseField>
+
+<ResponseField name="name" type="string" required>
+  Display name of the resource. Max 255 characters.
+</ResponseField>
+
+<ResponseField name="metadata" type="object">
+  Optional key-value metadata attached to the resource.
+</ResponseField>
+
+<ResponseField name="created_at" type="string (ISO 8601)">
+  Timestamp when the resource was created.
+</ResponseField>
+```
+
+**Output:**
+
+<ResponseField name="id" type="string" required>
+  Unique identifier for the resource. Format: UUID v4.
+</ResponseField>
+
+<ResponseField name="name" type="string" required>
+  Display name of the resource. Max 255 characters.
+</ResponseField>
+
+<ResponseField name="metadata" type="object">
+  Optional key-value metadata attached to the resource.
+</ResponseField>
+
+<ResponseField name="created_at" type="string (ISO 8601)">
+  Timestamp when the resource was created.
+</ResponseField>
+
+## Properties and Property
+
+Document a group of schema properties:
+
+```mdx
+<Properties>
+  <Property name="user_id" type="string">
+    ID of the authenticated user making the request.
+  </Property>
+  <Property name="workspace" type="string">
+    Workspace slug. Defaults to the user's personal workspace.
+  </Property>
+  <Property name="dry_run" type="boolean">
+    If `true`, validates the request without making changes.
+  </Property>
+</Properties>
+```
+
+**Output:**
+
+<Properties>
+  <Property name="user_id" type="string">
+    ID of the authenticated user making the request.
+  </Property>
+  <Property name="workspace" type="string">
+    Workspace slug. Defaults to the user's personal workspace.
+  </Property>
+  <Property name="dry_run" type="boolean">
+    If `true`, validates the request without making changes.
+  </Property>
+</Properties>
+
+## Nested Schema Example
+
+Combine `Expandable` with `ResponseField` and `Properties` for complex nested schemas:
+
+```mdx
+<ResponseField name="user" type="object" required>
+  The authenticated user object.
+
+  <Expandable title="user fields">
+    <ResponseField name="user.id" type="string">UUID of the user.</ResponseField>
+    <ResponseField name="user.email" type="string">Email address.</ResponseField>
+    <ResponseField name="user.role" type="string">One of: `admin`, `editor`, `viewer`.</ResponseField>
+  </Expandable>
+</ResponseField>
+```
+
+**Output:**
+
+<ResponseField name="user" type="object" required>
+  The authenticated user object.
+
+  <Expandable title="user fields">
+    <ResponseField name="user.id" type="string">UUID of the user.</ResponseField>
+    <ResponseField name="user.email" type="string">Email address.</ResponseField>
+    <ResponseField name="user.role" type="string">One of: `admin`, `editor`, `viewer`.</ResponseField>
+  </Expandable>
+</ResponseField>
+
+## Props Reference
+
+### Expandable Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `title` | `string` | Label shown when the section is collapsed. |
+| `icon` | `string` | Optional Lucide icon name. |
+| `children` | `ReactNode` | Content shown when expanded. |
+
+### ResponseField Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `name` | `string` | Field name (e.g. `"user_id"`). |
+| `type` | `string` | Data type (e.g. `"string"`, `"object"`, `"boolean"`). |
+| `required` | `boolean` | If true, shows a "Required" badge. |
+| `children` | `ReactNode` | Description of the field. |
+
+### Property Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `name` | `string` | Property name. |
+| `type` | `string` | Data type. |
+| `children` | `ReactNode` | Description of the property. |

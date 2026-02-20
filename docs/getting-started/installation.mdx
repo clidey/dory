@@ -1,0 +1,82 @@
+---
+title: 'Installation'
+description: 'Install Dory and start building your documentation site.'
+---
+
+# Installation
+
+## Install the CLI
+
+Install Dory globally to use the `dory` command anywhere:
+
+<CodeGroup>
+  ```bash npm
+  npm install -g @clidey/dory
+  ```
+  ```bash pnpm
+  pnpm add -g @clidey/dory
+  ```
+  ```bash yarn
+  yarn global add @clidey/dory
+  ```
+</CodeGroup>
+
+Verify the installation:
+
+```bash
+dory version
+# @clidey/dory v0.46.0
+```
+
+## CLI Commands
+
+<AccordionGroup>
+  <Accordion title="dory build" icon="hammer">
+    Compiles your MDX files and outputs a static site to the `dist/` directory.
+
+    ```bash
+    dory build
+    ```
+
+    This reads your `dory.json`, processes all your pages, and produces a fully static site ready to deploy.
+  </Accordion>
+  <Accordion title="dory preview" icon="eye">
+    Serves a previously built site locally so you can review it before deploying.
+
+    ```bash
+    dory preview
+    # Serving dist/ at http://localhost:3000
+    ```
+
+    <Warning>
+      Run `dory build` before `dory preview`. The preview command serves the built output, not the source files.
+    </Warning>
+  </Accordion>
+  <Accordion title="dory version" icon="info">
+    Prints the installed version of Dory.
+
+    ```bash
+    dory version
+    # @clidey/dory v0.46.0
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Project Structure
+
+A Dory project has this structure:
+
+```
+my-docs/
+├── dory.json          # Site configuration (required)
+├── favicon.svg        # Site favicon
+├── logo/
+│   ├── logo.svg       # Logo for light mode
+│   └── logo-dark.svg  # Logo for dark mode (optional)
+├── assets/            # Images and other static files
+└── introduction.mdx   # Your first page
+```
+
+<Note>
+  Dory expects `dory.json` and your MDX files in the same directory. When running the CLI, point it to your docs folder if it's not the current directory.
+</Note>

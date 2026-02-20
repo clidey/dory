@@ -1,0 +1,130 @@
+---
+title: 'Layout'
+description: 'Row and Col components for multi-column grid layouts within MDX pages.'
+---
+
+# Layout
+
+The `<Row>` and `<Col>` components create responsive multi-column layouts inside your MDX content.
+
+## Basic Two-Column Layout
+
+```mdx
+<Row>
+  <Col>
+    Left column content here.
+  </Col>
+  <Col>
+    Right column content here.
+  </Col>
+</Row>
+```
+
+<Row>
+  <Col>
+    **Left column**
+
+    Content on the left side. Columns are equal width by default.
+  </Col>
+  <Col>
+    **Right column**
+
+    Content on the right side.
+  </Col>
+</Row>
+
+## Prose + Code Pattern
+
+The most common layout: prose on the left, a sticky code column on the right.
+Use `sticky` on the code column so it stays visible while the prose scrolls.
+
+```mdx
+<Row>
+  <Col>
+    ## Creating a user
+
+    Send a POST request to /api/users with the user's name and email.
+
+    ### Required fields
+
+    - `name` — Display name (max 255 characters)
+    - `email` — Valid email address
+  </Col>
+  <Col sticky>
+    Request and response examples here.
+  </Col>
+</Row>
+```
+
+<Row>
+  <Col>
+    ## Creating a user
+
+    Send a `POST` request to `/api/users` with the user's name and email.
+
+    The response includes the new user's `id`, which you'll need for subsequent requests.
+
+    ### Required fields
+
+    - `name` — Display name (max 255 characters)
+    - `email` — Valid email address (must be unique)
+  </Col>
+  <Col sticky>
+    **Request**
+
+    `POST /api/users`
+
+    `Content-Type: application/json`
+
+    **Response**
+
+    `201 Created`
+  </Col>
+</Row>
+
+## Three Columns
+
+```mdx
+<Row cols={3}>
+  <Col>Column 1</Col>
+  <Col>Column 2</Col>
+  <Col>Column 3</Col>
+</Row>
+```
+
+<Row cols={3}>
+  <Col>
+    **Column 1**
+
+    First piece of content.
+  </Col>
+  <Col>
+    **Column 2**
+
+    Second piece of content.
+  </Col>
+  <Col>
+    **Column 3**
+
+    Third piece of content.
+  </Col>
+</Row>
+
+## Props Reference
+
+### Row Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `cols` | `number` | `1` | Grid column count. |
+| `className` | `string` | — | Additional CSS classes. |
+| `children` | `ReactNode` | — | `Col` components. |
+
+### Col Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `sticky` | `boolean` | `false` | Enables `xl:sticky top-24` positioning. Keeps the column visible while adjacent content scrolls. |
+| `rows` | `number` | `1` | Number of CSS grid rows this column spans. |
+| `gap` | `number` | `4` | Spacing (Tailwind scale) between items inside the column. |
+| `children` | `ReactNode` | — | Column content. |

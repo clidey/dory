@@ -1,0 +1,91 @@
+---
+title: 'Configuration'
+description: 'Configure your Dory site with dory.json — branding, navigation, fonts, colors, and more.'
+---
+
+# Configuration
+
+All Dory configuration lives in a single `dory.json` file in your docs directory. Here is a complete example:
+
+```json
+{
+  "name": "My Docs",
+  "title": "My Docs — Developer Reference",
+  "description": "The official documentation for My Project.",
+  "url": "https://docs.myproject.com",
+  "image": "/og-card.png",
+  "twitter": "@myhandle",
+  "favicon": "./favicon.svg",
+  "colors": {
+    "primary": "#6366f1",
+    "light": "#818cf8",
+    "dark": "#4f46e5"
+  },
+  "fonts": {
+    "family": "Inter",
+    "source": "https://fonts.gstatic.com/...",
+    "format": "woff2"
+  },
+  "logo": {
+    "light": "./logo/logo.svg",
+    "dark": "./logo/logo-dark.svg"
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": ["introduction", "installation"]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Endpoints",
+            "pages": ["api/create", "api/update", "api/delete"]
+          }
+        ]
+      }
+    ]
+  },
+  "analytics": {
+    "posthog": {
+      "token": "phc_your_token",
+      "apiHost": "https://us.i.posthog.com"
+    }
+  }
+}
+```
+
+## Top-Level Fields
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `name` | Yes | Site name shown in the header and browser tab. |
+| `title` | No | Custom page title. Defaults to `name`. |
+| `description` | No | Short description used for SEO. |
+| `url` | No | Your site's URL, used for social sharing previews. |
+| `image` | No | Preview image shown when sharing links on social media. |
+| `twitter` | No | Your Twitter/X handle for social meta tags. |
+| `favicon` | Yes | Path to your favicon file (SVG or PNG). |
+| `colors` | No | Brand colors. See [Theming](/configuration/theming). |
+| `fonts` | No | Custom font. See [Fonts](/configuration/fonts). |
+| `logo` | Yes | Logo paths for light and dark mode. |
+| `navigation` | Yes | Navigation structure. See [Navigation](/configuration/navigation). |
+| `analytics` | No | Analytics integrations. See [Analytics](/configuration/analytics). |
+| `embed` | No | Embeddable widget config. See [Embed](/configuration/embed). |
+
+## Configuration Sections
+
+<CardGroup cols={2}>
+  <Card title="Navigation" href="/configuration/navigation" icon="map" description="Configure tabs, groups, and pages in the sidebar." />
+  <Card title="Theming" href="/configuration/theming" icon="palette" description="Set primary, light, and dark brand colors." />
+  <Card title="Fonts" href="/configuration/fonts" icon="type" description="Use a custom web font from Google Fonts or any CDN." />
+  <Card title="Analytics" href="/configuration/analytics" icon="bar-chart" description="Integrate PostHog for page view tracking." />
+  <Card title="Embed" href="/configuration/embed" icon="code-2" description="Configure the embeddable widget for external sites." />
+  <Card title="Full Reference" href="/configuration/dory-json" icon="file-text" description="Complete dory.json reference with all fields." />
+</CardGroup>

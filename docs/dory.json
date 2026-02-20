@@ -1,19 +1,21 @@
 {
-  "name": "Docucod",
-  "url": "https://docucod.com",
-  "description": "Docucod generates and maintains up-to-date documentation from your codebase.",
-  "image": "/og-card.png",
-  "twitter": "@ClideyOfficial",
+  "name": "Dory",
+  "url": "https://dory.clidey.com",
+  "description": "Static documentation site generator for modern teams. Build beautiful docs from MDX files.",
   "favicon": "./favicon.svg",
   "colors": {
-    "primary": "#0ea5e9",
-    "light": "#0C8BC6",
-    "dark": "#0284c7"
+    "primary": "#6366f1",
+    "light": "#818cf8",
+    "dark": "#4f46e5"
   },
   "fonts": {
-    "family": "Montserrat",
-    "source": "https://fonts.gstatic.com/s/googlesansflex/v5/t5sJIQcYNIWbFgDgAAzZ34auoVyXkJCOvp3SFWJbN5hF8Ju1x6sKCyp0l9sI40swNJwGpVd4AZzz0v6lJ4qFXNZhGjLvDSkV4USKMo6qQzwliVdHAy9jxTDHg_ugnAakpwGc-cxgUqDCIUI.woff2",
+    "family": "Inter",
+    "source": "https://fonts.gstatic.com/s/inter/v19/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfAZ9hiJ-Ek-_EeA.woff2",
     "format": "woff2"
+  },
+  "logo": {
+    "light": "./logo/logo.svg",
+    "dark": "./logo/logo.svg"
   },
   "navigation": {
     "tabs": [
@@ -23,52 +25,54 @@
           {
             "group": "Getting Started",
             "pages": [
-              "introduction"
+              "introduction",
+              "getting-started/installation",
+              "getting-started/quick-start",
+              "getting-started/configuration"
             ]
           },
           {
-            "group": "Features",
+            "group": "Components",
             "pages": [
-              "features"
+              "components/overview",
+              "components/typography",
+              "components/code-blocks",
+              "components/callouts",
+              "components/cards",
+              "components/accordion",
+              "components/expandable",
+              "components/steps",
+              "components/tables",
+              "components/lists",
+              "components/icons",
+              "components/tags",
+              "components/images",
+              "components/layout",
+              "components/source",
+              "components/mermaid",
+              "components/latex"
             ]
           },
           {
-            "group": "Playground",
+            "group": "Interactive Playgrounds",
             "pages": [
-              "websocket-playground-demo"
+              "playgrounds/api-playground",
+              "playgrounds/websocket-playground"
             ]
           },
           {
-            "group": "API Reference",
+            "group": "Configuration",
             "pages": [
-              "api-reference/operations/create",
-              "api-reference/operations/get",
-              "api-reference/operations/update",
-              "api-reference/operations/delete"
-            ]
-          },
-          {
-            "group": "WebSocket API Reference",
-            "pages": [
-              "api-reference/websocket-operations/send-chat-message",
-              "api-reference/websocket-operations/receive-chat-message",
-              "api-reference/websocket-operations/receive-notifications",
-              "api-reference/websocket-operations/send-presence-update",
-              "api-reference/websocket-operations/receive-presence-update"
+              "configuration/dory-json",
+              "configuration/navigation",
+              "configuration/theming",
+              "configuration/fonts",
+              "configuration/analytics",
+              "configuration/embed"
             ]
           }
         ]
       }
     ]
-  },
-  "logo": {
-    "light": "./logo/logo.svg",
-    "dark": "./logo/logo.svg"
-  },
-  "analytics": {
-    "posthog": {
-      "token": "phc_hxwfcMiIgSXYKkbWl9zpQE0HaPPmlRaVXCWODricYu1",
-      "apiHost": "https://us.i.posthog.com"
-    }
   }
 }

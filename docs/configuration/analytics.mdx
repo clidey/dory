@@ -1,0 +1,78 @@
+---
+title: 'Analytics'
+description: 'Integrate PostHog analytics for page view tracking and user behavior insights.'
+---
+
+# Analytics
+
+Dory supports [PostHog](https://posthog.com) for analytics. When configured, Dory automatically tracks page views as users navigate your documentation.
+
+## Configuration
+
+```json
+"analytics": {
+  "posthog": {
+    "token": "phc_your_project_api_key",
+    "apiHost": "https://us.i.posthog.com"
+  }
+}
+```
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `posthog.token` | `string` | Your PostHog project API key (starts with `phc_`). |
+| `posthog.apiHost` | `string` | PostHog instance URL. Use `https://us.i.posthog.com` for US cloud or `https://eu.i.posthog.com` for EU cloud. |
+
+## Setup
+
+<Steps>
+  <Step title="Create a PostHog account">
+    Sign up at [posthog.com](https://posthog.com). The free tier supports up to 1 million events per month.
+  </Step>
+  <Step title="Create a project">
+    In the PostHog dashboard, create a new project for your documentation site.
+  </Step>
+  <Step title="Copy your API key">
+    Go to **Project Settings → Project API Key**. Copy the key that starts with `phc_`.
+  </Step>
+  <Step title="Add to dory.json">
+    Add the `analytics` block to your `dory.json`:
+
+    ```json
+    "analytics": {
+      "posthog": {
+        "token": "phc_your_key_here",
+        "apiHost": "https://us.i.posthog.com"
+      }
+    }
+    ```
+  </Step>
+  <Step title="Rebuild and deploy">
+    Run `dory build` and redeploy. Page views will start appearing in your PostHog dashboard.
+  </Step>
+</Steps>
+
+## What is Tracked
+
+By default, Dory tracks:
+- **Page views** — every navigation event, with the full page path
+- **Session duration** — how long users spend reading each page
+
+No personally identifiable information is collected beyond what PostHog captures by default (IP geolocation, browser/OS).
+
+## Self-Hosted PostHog
+
+If you run a self-hosted PostHog instance, set `apiHost` to your instance URL:
+
+```json
+"analytics": {
+  "posthog": {
+    "token": "phc_your_key",
+    "apiHost": "https://posthog.yourdomain.com"
+  }
+}
+```
+
+<Note>
+  Analytics are only active in production builds. They are disabled during local development (`pnpm run dev`) to avoid polluting your analytics data.
+</Note>

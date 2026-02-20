@@ -1,0 +1,179 @@
+---
+title: 'Code Blocks'
+description: 'Syntax-highlighted code blocks with multi-language tab groups, copy button, and HTTP method badges.'
+---
+
+# Code Blocks
+
+Dory provides rich code block components with syntax highlighting, tab groups, and interactive copy functionality.
+
+## Basic Code Block
+
+Use triple backticks with an optional language identifier:
+
+````mdx
+```python
+def greet(name: str) -> str:
+    return f"Hello, {name}!"
+
+print(greet("World"))
+```
+````
+
+**Output:**
+
+```python
+def greet(name: str) -> str:
+    return f"Hello, {name}!"
+
+print(greet("World"))
+```
+
+## Supported Languages
+
+Dory supports syntax highlighting for 20+ languages:
+
+<Row>
+  <Col>
+    - `python`
+    - `javascript` / `js`
+    - `typescript` / `ts`
+    - `jsx` / `tsx`
+    - `java`
+    - `c`, `cpp`, `c#`
+    - `rust`
+    - `go`
+  </Col>
+  <Col>
+    - `ruby`
+    - `php`
+    - `swift`
+    - `kotlin`
+    - `bash`
+    - `json`
+    - `yaml` / `toml`
+    - `html` / `css`
+    - `sql`
+    - `graphql`
+  </Col>
+</Row>
+
+## CodeGroup — Multi-Language Tabs
+
+Use `<CodeGroup>` to show the same code in multiple languages. Each child code block becomes a tab.
+
+````mdx
+<CodeGroup>
+  ```python
+  import requests
+
+  response = requests.get("https://api.example.com/users")
+  print(response.json())
+  ```
+  ```javascript
+  const response = await fetch("https://api.example.com/users");
+  const data = await response.json();
+  console.log(data);
+  ```
+  ```go
+  resp, err := http.Get("https://api.example.com/users")
+  if err != nil {
+      log.Fatal(err)
+  }
+  defer resp.Body.Close()
+  ```
+</CodeGroup>
+````
+
+**Output:**
+
+<CodeGroup>
+  ```python
+  import requests
+
+  response = requests.get("https://api.example.com/users")
+  print(response.json())
+  ```
+  ```javascript
+  const response = await fetch("https://api.example.com/users");
+  const data = await response.json();
+  console.log(data);
+  ```
+  ```go
+  resp, err := http.Get("https://api.example.com/users")
+  if err != nil {
+      log.Fatal(err)
+  }
+  defer resp.Body.Close()
+  ```
+</CodeGroup>
+
+### CodeGroup with Title
+
+Add a `title` prop to label the group:
+
+````mdx
+<CodeGroup title="Fetch Users">
+  ```python
+  import requests
+  response = requests.get("https://api.example.com/users")
+  ```
+  ```typescript
+  const res = await fetch("https://api.example.com/users");
+  ```
+</CodeGroup>
+````
+
+**Output:**
+
+<CodeGroup title="Fetch Users">
+  ```python
+  import requests
+  response = requests.get("https://api.example.com/users")
+  ```
+  ```typescript
+  const res = await fetch("https://api.example.com/users");
+  ```
+</CodeGroup>
+
+## HTTP Method Badges
+
+Add `tag` and `label` to a code block inside a `CodeGroup` to show HTTP method badges:
+
+````mdx
+<CodeGroup>
+  ```bash tag="GET" label="/api/users"
+  curl https://api.example.com/users
+  ```
+  ```bash tag="POST" label="/api/users"
+  curl -X POST https://api.example.com/users \
+    -H "Content-Type: application/json" \
+    -d '{"name": "Alice"}'
+  ```
+</CodeGroup>
+````
+
+**Output:**
+
+<CodeGroup>
+  ```bash tag="GET" label="/api/users"
+  curl https://api.example.com/users
+  ```
+  ```bash tag="POST" label="/api/users"
+  curl -X POST https://api.example.com/users \
+    -H "Content-Type: application/json" \
+    -d '{"name": "Alice"}'
+  ```
+</CodeGroup>
+
+## Inline Code
+
+Use single backticks for inline `code` within prose text.
+
+```mdx
+Call the `greet()` function with a `name` parameter.
+```
+
+## Copy Button
+
+All code blocks include a **copy button** that appears on hover. It copies the raw code to the clipboard and shows a checkmark for 1 second.

@@ -1,0 +1,122 @@
+---
+title: 'Lists'
+description: 'Styled unordered and ordered lists using standard Markdown or explicit list components.'
+---
+
+# Lists
+
+Dory supports standard Markdown lists and provides explicit `<UnorderedList>`, `<OrderedList>`, and `<ListItem>` components.
+
+## Unordered List
+
+Use standard Markdown syntax:
+
+```mdx
+- First item
+- Second item
+  - Nested item
+  - Another nested item
+- Third item
+```
+
+**Output:**
+
+- First item
+- Second item
+  - Nested item
+  - Another nested item
+- Third item
+
+## Ordered List
+
+```mdx
+1. Clone the repository
+2. Install dependencies
+3. Configure your environment
+4. Run the development server
+```
+
+**Output:**
+
+1. Clone the repository
+2. Install dependencies
+3. Configure your environment
+4. Run the development server
+
+## Mixed Lists
+
+Combine ordered and unordered lists:
+
+```mdx
+1. Choose an authentication method:
+   - Bearer token (recommended)
+   - API key in query string
+   - Basic authentication
+2. Generate credentials in the dashboard
+3. Include credentials in every request
+```
+
+**Output:**
+
+1. Choose an authentication method:
+   - Bearer token (recommended)
+   - API key in query string
+   - Basic authentication
+2. Generate credentials in the dashboard
+3. Include credentials in every request
+
+## Explicit Components
+
+Use explicit components when building lists programmatically or with dynamic content:
+
+```mdx
+<UnorderedList>
+  <ListItem>Supports 20+ programming languages</ListItem>
+  <ListItem>Copy button on all code blocks</ListItem>
+  <ListItem>Multi-language tab groups</ListItem>
+</UnorderedList>
+```
+
+**Output:**
+
+<UnorderedList>
+  <ListItem>Supports 20+ programming languages</ListItem>
+  <ListItem>Copy button on all code blocks</ListItem>
+  <ListItem>Multi-language tab groups</ListItem>
+</UnorderedList>
+
+```mdx
+<OrderedList>
+  <ListItem>Install the Dory CLI</ListItem>
+  <ListItem>Create your dory.json config</ListItem>
+  <ListItem>Write MDX pages</ListItem>
+  <ListItem>Run dory build</ListItem>
+</OrderedList>
+```
+
+**Output:**
+
+<OrderedList>
+  <ListItem>Install the Dory CLI</ListItem>
+  <ListItem>Create your dory.json config</ListItem>
+  <ListItem>Write MDX pages</ListItem>
+  <ListItem>Run dory build</ListItem>
+</OrderedList>
+
+## Rich List Items
+
+Standard Markdown list items support inline formatting:
+
+```mdx
+- **Bold item** — important information
+- *Italic item* — supplementary detail
+- Item with `inline code` — technical terms
+- Item with a [link](https://dory.clidey.com) — external reference
+```
+
+**Output:**
+
+- **Bold item** — important information
+- *Italic item* — supplementary detail
+- Item with `inline code` — technical terms
+- Item with a [link](https://dory.clidey.com) — external reference

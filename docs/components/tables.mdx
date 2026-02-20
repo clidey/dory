@@ -1,0 +1,106 @@
+---
+title: 'Tables'
+description: 'Responsive tables with styled headers and cells using standard Markdown or Table components.'
+---
+
+# Tables
+
+Dory renders tables from standard Markdown syntax and also provides `<Table>`, `<Th>`, and `<Td>` components for programmatic use.
+
+## Markdown Tables
+
+Use standard Markdown table syntax:
+
+```mdx
+| Name | Type | Required | Description |
+| --- | --- | --- | --- |
+| `id` | `string` | Yes | Unique identifier. |
+| `name` | `string` | Yes | Display name. |
+| `email` | `string` | No | Email address. |
+| `created_at` | `string` | No | ISO 8601 timestamp. |
+```
+
+**Output:**
+
+| Name | Type | Required | Description |
+| --- | --- | --- | --- |
+| `id` | `string` | Yes | Unique identifier. |
+| `name` | `string` | Yes | Display name. |
+| `email` | `string` | No | Email address. |
+| `created_at` | `string` | No | ISO 8601 timestamp. |
+
+## Alignment
+
+Use colons in the separator row to control column alignment:
+
+```mdx
+| Left | Center | Right |
+| :--- | :---: | ---: |
+| text | text | text |
+| longer text | longer text | longer text |
+```
+
+**Output:**
+
+| Left | Center | Right |
+| :--- | :---: | ---: |
+| text | text | text |
+| longer text | longer text | longer text |
+
+## Configuration Reference Table
+
+Tables work well for configuration references:
+
+```mdx
+| Field | Type | Default | Description |
+| --- | --- | --- | --- |
+| `name` | `string` | — | Site name shown in the header. |
+| `colors.primary` | `string` | `#6366f1` | Brand primary color (hex). |
+| `fonts.family` | `string` | System font | Font family name. |
+| `navigation.tabs` | `array` | `[]` | Navigation tab definitions. |
+```
+
+**Output:**
+
+| Field | Type | Default | Description |
+| --- | --- | --- | --- |
+| `name` | `string` | — | Site name shown in the header. |
+| `colors.primary` | `string` | `#6366f1` | Brand primary color (hex). |
+| `fonts.family` | `string` | System font | Font family name. |
+| `navigation.tabs` | `array` | `[]` | Navigation tab definitions. |
+
+## HTTP Status Code Table
+
+```mdx
+| Status | Code | Description |
+| --- | --- | --- |
+| OK | `200` | Request succeeded. |
+| Created | `201` | Resource created successfully. |
+| Bad Request | `400` | Invalid parameters or missing required fields. |
+| Unauthorized | `401` | Missing or invalid authentication token. |
+| Forbidden | `403` | Authenticated but lacking permission. |
+| Not Found | `404` | Resource does not exist. |
+| Rate Limited | `429` | Too many requests. Check `Retry-After` header. |
+| Server Error | `500` | Unexpected server error. |
+```
+
+**Output:**
+
+| Status | Code | Description |
+| --- | --- | --- |
+| OK | `200` | Request succeeded. |
+| Created | `201` | Resource created successfully. |
+| Bad Request | `400` | Invalid parameters or missing required fields. |
+| Unauthorized | `401` | Missing or invalid authentication token. |
+| Forbidden | `403` | Authenticated but lacking permission. |
+| Not Found | `404` | Resource does not exist. |
+| Rate Limited | `429` | Too many requests. Check `Retry-After` header. |
+| Server Error | `500` | Unexpected server error. |
+
+## Long Tables
+
+Tables are wrapped in a horizontally scrollable container, so wide tables work on mobile without breaking the layout.
+
+<Note>
+  Tables are automatically wrapped in `overflow-x-auto` — wide tables scroll horizontally rather than overflowing the page.
+</Note>

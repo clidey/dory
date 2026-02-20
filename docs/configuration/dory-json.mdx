@@ -1,0 +1,191 @@
+---
+title: 'dory.json Reference'
+description: 'Complete reference for all fields in the dory.json configuration file.'
+---
+
+# dory.json Reference
+
+The `dory.json` file is the single configuration file for your Dory documentation site. It controls navigation, branding, analytics, and more.
+
+## Full Example
+
+```json
+{
+  "name": "My Docs",
+  "title": "My Docs — Developer Reference",
+  "description": "The official developer documentation.",
+  "url": "https://docs.example.com",
+  "image": "/og-card.png",
+  "twitter": "@yourhandle",
+  "favicon": "./favicon.svg",
+  "colors": {
+    "primary": "#6366f1",
+    "light": "#818cf8",
+    "dark": "#4f46e5"
+  },
+  "fonts": {
+    "family": "Inter",
+    "source": "https://fonts.gstatic.com/s/inter/v19/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfAZ9hiJ-Ek-_EeA.woff2",
+    "format": "woff2"
+  },
+  "logo": {
+    "light": "./logo/logo.svg",
+    "dark": "./logo/logo-dark.svg"
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": ["introduction", "installation"]
+          }
+        ]
+      }
+    ]
+  },
+  "analytics": {
+    "posthog": {
+      "token": "phc_your_token",
+      "apiHost": "https://us.i.posthog.com"
+    }
+  },
+  "embed": {
+    "enabled": true,
+    "defaults": {
+      "position": "bottom-right",
+      "width": 400,
+      "height": 600,
+      "theme": "system"
+    }
+  }
+}
+```
+
+## Site Identity
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `name` | **Yes** | Site name shown in the header and browser tab. |
+| `title` | No | Custom title override. Defaults to `name`. |
+| `description` | No | Meta description for SEO and social sharing. |
+| `url` | No | Canonical URL used when sharing links. |
+| `image` | No | Preview image shown when links are shared on social media. |
+| `twitter` | No | Your Twitter/X handle (e.g. `"@yourhandle"`). |
+| `favicon` | **Yes** | Path to favicon file. Supports SVG and PNG. |
+
+## Colors
+
+```json
+"colors": {
+  "primary": "#6366f1",
+  "light": "#818cf8",
+  "dark": "#4f46e5"
+}
+```
+
+| Field | Description |
+| --- | --- |
+| `primary` | Main brand color. Used for links, active states, and accents. |
+| `light` | Lighter variant used in light mode. |
+| `dark` | Darker variant used in dark mode. |
+
+See [Theming](/configuration/theming) for more detail.
+
+## Fonts
+
+```json
+"fonts": {
+  "family": "Inter",
+  "source": "https://fonts.gstatic.com/...",
+  "format": "woff2"
+}
+```
+
+| Field | Description |
+| --- | --- |
+| `family` | The font name (e.g. `"Inter"`, `"Montserrat"`). |
+| `source` | Direct URL to the font file. |
+| `format` | Font format — use `"woff2"` for best compatibility. |
+
+See [Fonts](/configuration/fonts) for more detail.
+
+## Logo
+
+```json
+"logo": {
+  "light": "./logo/logo.svg",
+  "dark": "./logo/logo-dark.svg"
+}
+```
+
+| Field | Description |
+| --- | --- |
+| `light` | Path to logo for light mode. |
+| `dark` | Path to logo for dark mode. Can be the same as `light` if your logo works on both backgrounds. |
+
+## Navigation
+
+```json
+"navigation": {
+  "tabs": [
+    {
+      "tab": "Documentation",
+      "groups": [
+        {
+          "group": "Getting Started",
+          "pages": ["introduction", "installation"]
+        }
+      ]
+    }
+  ]
+}
+```
+
+See [Navigation](/configuration/navigation) for the full structure reference.
+
+## Analytics
+
+```json
+"analytics": {
+  "posthog": {
+    "token": "phc_your_token",
+    "apiHost": "https://us.i.posthog.com"
+  }
+}
+```
+
+See [Analytics](/configuration/analytics) for setup instructions.
+
+## Embed
+
+```json
+"embed": {
+  "enabled": true,
+  "defaults": {
+    "position": "bottom-right",
+    "width": 400,
+    "height": 600,
+    "theme": "system",
+    "showOverlay": true,
+    "closeOnEscape": true,
+    "closeOnOverlayClick": true
+  },
+  "branding": {
+    "showLogo": true,
+    "showName": true
+  },
+  "features": {
+    "search": true,
+    "toc": true,
+    "codeBlocks": true,
+    "mermaid": true,
+    "katex": true,
+    "apiPlayground": true,
+    "darkMode": true
+  }
+}
+```
+
+See [Embed](/configuration/embed) for embedding configuration.

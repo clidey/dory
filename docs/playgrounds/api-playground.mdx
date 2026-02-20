@@ -1,0 +1,122 @@
+---
+title: 'API Playground'
+description: 'Interactive HTTP API testing built directly into your documentation. Test endpoints with real requests.'
+---
+
+# API Playground
+
+The `<APIPlayground>` component embeds a fully interactive HTTP client inside your documentation. Readers can test API endpoints with real requests without leaving the page.
+
+## Live Demo
+
+Try it now — this makes a real HTTP request to a public API:
+
+<APIPlayground
+  method="GET"
+  url="https://jsonplaceholder.typicode.com/users"
+  title="List Users"
+  description="Fetches a list of all users from the JSONPlaceholder test API."
+  parameters={[
+    { name: "_limit", type: "number", required: false, description: "Limit the number of results.", defaultValue: "10" }
+  ]}
+/>
+
+## POST Request with Body
+
+<APIPlayground
+  method="POST"
+  url="https://jsonplaceholder.typicode.com/posts"
+  title="Create Post"
+  description="Creates a new post. JSONPlaceholder simulates the creation and returns the new object."
+  headers={{ "Content-Type": "application/json" }}
+  body={{ "title": "My Post", "body": "Post content here.", "userId": 1 }}
+/>
+
+## Authenticated Endpoint
+
+<APIPlayground
+  method="GET"
+  url="https://jsonplaceholder.typicode.com/users/1"
+  title="Get User (with Auth)"
+  description="Demonstrates Bearer token authentication. The token is sent in the Authorization header."
+  authType="bearer"
+  servers={[
+    { url: "https://jsonplaceholder.typicode.com", description: "Production" },
+    { url: "https://staging.jsonplaceholder.typicode.com", description: "Staging" }
+  ]}
+/>
+
+## Usage in MDX
+
+```mdx
+<APIPlayground
+  method="GET"
+  url="https://api.example.com/users"
+  title="List Users"
+  description="Returns a paginated list of users."
+  parameters={[
+    {
+      name: "page",
+      type: "number",
+      required: false,
+      description: "Page number (1-indexed).",
+      defaultValue: "1"
+    },
+    {
+      name: "limit",
+      type: "number",
+      required: false,
+      description: "Items per page.",
+      defaultValue: "20"
+    }
+  ]}
+  headers={{
+    "Accept": "application/json"
+  }}
+  authType="bearer"
+/>
+```
+
+## Features
+
+<CardGroup cols={2}>
+  <Card title="Query Parameters" icon="sliders" description="Add, edit, and remove URL query parameters with a visual editor." />
+  <Card title="Request Headers" icon="list" description="Set custom headers including Content-Type, Accept, and custom headers." />
+  <Card title="Request Body" icon="file-json" description="Edit JSON request body with syntax highlighting." />
+  <Card title="Authentication" icon="lock" description="Supports Bearer token, API key, Basic auth, and no auth." />
+  <Card title="Multiple Servers" icon="server" description="Switch between server environments (production, staging, etc.)." />
+  <Card title="Response Display" icon="eye" description="Shows status code, response time, response headers, and formatted body." />
+</CardGroup>
+
+## Authentication Types
+
+| `authType` | Description | Fields |
+| --- | --- | --- |
+| `none` | No authentication | — |
+| `bearer` | Bearer token | Token field |
+| `apiKey` | API key in header | Key name + value |
+| `basic` | HTTP Basic auth | Username + password |
+
+## Props Reference
+
+| Prop | Type | Required | Description |
+| --- | --- | --- | --- |
+| `method` | `'GET' \| 'POST' \| 'PUT' \| 'DELETE'` | Yes | HTTP method. |
+| `url` | `string` | Yes | Endpoint URL. |
+| `title` | `string` | No | Display title. |
+| `description` | `string` | No | Description shown above the playground. |
+| `parameters` | `Parameter[]` | No | Pre-populated query parameters. |
+| `headers` | `Record<string, string>` | No | Pre-populated request headers. |
+| `body` | `object` | No | Pre-populated JSON request body. |
+| `authType` | `'bearer' \| 'apiKey' \| 'basic' \| 'none'` | No | Authentication method. |
+| `servers` | `Array<{ url, description }>` | No | Server environment options. |
+
+### Parameter Object
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `name` | `string` | Parameter name. |
+| `type` | `string` | Type hint (e.g. `"string"`, `"number"`). |
+| `required` | `boolean` | Whether the parameter is required. |
+| `description` | `string` | Parameter description. |
+| `defaultValue` | `string` | Pre-populated value. |

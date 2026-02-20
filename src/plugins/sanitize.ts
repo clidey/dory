@@ -24,7 +24,7 @@ const KNOWN_COMPONENTS = [
   'Callout', 'Note', 'Warning', 'Info', 'Tip', 'Check',
   'Latex', 'API', 'Expandable', 'ResponseField', 'Properties', 'Property',
   'Steps', 'Step', 'table', 'th', 'td', 'ul', 'ol', 'li',
-  'APIPlayground', 'WebSocketPlayground', 'AsyncAPI', 'Source',
+  'APIPlayground', 'WebSocketPlayground', 'AsyncAPI', 'Source', 'Tag',
   // Common HTML elements that should be preserved
   'div', 'span', 'br', 'hr', 'strong', 'em', 'b', 'i', 'u', 's',
   'blockquote', 'nav', 'section', 'article', 'header', 'footer', 'main',

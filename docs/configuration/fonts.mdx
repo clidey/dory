@@ -1,0 +1,86 @@
+---
+title: 'Fonts'
+description: 'Configure a custom web font for your documentation site using Google Fonts or any CDN.'
+---
+
+# Fonts
+
+Dory supports custom web fonts configured in `dory.json`. By default, the site uses your system font — you can swap in any Google Font or custom font in a few lines.
+
+## Configuration
+
+```json
+"fonts": {
+  "family": "Inter",
+  "source": "https://fonts.gstatic.com/s/inter/v19/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfAZ9hiJ-Ek-_EeA.woff2",
+  "format": "woff2"
+}
+```
+
+| Field | Description |
+| --- | --- |
+| `family` | The font name (e.g. `"Inter"`, `"Montserrat"`, `"Fira Code"`). |
+| `source` | Direct URL to the font file. See below for how to get this from Google Fonts. |
+| `format` | Font format. Use `"woff2"` for the best browser support. |
+
+## Getting a Font URL from Google Fonts
+
+<Steps>
+  <Step title="Visit Google Fonts">
+    Go to [fonts.google.com](https://fonts.google.com) and find the font you want.
+  </Step>
+  <Step title="Select a weight">
+    Click the font, then select the weight you want (e.g. Regular 400). Click **Get font** → **Get embed code**.
+  </Step>
+  <Step title="Copy the font URL">
+    In the embed panel, switch to the **CSS** tab. Find the line that starts with `src: url(` and copy the URL inside the parentheses.
+
+    For Inter, it looks like this:
+    ```
+    https://fonts.gstatic.com/s/inter/v19/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfAZ9hiJ-Ek-_EeA.woff2
+    ```
+  </Step>
+  <Step title="Update dory.json">
+    Set `family` to the font name, `source` to the URL you copied, and `format` to `"woff2"`.
+  </Step>
+</Steps>
+
+## Popular Font Configurations
+
+<AccordionGroup>
+  <Accordion title="Inter" icon="type">
+    ```json
+    "fonts": {
+      "family": "Inter",
+      "source": "https://fonts.gstatic.com/s/inter/v19/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfAZ9hiJ-Ek-_EeA.woff2",
+      "format": "woff2"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Montserrat" icon="type">
+    ```json
+    "fonts": {
+      "family": "Montserrat",
+      "source": "https://fonts.gstatic.com/s/montserrat/v29/JTUSjIg1_i6t8kCHKm459WlhyyTh89Y.woff2",
+      "format": "woff2"
+    }
+    ```
+  </Accordion>
+  <Accordion title="Geist (Vercel)" icon="type">
+    ```json
+    "fonts": {
+      "family": "Geist",
+      "source": "https://fonts.gstatic.com/s/geist/v1/gyByhwUxId8gMEwcGFWNOITD-w.woff2",
+      "format": "woff2"
+    }
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Default Font
+
+If no `fonts` configuration is provided, Dory uses the operating system's default font — which looks clean and loads instantly with no extra network request.
+
+<Tip>
+  For a polished look, set a custom font that matches your brand. Google Fonts has hundreds of free options and the setup takes under a minute.
+</Tip>

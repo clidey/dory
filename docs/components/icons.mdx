@@ -1,0 +1,119 @@
+---
+title: 'Icons'
+description: 'Inline icons from the Lucide and FontAwesome libraries using the Icon component.'
+---
+
+# Icons
+
+The `<Icon>` component renders icons inline within text or as standalone visual elements. It supports **Lucide** icons by default and falls back to **FontAwesome** when a Lucide icon isn't found.
+
+## Basic Usage
+
+```mdx
+<Icon icon="rocket" />
+<Icon icon="code-2" />
+<Icon icon="check-circle" />
+```
+
+**Output:**
+
+<Icon icon="rocket" /> <Icon icon="code-2" /> <Icon icon="check-circle" />
+
+## With Color
+
+```mdx
+<Icon icon="heart" color="#ef4444" />
+<Icon icon="star" color="#f59e0b" />
+<Icon icon="shield-check" color="#22c55e" />
+```
+
+**Output:**
+
+<Icon icon="heart" color="#ef4444" /> <Icon icon="star" color="#f59e0b" /> <Icon icon="shield-check" color="#22c55e" />
+
+## With Size
+
+```mdx
+<Icon icon="zap" size={16} />
+<Icon icon="zap" size={24} />
+<Icon icon="zap" size={40} />
+```
+
+**Output:**
+
+<Icon icon="zap" size={16} /> <Icon icon="zap" size={24} /> <Icon icon="zap" size={40} />
+
+## Lucide Icons in Context
+
+Icons work well alongside text:
+
+```mdx
+<Icon icon="terminal" size={16} /> Run `dory build` to compile your site.
+
+<Icon icon="package" size={16} /> Install with `npm install -g @clidey/dory`.
+
+<Icon icon="git-branch" size={16} /> Push the `dist/` directory to your hosting provider.
+```
+
+**Output:**
+
+<Icon icon="terminal" size={16} /> Run `dory build` to compile your site.
+
+<Icon icon="package" size={16} /> Install with `npm install -g @clidey/dory`.
+
+<Icon icon="git-branch" size={16} /> Push the `dist/` directory to your hosting provider.
+
+## FontAwesome Fallback
+
+When a Lucide icon isn't found, Dory falls back to FontAwesome. Specify the icon type with `iconType`:
+
+```mdx
+<Icon icon="github" iconType="brands" size={24} />
+<Icon icon="twitter" iconType="brands" size={24} />
+<Icon icon="npm" iconType="brands" size={24} />
+```
+
+**Output:**
+
+<Icon icon="github" iconType="brands" size={24} /> <Icon icon="twitter" iconType="brands" size={24} /> <Icon icon="npm" iconType="brands" size={24} />
+
+## Common Lucide Icon Names
+
+Icons use **kebab-case** names from the [Lucide icon library](https://lucide.dev):
+
+<Row>
+  <Col>
+    | Icon | Name |
+    | --- | --- |
+    | <Icon icon="rocket" size={18} /> | `rocket` |
+    | <Icon icon="code-2" size={18} /> | `code-2` |
+    | <Icon icon="layers" size={18} /> | `layers` |
+    | <Icon icon="settings" size={18} /> | `settings` |
+    | <Icon icon="zap" size={18} /> | `zap` |
+    | <Icon icon="lock" size={18} /> | `lock` |
+    | <Icon icon="globe" size={18} /> | `globe` |
+    | <Icon icon="package" size={18} /> | `package` |
+  </Col>
+  <Col>
+    | Icon | Name |
+    | --- | --- |
+    | <Icon icon="check-circle" size={18} /> | `check-circle` |
+    | <Icon icon="alert-triangle" size={18} /> | `alert-triangle` |
+    | <Icon icon="info" size={18} /> | `info` |
+    | <Icon icon="star" size={18} /> | `star` |
+    | <Icon icon="heart" size={18} /> | `heart` |
+    | <Icon icon="git-branch" size={18} /> | `git-branch` |
+    | <Icon icon="terminal" size={18} /> | `terminal` |
+    | <Icon icon="file-text" size={18} /> | `file-text` |
+  </Col>
+</Row>
+
+## Props Reference
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `icon` | `string` | — | Icon name in kebab-case (e.g. `"check-circle"`). |
+| `iconType` | `'solid' \| 'regular' \| 'brands'` | `'solid'` | FontAwesome icon type (used as fallback). |
+| `color` | `string` | Inherits from theme | CSS color value (hex, rgb, named color). |
+| `size` | `number` | `24` | Icon size in pixels. |
+| `className` | `string` | — | Additional CSS classes. |

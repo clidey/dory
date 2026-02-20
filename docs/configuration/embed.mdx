@@ -1,0 +1,143 @@
+---
+title: 'Embed'
+description: 'Embed your Dory documentation as a widget on any website using the embed loader script.'
+---
+
+# Embed
+
+Dory can be embedded as a floating widget on any website. Users click a button to open your documentation in an iframe overlay — without leaving the current page.
+
+## Configuration
+
+```json
+"embed": {
+  "enabled": true,
+  "defaults": {
+    "position": "bottom-right",
+    "width": 400,
+    "height": 600,
+    "theme": "system",
+    "showOverlay": true,
+    "closeOnEscape": true,
+    "closeOnOverlayClick": true
+  },
+  "branding": {
+    "showLogo": true,
+    "showName": true,
+    "customCSS": ""
+  },
+  "features": {
+    "search": true,
+    "toc": true,
+    "codeBlocks": true,
+    "mermaid": true,
+    "katex": true,
+    "apiPlayground": true,
+    "darkMode": true
+  },
+  "analytics": {
+    "enabled": true,
+    "trackEvents": true
+  },
+  "security": {
+    "allowedOrigins": ["https://yourdomain.com"],
+    "corsEnabled": true
+  },
+  "performance": {
+    "lazyLoadImages": true,
+    "prefetchPages": true,
+    "cacheStrategy": "stale-while-revalidate"
+  }
+}
+```
+
+## Adding the Embed Script
+
+Add the embed loader script to your website's HTML:
+
+```html
+<script
+  src="https://your-dory-site.com/embed.js"
+  data-dory-url="https://your-dory-site.com"
+  data-position="bottom-right"
+  data-theme="system"
+  async
+></script>
+```
+
+## Embed Options Reference
+
+### `defaults`
+
+| Field | Type | Default | Description |
+| --- | --- | --- | --- |
+| `position` | `string` | `"bottom-right"` | Widget position. Options: `"bottom-right"`, `"bottom-left"`, `"top-right"`, `"top-left"`. |
+| `width` | `number` | `400` | Widget width in pixels. |
+| `height` | `number` | `600` | Widget height in pixels. |
+| `theme` | `string` | `"system"` | Color theme. Options: `"light"`, `"dark"`, `"system"`. |
+| `showOverlay` | `boolean` | `true` | Show a dimmed overlay behind the widget. |
+| `closeOnEscape` | `boolean` | `true` | Close the widget when pressing Escape. |
+| `closeOnOverlayClick` | `boolean` | `true` | Close the widget when clicking the overlay. |
+
+### `branding`
+
+| Field | Type | Default | Description |
+| --- | --- | --- | --- |
+| `showLogo` | `boolean` | `true` | Show the site logo in the widget header. |
+| `showName` | `boolean` | `true` | Show the site name in the widget header. |
+| `customCSS` | `string` | — | Additional CSS injected into the widget iframe. |
+
+### `features`
+
+| Field | Type | Default | Description |
+| --- | --- | --- | --- |
+| `search` | `boolean` | `true` | Enable full-text search inside the widget. |
+| `toc` | `boolean` | `true` | Show the table of contents. |
+| `codeBlocks` | `boolean` | `true` | Enable syntax-highlighted code blocks. |
+| `mermaid` | `boolean` | `true` | Enable Mermaid diagram rendering. |
+| `katex` | `boolean` | `true` | Enable LaTeX math rendering. |
+| `apiPlayground` | `boolean` | `true` | Enable the interactive API playground. |
+| `darkMode` | `boolean` | `true` | Allow dark/light mode switching. |
+
+### `security`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `allowedOrigins` | `string[]` | List of allowed origins for the widget iframe. |
+| `corsEnabled` | `boolean` | Whether to enable CORS headers for embed requests. |
+
+## React SDK
+
+For React applications, use the React SDK instead of the script tag:
+
+```tsx
+import { DoryWidget } from "@clidey/dory/sdk/react";
+
+export default function App() {
+  return (
+    <>
+      <YourApp />
+      <DoryWidget
+        url="https://your-dory-site.com"
+        position="bottom-right"
+        theme="system"
+      />
+    </>
+  );
+}
+```
+
+## Vue SDK
+
+For Vue applications:
+
+```ts
+import { createDoryWidget } from "@clidey/dory/sdk/vue";
+
+const app = createApp(App);
+app.use(createDoryWidget({
+  url: "https://your-dory-site.com",
+  position: "bottom-right"
+}));
+app.mount("#app");
+```

@@ -1,0 +1,120 @@
+---
+title: 'Cards'
+description: 'Informational and linked cards in responsive grid layouts using Card and CardGroup.'
+---
+
+# Cards
+
+Cards are versatile components for showcasing features, navigation links, or grouped information.
+
+## Basic Card
+
+```mdx
+<Card title="Getting Started" icon="rocket" description="Set up your first Dory project in minutes." />
+```
+
+**Output:**
+
+<Card title="Getting Started" icon="rocket" description="Set up your first Dory project in minutes." />
+
+## Linked Card
+
+Add an `href` prop to make the entire card clickable:
+
+```mdx
+<Card
+  title="Installation"
+  icon="package"
+  href="/getting-started/installation"
+  description="Install Dory globally or as a project dependency."
+/>
+```
+
+**Output:**
+
+<Card
+  title="Installation"
+  icon="package"
+  href="/getting-started/installation"
+  description="Install Dory globally or as a project dependency."
+/>
+
+## Card with Children
+
+Add content inside the card for richer layouts:
+
+```mdx
+<Card title="API Rate Limits" icon="gauge">
+  The default rate limit is **1000 requests per hour** per API key.
+
+  - Burst limit: 100 requests per second
+  - Retry after: `Retry-After` header in 429 responses
+</Card>
+```
+
+**Output:**
+
+<Card title="API Rate Limits" icon="gauge">
+  The default rate limit is **1000 requests per hour** per API key.
+
+  - Burst limit: 100 requests per second
+  - Retry after: `Retry-After` header in 429 responses
+</Card>
+
+## CardGroup — Grid Layout
+
+Use `<CardGroup>` to arrange cards in a responsive grid:
+
+```mdx
+<CardGroup cols={2}>
+  <Card title="TypeScript" icon="code-2" description="Full type definitions included." />
+  <Card title="Open Source" icon="github" description="MIT licensed. Contributions welcome." />
+  <Card title="Zero Config" icon="zap" description="Works out of the box with sensible defaults." />
+  <Card title="Extensible" icon="plug" description="Customize themes, fonts, and components." />
+</CardGroup>
+```
+
+**Output:**
+
+<CardGroup cols={2}>
+  <Card title="TypeScript" icon="code-2" description="Full type definitions included." />
+  <Card title="Open Source" icon="github" description="Contributions welcome." />
+  <Card title="Zero Config" icon="zap" description="Works out of the box with sensible defaults." />
+  <Card title="Extensible" icon="plug" description="Customize themes, fonts, and components." />
+</CardGroup>
+
+### Three-Column Grid
+
+```mdx
+<CardGroup cols={3}>
+  <Card title="Build" icon="hammer" description="Compile MDX into a static site." />
+  <Card title="Preview" icon="eye" description="Serve the built site locally." />
+  <Card title="Deploy" icon="rocket" description="Upload dist/ to any static host." />
+</CardGroup>
+```
+
+**Output:**
+
+<CardGroup cols={3}>
+  <Card title="Build" icon="hammer" description="Compile MDX into a static site." />
+  <Card title="Preview" icon="eye" description="Serve the built site locally." />
+  <Card title="Deploy" icon="rocket" description="Upload dist/ to any static host." />
+</CardGroup>
+
+## Props Reference
+
+### Card Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `title` | `string` | Card heading. |
+| `description` | `string` | Optional subtitle text. |
+| `icon` | `string` | Lucide icon name (e.g. `"rocket"`, `"code-2"`). |
+| `href` | `string` | Makes the card a link. Navigates on click. |
+| `children` | `ReactNode` | Rich content rendered inside the card body. |
+
+### CardGroup Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `cols` | `1 \| 2 \| 3 \| 4` | `2` | Number of columns in the grid. Responsive — collapses to 1 on mobile. |

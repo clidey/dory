@@ -1,0 +1,109 @@
+---
+title: 'LaTeX Math'
+description: 'Render mathematical expressions and equations using KaTeX with the Latex component.'
+---
+
+# LaTeX Math
+
+The `<Latex>` component renders mathematical expressions using [KaTeX](https://katex.org). Use it for equations, formulas, and any mathematical notation.
+
+<Note>
+  In MDX, curly braces inside JSX content are parsed as JavaScript expressions. For LaTeX expressions containing curly braces (like `\frac{a}{b}`), use a JavaScript string literal: `{'\\frac{a}{b}'}`.
+</Note>
+
+## Basic Expressions
+
+Simple expressions without curly braces work directly:
+
+```mdx
+<Latex>E = mc^2</Latex>
+```
+
+<Latex>E = mc^2</Latex>
+
+```mdx
+<Latex>a^2 + b^2 = c^2</Latex>
+```
+
+<Latex>a^2 + b^2 = c^2</Latex>
+
+## Fractions and Derivatives
+
+For LaTeX with curly braces, wrap in a JS string literal:
+
+```mdx
+<Latex>{'\\frac{d}{dx}\\left(\\int_0^x f(t)\\,dt\\right) = f(x)'}</Latex>
+```
+
+<Latex>{'\\frac{d}{dx}\\left(\\int_0^x f(t)\\,dt\\right) = f(x)'}</Latex>
+
+```mdx
+<Latex>{'x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}'}</Latex>
+```
+
+<Latex>{'x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}'}</Latex>
+
+## Summation
+
+```mdx
+<Latex>{'\\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}'}</Latex>
+```
+
+<Latex>{'\\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}'}</Latex>
+
+## Integrals
+
+```mdx
+<Latex>{'\\int_{-\\infty}^{\\infty} e^{-x^2}\\,dx = \\sqrt{\\pi}'}</Latex>
+```
+
+<Latex>{'\\int_{-\\infty}^{\\infty} e^{-x^2}\\,dx = \\sqrt{\\pi}'}</Latex>
+
+## Normal Distribution
+
+```mdx
+<Latex>{'f(x) = \\frac{1}{\\sigma\\sqrt{2\\pi}}e^{-\\frac{(x-\\mu)^2}{2\\sigma^2}}'}</Latex>
+```
+
+<Latex>{'f(x) = \\frac{1}{\\sigma\\sqrt{2\\pi}}e^{-\\frac{(x-\\mu)^2}{2\\sigma^2}}'}</Latex>
+
+## Euler's Identity
+
+```mdx
+<Latex>e^{i\pi} + 1 = 0</Latex>
+```
+
+<Latex>{'e^{i\\pi} + 1 = 0'}</Latex>
+
+## Using Strings vs Direct Content
+
+<Row>
+  <Col>
+    **Direct content (works for simple expressions)**
+
+    ```mdx
+    <Latex>a^2 + b^2 = c^2</Latex>
+    ```
+
+    Works when the expression has no `{` or `}` characters.
+  </Col>
+  <Col>
+    **String literal (required for complex expressions)**
+
+    ```mdx
+    <Latex>{'\\frac{a}{b}'}</Latex>
+    ```
+
+    Required when the expression contains `{...}` braces. Use `\\` for backslashes in the string.
+  </Col>
+</Row>
+
+## Props Reference
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `children` | `string` | LaTeX expression string. |
+
+<Note>
+  KaTeX supports a large subset of LaTeX. See the [KaTeX supported functions](https://katex.org/docs/supported) documentation for the complete list.
+</Note>
