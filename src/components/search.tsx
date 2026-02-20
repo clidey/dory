@@ -374,6 +374,7 @@ function useSearchProps() {
   return {
     inputProps: {
       ref: inputRef,
+      readOnly: true,
       onClick() {
         setOpen(true)
       },

@@ -6,9 +6,12 @@ import { addToSearchIndex } from './search-index';
 
 const config = docsConfig as DoryConfig;
 
+// Eager-load all page modules so they're available synchronously.
+// This eliminates the async loading spinner in Routes and enables
+// proper hydrate() — the first render matches the SSR DOM.
 export const ALL_PAGES = Object.fromEntries(
-  Object.entries(import.meta.glob<{ default: ComponentType; }>('../../docs/**/*.mdx'))
-    .map(([path, loader]) => [pathFromFilename(path), loader])
+  Object.entries(import.meta.glob<{ default: ComponentType; }>('../../docs/**/*.mdx', { eager: true }))
+    .map(([path, mod]) => [pathFromFilename(path), mod])
 );
 export const ALL_OPENAPI = Object.fromEntries(
   Object.entries(import.meta.glob<{ default: string }>('../../docs/**/openapi.json', { query: 'raw', eager: true }))
@@ -60,6 +63,7 @@ export function pathFromFilename(filename: string): string {
 }
 
 function parseFrontMatter(content: string) {
+    if (typeof content !== 'string') return { data: {}, content: '' };
     const frontMatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
     if (!frontMatterMatch) return { data: {}, content };
     
@@ -78,11 +82,24 @@ function parseFrontMatter(content: string) {
 }
 
 export let completeFrontMatter: Record<string, any>[] = [];
+export function isFrontmatterReady() { return preloadedFrontMatter !== null; }
 let preloadedFrontMatter: Record<string, any>[] | null = null;
 
-// Preload frontmatter from JSON file (optimized approach)
+// Check for inlined frontmatter from SSR (available synchronously, no fetch needed)
+if (typeof window !== 'undefined' && (window as any).__DORY_FRONTMATTER__) {
+    preloadedFrontMatter = (window as any).__DORY_FRONTMATTER__;
+    completeFrontMatter = [...preloadedFrontMatter!];
+    for (const fm of preloadedFrontMatter!) {
+        updateNavigationTitle(fm.path, fm.title);
+    }
+    delete (window as any).__DORY_FRONTMATTER__;
+    // Build search index in the background after the page has fully rendered
+    setTimeout(() => addPreloadedContentToSearch(), 2000);
+}
+
+// Preload frontmatter from JSON file (fallback when no inline data)
 export async function preloadFrontmatter() {
-    if (preloadedFrontMatter) return; // Already loaded
+    if (preloadedFrontMatter) return; // Already loaded (inline or previous fetch)
 
     try {
         const response = await fetch('/frontmatter.json');
@@ -106,33 +123,23 @@ export async function preloadFrontmatter() {
     }
 }
 
-// Add preloaded content to search index (runs in background, never blocks rendering)
+// Add preloaded content to search index (runs in background, never blocks rendering).
+// Fetches pre-built search-content.json generated at build time — no ?raw glob needed.
 async function addPreloadedContentToSearch() {
-    if (!preloadedFrontMatter) return;
+    try {
+        const response = await fetch('/search-content.json');
+        if (!response.ok) return;
+        const searchContent: Array<{ path: string; title: string; content: string }> = await response.json();
 
-    const mdxFiles = import.meta.glob<{ default: string }>('../../docs/**/*.mdx', { query: '?raw' });
-    const fileEntries = Object.entries(mdxFiles);
-
-    // Index in batches to avoid firing hundreds of requests at once
-    const BATCH_SIZE = 10;
-    for (let i = 0; i < preloadedFrontMatter.length; i += BATCH_SIZE) {
-        const batch = preloadedFrontMatter.slice(i, i + BATCH_SIZE);
-        await Promise.all(
-            batch.map(async (fm) => {
-                const fileEntry = fileEntries.find(([filePath]) => pathFromFilename(filePath) === fm.path);
-                if (fileEntry) {
-                    try {
-                        const [, loader] = fileEntry;
-                        const rawContent = (await loader()).default;
-                        const { content } = parseFrontMatter(rawContent);
-
-                        await addToSearchIndex(fm.path, { title: fm.title }, content);
-                    } catch (error) {
-                        console.warn(`Failed to index ${fm.path}:`, error);
-                    }
-                }
-            })
-        );
+        for (const entry of searchContent) {
+            try {
+                await addToSearchIndex(entry.path, { title: entry.title }, entry.content);
+            } catch (error) {
+                console.warn(`Failed to index ${entry.path}:`, error);
+            }
+        }
+    } catch (error) {
+        console.warn('Failed to load search content:', error);
     }
 }
 
@@ -146,53 +153,40 @@ export async function loadMDXFrontMatterForPath(pathname: string) {
     // Check if already loaded in completeFrontMatter
     if (completeFrontMatter.find(fm => fm.path === pathname)) return;
 
-    // Fallback to dynamic loading
-    const mdxFiles = import.meta.glob<{ default: string }>('../../docs/**/*.mdx', { query: '?raw' });
-    const fileEntries = Object.entries(mdxFiles);
-
-    const fileEntry = fileEntries.find(([path]) => pathFromFilename(path) === pathname);
-    if (!fileEntry) return;
-
-    const [path, loader] = fileEntry;
-    const rawContent = (await loader()).default;
-    const { data, content } = parseFrontMatter(rawContent);
-    const filename = pathFromFilename(path);
-
-    updateNavigationTitle(filename, data.title);
-    await addToSearchIndex(filename, data, content);
-
-    const frontmatterItem = { ...data, path: filename };
-    completeFrontMatter = [...completeFrontMatter, frontmatterItem];
+    // Fallback: fetch frontmatter.json for this page's metadata
+    try {
+        const response = await fetch('/frontmatter.json');
+        if (response.ok) {
+            const allFm: Record<string, any>[] = await response.json();
+            const fm = allFm.find(f => f.path === pathname);
+            if (fm) {
+                updateNavigationTitle(pathname, fm.title);
+                completeFrontMatter = [...completeFrontMatter, fm];
+            }
+        }
+    } catch {
+        // Non-fatal — page will still render, just without title in nav
+    }
 }
 
 // Load all remaining frontmatter (after initial load) - optimized with fallback
 export async function loadAllMDXFrontMatter(pathname: string) {
-    // If we have preloaded data, we're already done
-    if (preloadedFrontMatter) {
-        return;
+    if (preloadedFrontMatter) return;
+
+    try {
+        const response = await fetch('/frontmatter.json');
+        if (!response.ok) return;
+        const allFm: Record<string, any>[] = await response.json();
+
+        for (const fm of allFm) {
+            if (fm.path !== pathname) {
+                updateNavigationTitle(fm.path, fm.title);
+                completeFrontMatter = [...completeFrontMatter, fm];
+            }
+        }
+    } catch {
+        // Non-fatal
     }
-
-    // Fallback to dynamic loading
-    const mdxFiles = import.meta.glob<{ default: string }>('../../docs/**/*.mdx', { query: '?raw' });
-    const fileEntries = Object.entries(mdxFiles);
-
-    const remainingEntries = fileEntries.filter(([path]) => pathFromFilename(path) !== pathname);
-    const newFrontmatter: Record<string, any>[] = [];
-
-    await Promise.all(
-        remainingEntries.map(async ([path, loader]) => {
-            const rawContent = (await loader()).default;
-            const { data, content } = parseFrontMatter(rawContent);
-            const filename = pathFromFilename(path);
-
-            updateNavigationTitle(filename, data.title);
-            await addToSearchIndex(filename, data, content);
-
-            newFrontmatter.push({ ...data, path: filename });
-        })
-    );
-
-    completeFrontMatter = [...completeFrontMatter, ...newFrontmatter];
 }
 
 // Shared helper

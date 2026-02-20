@@ -16,6 +16,11 @@ interface LatexProps {
 
 export function Latex({ children }: LatexProps) {
   const expression = extractText(children).trim();
+
+  if (typeof window === 'undefined') {
+    return <div className="my-4"><code>{expression}</code></div>
+  }
+
   const containerRef = useRef<HTMLDivElement>(null)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)

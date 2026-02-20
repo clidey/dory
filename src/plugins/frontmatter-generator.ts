@@ -142,6 +142,41 @@ function generateFrontmatterJson(docsDir: string): Array<Record<string, any>> {
   return frontmatterArray;
 }
 
+// Strip MDX/JSX syntax to extract plain text for search indexing
+function stripMdxToText(content: string): string {
+  return content
+    .replace(/^import\s+.*$/gm, '')           // import statements
+    .replace(/^export\s+.*$/gm, '')           // export statements
+    .replace(/```[\s\S]*?```/g, '')           // fenced code blocks
+    .replace(/<[^>]+>/g, '')                  // JSX/HTML tags
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')  // markdown links → text
+    .replace(/[#*_~`>|]/g, '')               // markdown syntax chars
+    .replace(/\n{3,}/g, '\n\n')              // collapse blank lines
+    .trim();
+}
+
+// Generate search content JSON: [{ path, title, content }]
+function generateSearchContentJson(docsDir: string, frontmatterArray: Array<Record<string, any>>): Array<Record<string, any>> {
+  const mdxFilesMap = findMdxFilesMap(docsDir, docsDir);
+  const searchContent: Array<Record<string, any>> = [];
+
+  for (const fm of frontmatterArray) {
+    // Find the MDX file for this frontmatter entry
+    const fileEntry = Object.entries(mdxFilesMap).find(([, filePath]) =>
+      pathFromFilename(filePath, docsDir) === fm.path
+    );
+    if (!fileEntry) continue;
+
+    const rawContent = fs.readFileSync(fileEntry[1], 'utf-8');
+    const { content } = parseFrontmatter(rawContent);
+    const text = stripMdxToText(content);
+
+    searchContent.push({ path: fm.path, title: fm.title || '', content: text });
+  }
+
+  return searchContent;
+}
+
 export function frontmatterGenerator(options: FrontmatterGeneratorOptions = {}): Plugin {
   return {
     name: 'frontmatter-generator',
@@ -156,9 +191,19 @@ export function frontmatterGenerator(options: FrontmatterGeneratorOptions = {}):
         source: jsonContent
       });
 
+      // Also generate search content for client-side indexing
+      const searchContent = generateSearchContentJson(docsDir, frontmatterArray);
+      const searchJson = JSON.stringify(searchContent);
+
+      this.emitFile({
+        type: 'asset',
+        fileName: 'search-content.json',
+        source: searchJson
+      });
+
       console.log(`✅ Generated frontmatter JSON file`);
       console.log(`📄 Processed ${frontmatterArray.length} MDX files`);
-      console.log(`📝 Total JSON size: ${jsonContent.length} characters`);
+      console.log(`🔍 Generated search content (${searchContent.length} pages, ${(searchJson.length / 1024).toFixed(0)} KB)`);
     }
   };
 }

@@ -22,20 +22,28 @@ export { UnorderedList as ul, OrderedList as ol, ListItem as li } from './list';
 export { AsyncAPI } from './async-api';
 export { Source } from './source';
 
-// Lazy-loaded heavy components — only downloaded when a page uses them
+// Lazy-loaded heavy components — only downloaded when a page uses them.
+// SSR guard at this level prevents Suspense from rendering in Node.js
+// (renderToString can't resolve lazy components).
 const LazyAPIPlayground = lazy(() => import('./api-playground').then(m => ({ default: m.APIPlayground })));
-export const APIPlayground = (props: any) => (
-  <Suspense fallback={<Loading />}>
-    <LazyAPIPlayground {...props} />
-  </Suspense>
-);
+export const APIPlayground = (props: any) => {
+  if (typeof window === 'undefined') return null;
+  return (
+    <Suspense fallback={<Loading />}>
+      <LazyAPIPlayground {...props} />
+    </Suspense>
+  );
+};
 
 const LazyWebSocketPlayground = lazy(() => import('./websocket-playground').then(m => ({ default: m.WebSocketPlayground })));
-export const WebSocketPlayground = (props: any) => (
-  <Suspense fallback={<Loading />}>
-    <LazyWebSocketPlayground {...props} />
-  </Suspense>
-);
+export const WebSocketPlayground = (props: any) => {
+  if (typeof window === 'undefined') return null;
+  return (
+    <Suspense fallback={<Loading />}>
+      <LazyWebSocketPlayground {...props} />
+    </Suspense>
+  );
+};
 
 export const wrapper = ({ children }: { children: preact.ComponentChildren }) => {
   const ref = useRef<HTMLDivElement>(null);

@@ -750,6 +750,8 @@ function WebSocketPlaygroundInternal({
 
 // Main exported component with Sheet wrapper
 export function WebSocketPlayground(props: WebSocketPlaygroundProps) {
+  if (typeof window === 'undefined') return null
+
   const [showPlayground, setShowPlayground] = useState(false)
 
   const handleShowPlayground = () => {

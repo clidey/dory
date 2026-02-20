@@ -36,9 +36,10 @@ export default defineConfig(({ command }) => ({
     prerender(),
   ],
   resolve: {
+    dedupe: ['preact', 'preact/compat', 'preact/hooks', 'preact/jsx-runtime', 'preact/compat/jsx-runtime'],
     alias: {
       react: 'preact/compat',
-      'react-dom': 'preact/compat'
+      'react-dom': 'preact/compat',
     }
   },
   publicDir: false, // Don't use a public directory since we need to import from docs

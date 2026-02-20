@@ -2,6 +2,7 @@
  * Post-build SSR rendering script.
  * Reads the SSR bundle from dist-ssr/, renders each route to HTML,
  * and injects the content into the prerendered HTML files in dist/.
+ * Also inlines frontmatter JSON so the client can hydrate without fetching.
  */
 import { readFileSync, writeFileSync, existsSync, rmSync } from 'fs';
 import { resolve, dirname } from 'path';
@@ -31,12 +32,20 @@ const frontmatter = JSON.parse(readFileSync(frontmatterPath, 'utf-8'));
 let count = 0;
 let failed = 0;
 
-function injectSSR(htmlPath, ssrHtml) {
+function injectSSR(htmlPath, ssrHtml, routePath) {
   let html = readFileSync(htmlPath, 'utf-8');
 
+  // Inject SSR-rendered content into #app
   html = html.replace(
     '<div id="app"></div>',
     `<div id="app">${ssrHtml}</div>`
+  );
+
+  // Blocking theme script — sets dark class before first paint to prevent flash.
+  // Inline frontmatter JSON so the client can read it synchronously.
+  html = html.replace(
+    '</head>',
+    `<script>(function(){try{var t=localStorage.getItem("@clidey/dory/theme");if(t==="dark"||(t==="system"||!t)&&window.matchMedia("(prefers-color-scheme:dark)").matches)document.documentElement.classList.add("dark")}catch(e){}})();window.__DORY_FRONTMATTER__=${JSON.stringify(frontmatter)};window.__DORY_ROUTE__=${JSON.stringify(routePath)};</script>\n</head>`
   );
 
   html = html.replace(
@@ -47,7 +56,7 @@ function injectSSR(htmlPath, ssrHtml) {
   writeFileSync(htmlPath, html, 'utf-8');
 }
 
-// Render each route
+// Render each route — pass frontmatter so SSR can build navigation titles
 for (const page of frontmatter) {
   const routePath = page.path;
   if (!routePath || routePath === '/') continue;
@@ -56,10 +65,10 @@ for (const page of frontmatter) {
   if (!existsSync(htmlPath)) continue;
 
   try {
-    const ssrHtml = await render(routePath);
+    const ssrHtml = await render(routePath, frontmatter);
     if (!ssrHtml) continue;
 
-    injectSSR(htmlPath, ssrHtml);
+    injectSSR(htmlPath, ssrHtml, routePath);
     count++;
   } catch (error) {
     console.warn(`⚠️  SSR failed for ${routePath}: ${error.message}`);
@@ -73,9 +82,9 @@ try {
   if (existsSync(rootHtmlPath) && frontmatter.length > 0) {
     const firstRoute = frontmatter[0].path;
     if (firstRoute) {
-      const ssrHtml = await render(firstRoute);
+      const ssrHtml = await render(firstRoute, frontmatter);
       if (ssrHtml) {
-        injectSSR(rootHtmlPath, ssrHtml);
+        injectSSR(rootHtmlPath, ssrHtml, firstRoute);
         count++;
       }
     }

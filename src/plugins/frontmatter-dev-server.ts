@@ -137,10 +137,47 @@ function generateFrontmatterJson(docsDir: string): Array<Record<string, any>> {
   return frontmatterArray;
 }
 
+// Strip MDX/JSX syntax to extract plain text for search indexing
+function stripMdxToText(content: string): string {
+  return content
+    .replace(/^import\s+.*$/gm, '')
+    .replace(/^export\s+.*$/gm, '')
+    .replace(/```[\s\S]*?```/g, '')
+    .replace(/<[^>]+>/g, '')
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/[#*_~`>|]/g, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 export function frontmatterDevServer(): Plugin {
   return {
     name: 'frontmatter-dev-server',
     configureServer(server) {
+      // Serve search content for client-side indexing
+      server.middlewares.use('/search-content.json', (req, res, next) => {
+        if (req.method !== 'GET') return next();
+        try {
+          const docsDir = path.join(process.cwd(), 'docs');
+          const fmArray = generateFrontmatterJson(docsDir);
+          const mdxFilesMap = findMdxFilesMap(docsDir, docsDir);
+          const searchContent = fmArray.map(fm => {
+            const entry = Object.entries(mdxFilesMap).find(([, fp]) => pathFromFilename(fp, docsDir) === fm.path);
+            if (!entry) return { path: fm.path, title: fm.title || '', content: '' };
+            const raw = fs.readFileSync(entry[1], 'utf-8');
+            const { content } = parseFrontmatter(raw);
+            return { path: fm.path, title: fm.title || '', content: stripMdxToText(content) };
+          });
+          const json = JSON.stringify(searchContent);
+          res.setHeader('Content-Type', 'application/json; charset=utf-8');
+          res.end(json);
+        } catch (error) {
+          console.error('Error generating search content:', error);
+          res.statusCode = 500;
+          res.end('Internal Server Error');
+        }
+      });
+
       server.middlewares.use('/frontmatter.json', (req, res, next) => {
         if (req.method !== 'GET') {
           return next();

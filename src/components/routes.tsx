@@ -1,115 +1,63 @@
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useMemo } from 'preact/hooks';
 import { Route, Router, useLocation } from 'wouter-preact';
 import { usePathname } from './hooks';
 import { ALL_NAVIGATION, ALL_PAGES, pathFromFilename } from './store';
-import { Loading } from './loading';
 
 
 export default function Routes() {
-  const [routes, setRoutes] = useState<any[]>([]);
   const pathname = usePathname();
   const [, navigate] = useLocation();
-  const [loading, setLoading] = useState(true);
 
+  // Redirect root to the first page so the URL reflects the actual content
   useEffect(() => {
-    const links = document.querySelectorAll('.dory-navigation a');
-    const listeners: (() => void)[] = [];
-    const preloaded = new Set();
-  
-    links.forEach(link => {
-      const href = link.getAttribute('href');
-      if (!href) return;
-  
-      const loaderEntry = Object.entries(ALL_PAGES).find(
-        ([path]) => path === href
-      );
-  
-      if (!loaderEntry) return;
-  
-      const [path, loader] = loaderEntry;
-  
-      const handleMouseEnter = () => {
-        if (!preloaded.has(path)) {
-          loader();
-          preloaded.add(path);
-        }
-      };
-  
-      link.addEventListener('mouseenter', handleMouseEnter);
-      listeners.push(() => link.removeEventListener('mouseenter', handleMouseEnter));
-    });
-  
-    return () => {
-      listeners.forEach(unsub => unsub());
-    };
-  }, []);
-
-  useEffect(() => {
-    setLoading(true);
-    const loadRoutes = async () => {
-      try {
-        // For root path, load the first navigation page
-        const targetPath = pathname === '/' ? ALL_NAVIGATION[0].groups[0].pages[0].href : pathname;
-
-        const entries = await Promise.all(
-          Object.entries(ALL_PAGES).filter(([path]) => path === targetPath).map(async ([path, loader]) => {
-            const module = await loader();
-            const routePath = pathname === '/' ? '/' : pathFromFilename(path);
-            return {
-              path: routePath,
-              component: module.default,
-            };
-          })
-        );
-        setRoutes(entries);
-      } catch (error) {
-        console.error('Failed to load route:', error);
-        setRoutes([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadRoutes();
-  }, [pathname]);
-
-  useEffect(() => {
-    const page = ALL_NAVIGATION.find((tab) => tab.groups.find((group) => group.pages.find((page) => page.href === pathname)));
-    if (!page && pathname !== '/') {
-      setRoutes([{
-        path: pathname,
-        component: () => (
-          <div className="flex flex-col items-center justify-center min-h-[50vh] p-8">
-            <h1 className="text-6xl font-bold text-gray-300 dark:text-gray-700 mb-4">404</h1>
-            <h2 className="text-2xl font-semibold mb-4">Page Not Found</h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-6 text-center max-w-md">
-              The page <code className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-sm">{pathname}</code> doesn't exist.
-            </p>
-            <button
-              onClick={() => navigate(ALL_NAVIGATION[0].groups[0].pages[0].href)}
-              className="px-4 py-2 text-sm font-medium rounded-md bg-[var(--brand-primary)] text-white hover:opacity-90 transition-opacity"
-            >
-              Go to Home
-            </button>
-          </div>
-        )
-      }]);
-      setLoading(false);
+    if (pathname === '/') {
+      const firstPage = ALL_NAVIGATION[0]?.groups[0]?.pages[0]?.href;
+      if (firstPage) navigate(firstPage, { replace: true });
     }
   }, [pathname]);
 
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [pathname]);
-  
+  const route = useMemo(() => {
+    let targetPath = pathname;
+    if (pathname === '/') {
+      const ssrRoute = typeof window !== 'undefined' && (window as any).__DORY_ROUTE__;
+      targetPath = ssrRoute || ALL_NAVIGATION[0].groups[0].pages[0].href;
+    }
 
-  if (loading) return <div className="h-[25vh] flex grow"><Loading /></div>;
+    const entry = Object.entries(ALL_PAGES).find(([path]) => path === targetPath);
+    if (!entry) return null;
+
+    const [path, mod] = entry;
+    return {
+      path: pathname === '/' ? '/' : pathFromFilename(path),
+      component: (mod as any).default,
+    };
+  }, [pathname]);
+
+  // 404
+  if (!route) {
+    const page = ALL_NAVIGATION.find((tab) => tab.groups.find((group) => group.pages.find((page) => page.href === pathname)));
+    if (!page && pathname !== '/') {
+      return (
+        <div className="flex flex-col items-center justify-center min-h-[50vh] p-8">
+          <h1 className="text-6xl font-bold text-gray-300 dark:text-gray-700 mb-4">404</h1>
+          <h2 className="text-2xl font-semibold mb-4">Page Not Found</h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6 text-center max-w-md">
+            The page <code className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-sm">{pathname}</code> doesn't exist.
+          </p>
+          <button
+            onClick={() => navigate(ALL_NAVIGATION[0].groups[0].pages[0].href)}
+            className="px-4 py-2 text-sm font-medium rounded-md bg-[var(--brand-primary)] text-white hover:opacity-90 transition-opacity"
+          >
+            Go to Home
+          </button>
+        </div>
+      );
+    }
+  }
 
   return (
     <Router>
-      {routes.map(({ path, component: Component }) => (
-        <Route key={path} path={path} component={Component} />
-      ))}
+      {route && <Route key={route.path} path={route.path} component={route.component} />}
     </Router>
   );
 }

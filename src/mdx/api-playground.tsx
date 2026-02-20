@@ -323,6 +323,8 @@ export function APIPlayground({
   authType = 'none',
   servers = []
 }: APIPlaygroundProps) {
+  if (typeof window === 'undefined') return null
+
   const [selectedTab, setSelectedTab] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
   const [response, setResponse] = useState<ResponseData | null>(null)

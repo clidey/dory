@@ -1,7 +1,7 @@
 import type { ComponentChildren } from 'preact';
 import { useCallback, useEffect, useMemo, useState } from 'preact/hooks';
 import { Navigation } from '../components/navigation';
-import { ALL_NAVIGATION, ALL_OPENAPI, completeFrontMatter, loadMDXFrontMatterForPath, loadAllMDXFrontMatter, ALL_PAGES, pathFromFilename, preloadFrontmatter, ALL_ASYNCAPI } from '../components/store';
+import { ALL_NAVIGATION, ALL_OPENAPI, completeFrontMatter, loadMDXFrontMatterForPath, loadAllMDXFrontMatter, ALL_PAGES, pathFromFilename, preloadFrontmatter, ALL_ASYNCAPI, isFrontmatterReady } from '../components/store';
 import { usePathname } from '../components/hooks';
 import { OpenAPI } from '../mdx/open-api';
 import { AsyncAPI } from '../mdx/async-api';
@@ -25,8 +25,9 @@ const prompt = (pathname: string) => `Please read and analyze the content from t
   `Please provide clear, detailed explanations and examples where relevant.`;
 
 export default function Layout({ children }: LayoutProps) {
-  const [loading, setLoading] = useState(true);
-  const pathname = usePathname();
+  const [loading, setLoading] = useState(!isFrontmatterReady());
+  const rawPathname = usePathname();
+  const pathname = rawPathname === '/' ? ALL_NAVIGATION[0]?.groups[0]?.pages[0]?.href ?? '/' : rawPathname;
   const { showNotification } = useNotification();
   const isEmbedded = useIsEmbedded();
 
@@ -69,9 +70,9 @@ export default function Layout({ children }: LayoutProps) {
   ], [handleOpenMDX, handleCopyMDX, handleOpenChatGPT, handleOpenAnthropic]);
 
   useEffect(() => {
-    // Try to preload frontmatter first (optimized approach)
+    // Try to preload frontmatter first (optimized approach).
+    // If inline data was available from SSR, preloadFrontmatter() resolves immediately.
     preloadFrontmatter().then(() => {
-      // If preloading succeeds, we're done
       setLoading(false);
     }).catch(() => {
       // Fallback to the original approach
@@ -86,6 +87,7 @@ export default function Layout({ children }: LayoutProps) {
       });
     });
   }, [pathname]);
+
 
   const { title: group, group: title, page } = useMemo(() => {
     const group = ALL_NAVIGATION.flatMap((tab) =>
