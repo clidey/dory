@@ -36,9 +36,8 @@ export default function Layout({ children }: LayoutProps) {
   }, [pathname]);
 
   const handleCopyMDX = useCallback(() => {
-    ALL_PAGES[pathFromFilename(pathname)]().then((mdx) => {
-      navigator.clipboard.writeText(mdx.default.toString());
-    });
+    const mod = ALL_PAGES[pathFromFilename(pathname)];
+    if (mod) navigator.clipboard.writeText((mod as any).default.toString());
     showNotification('Copied to clipboard');
   }, []);
   const handleOpenChatGPT = useCallback(() => {

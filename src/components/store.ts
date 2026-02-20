@@ -62,24 +62,6 @@ export function pathFromFilename(filename: string): string {
         .toLowerCase();
 }
 
-function parseFrontMatter(content: string) {
-    if (typeof content !== 'string') return { data: {}, content: '' };
-    const frontMatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
-    if (!frontMatterMatch) return { data: {}, content };
-    
-    const frontMatter = frontMatterMatch[1];
-    const data: Record<string, any> = {};
-    
-    frontMatter.split('\n').forEach(line => {
-        const [key, ...valueParts] = line.split(':');
-        if (key && valueParts.length) {
-        const value = valueParts.join(':').trim();
-        data[key.trim()] = value.replace(/^["']|["']$/g, ''); // Remove quotes if present
-        }
-    });
-
-    return { data, content: content.slice(frontMatterMatch[0].length) };
-}
 
 export let completeFrontMatter: Record<string, any>[] = [];
 export function isFrontmatterReady() { return preloadedFrontMatter !== null; }
