@@ -190,6 +190,16 @@ export default function Layout({ children }: LayoutProps) {
     ldScript.textContent = JSON.stringify(structuredData);
   }, [page]);
 
+  const isLandingPage = useMemo(() => {
+    const firstTab = ALL_NAVIGATION[0];
+    if (!firstTab) return false;
+    return (
+      firstTab.groups.length === 1 &&
+      firstTab.groups[0].pages.length === 1 &&
+      pathname === firstTab.groups[0].pages[0].href
+    );
+  }, [pathname]);
+
   const tab = useMemo(() => {
     return completeFrontMatter.find((page) => page.path === pathname);
   }, [pathname, loading]);
@@ -225,6 +235,28 @@ export default function Layout({ children }: LayoutProps) {
   }, [tab, loading]);
 
   if (loading) return <div className="h-[25vh] flex grow"><Loading /></div>;
+
+  if (isLandingPage) {
+    return (
+      <div className="flex w-full flex-col">
+        <Header />
+        <main className="w-full">
+          <ErrorBoundary fallback={(error) => (
+            <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
+              <p className="text-lg font-semibold text-red-700 dark:text-red-300 mb-2">
+                This page failed to render
+              </p>
+              <pre className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-md p-3 max-w-md overflow-auto">
+                {error.message}
+              </pre>
+            </div>
+          )}>
+            {children}
+          </ErrorBoundary>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="flex w-full flex-col">
