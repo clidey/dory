@@ -257,7 +257,7 @@ export function CodeGroup({
   return (
     <CodeGroupContext.Provider value={true}>
       {hasTabs ? (
-        <Card className="py-0 border-black/10 bg-none overflow-hidden mb-4">
+        <Card className="p-0 border-black/10 bg-none overflow-hidden mb-4">
           <TabGroup
             as="div"
             selectedIndex={selectedIndex}
@@ -270,7 +270,7 @@ export function CodeGroup({
           </TabGroup>
         </Card>
       ) : (
-        <Card className="py-0 border-black/10 bg-none overflow-hidden mb-4">
+        <Card className="p-0 border-black/10 bg-none overflow-hidden mb-4">
           <div className="not-prose">
             {header}
             {panels}
@@ -285,5 +285,8 @@ export function Code({
   children,
   ...props
 }: React.ComponentPropsWithoutRef<'code'>) {
-  return <code className={classNames('dory-mdx-code rounded-md py-1 text-sm px-2', props.className)} {...props}>{children}</code>
+  const isBlock = props.className?.includes('language-');
+  return <code className={classNames(props.className, {
+    'dory-mdx-code rounded-md py-0.5 text-sm px-1.5': !isBlock,
+  })} {...props}>{children}</code>
 }

@@ -16,11 +16,11 @@ export function Steps({ children }: { children: preact.ComponentChildren }) {
               },
               'relative'
             )}>
-              <div aria-hidden="true" className="absolute top-10 left-4 h-full w-[0.5px] bg-gray-300/50 dark:bg-gray-600/50" style={{ top: '40px', height: 'calc(100% - 44px)' }} />
+              <div aria-hidden="true" className="absolute top-10 left-4 h-full w-[0.5px]" style={{ top: '40px', height: 'calc(100% - 44px)', backgroundColor: 'color-mix(in oklch, var(--brand-foreground) 30%, transparent)' }} />
               <div className="group relative flex items-start">
                 <span className="flex h-9 items-center">
-                  <span className="relative z-10 flex size-8 items-center justify-center rounded-full bg-white dark:bg-gray-800 group-hover:border-gray-400">
-                    <span className="text-sm font-medium text-gray-500 dark:text-white">
+                  <span className="relative z-10 flex size-8 items-center justify-center rounded-full border" style={{ borderColor: 'var(--brand-foreground)', backgroundColor: 'color-mix(in oklch, var(--brand-foreground) 12%, transparent)' }}>
+                    <span className="text-sm font-medium" style={{ color: 'var(--brand-foreground)' }}>
                       {stepIdx + 1}
                     </span>
                   </span>

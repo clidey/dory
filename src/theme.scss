@@ -88,6 +88,14 @@ html, body, #app {
     .dory-header {
         border-color: var(--border) !important;
     }
+
+    // Accordion & divider borders — subtle low opacity
+    [data-slot="accordion-item"],
+    hr,
+    .border-t,
+    .border-b {
+        border-color: color-mix(in oklch, var(--foreground) 8%, transparent) !important;
+    }
 }
 
 // === FONT OVERRIDES ===

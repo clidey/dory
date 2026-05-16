@@ -6,6 +6,14 @@ import { Loading } from '../components/loading'
 import { useTheme } from '@clidey/ux'
 import classNames from 'classnames'
 
+function dedent(code: string): string {
+  const lines = code.replace(/^\n+/, '').replace(/\s+$/, '').split('\n');
+  const indents = lines.filter(l => l.trim().length > 0).map(l => l.match(/^(\s*)/)?.[1].length ?? 0);
+  const minIndent = indents.length > 0 ? Math.min(...indents) : 0;
+  if (minIndent === 0) return lines.join('\n');
+  return lines.map(l => l.slice(minIndent)).join('\n');
+}
+
 
 export function Fence({
   children,
@@ -31,7 +39,7 @@ export function Fence({
 
   return (
     <Highlight
-      code={children.trimEnd()}
+      code={dedent(children)}
       language={supportedLanguage}
       theme={isDark ? themes.vsDark : themes.vsLight}>
       {({ className, style, tokens, getTokenProps }) => (
