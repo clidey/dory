@@ -1,39 +1,154 @@
 :root {
-    font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 
     // Brand colors (dynamically set from dory.json via loadColors())
-    // These variables are set at runtime:
-    // --brand-primary: primary color
-    // --brand-light: light mode accent
-    // --brand-dark: dark mode accent
-    // --brand-foreground: legacy/fallback (set to primary)
-
-    // Default fallback colors (will be overridden by loadColors())
     --brand-foreground: #0ea5e9;
     --brand-primary: #0ea5e9;
     --brand-light: #38bdf8;
     --brand-dark: #0284c7;
 
+    // Font families
+    --font-body: inherit;
+    --font-heading: inherit;
+    --font-mono: inherit;
+
     // ShadCN/clidey/ux compatible primary color
-    // Using light color for light mode
     --primary: var(--brand-light);
     --primary-rgb: var(--brand-light-rgb);
-    
+
     --ring: rgba(0, 0, 0, 0.1);
 }
 
-// Dark mode overrides
 :root.dark {
-    // Use dark color for dark mode
     --primary: var(--brand-dark);
     --primary-rgb: var(--brand-dark-rgb);
-
     --ring: rgba(255, 255, 255, 0.1);
 }
-  
+
+// Apply background from CSS variables
+html, body, #app {
+    background-color: var(--background);
+    color: var(--foreground);
+}
+
+// === THEMED MODE: override Tailwind utility classes ===
+[data-dory-themed="true"] {
+    // Navigation sidebar text
+    .dory-navigation {
+        a {
+            color: var(--muted-foreground) !important;
+        }
+
+        a:hover {
+            color: var(--foreground) !important;
+        }
+
+        a.font-semibold {
+            color: var(--brand-foreground) !important;
+        }
+
+        h2, h3 {
+            color: var(--foreground) !important;
+        }
+
+        ul[role="list"] {
+            border-color: var(--border) !important;
+        }
+    }
+
+    // Override hardcoded Tailwind text colors
+    .text-slate-500,
+    .text-slate-400,
+    .text-slate-600,
+    .text-zinc-500,
+    .text-zinc-400,
+    .text-gray-500,
+    .text-gray-400 {
+        color: var(--muted-foreground) !important;
+    }
+
+    .text-slate-900,
+    .text-zinc-900,
+    .text-gray-900 {
+        color: var(--foreground) !important;
+    }
+
+    // Override hardcoded Tailwind border colors
+    .border-slate-100,
+    .border-slate-200,
+    .border-slate-800,
+    .border-zinc-200,
+    .border-zinc-800 {
+        border-color: var(--border) !important;
+    }
+
+    // Header
+    .dory-header {
+        border-color: var(--border) !important;
+    }
+}
+
+// === FONT OVERRIDES ===
+[data-dory-themed="true"] {
+    // Page title — large display serif
+    .dory-page-title {
+        font-family: var(--font-heading, var(--font-body, inherit));
+        font-weight: 380;
+        font-variation-settings: "opsz" 144, "SOFT" 30;
+        letter-spacing: -0.02em;
+    }
+
+    // Subtitle / eyebrow — mono, muted amber
+    .dory-subtitle {
+        font-family: var(--font-mono, monospace);
+        color: var(--brand-foreground);
+        opacity: 0.8;
+        letter-spacing: 0.15em;
+        font-size: 11px;
+    }
+
+    // Article headings — serif with proper optical sizing
+    article h2 {
+        font-family: var(--font-heading, var(--font-body, inherit));
+        font-weight: 400;
+        font-variation-settings: "opsz" 48, "SOFT" 50;
+        letter-spacing: -0.015em;
+    }
+
+    article h3,
+    article h4 {
+        font-family: var(--font-body, inherit);
+        font-weight: 600;
+    }
+
+    code, pre {
+        font-family: var(--font-mono, monospace);
+    }
+}
+
+// === CODE BLOCK STYLING ===
+// Make code blocks translucent to match app feel
+[data-dory-themed="true"] {
+    [data-slot="card"],
+    .bg-card {
+        background-color: transparent !important;
+        border-color: var(--border) !important;
+    }
+
+    pre {
+        background-color: transparent !important;
+    }
+
+    // Inline code
+    .dory-mdx-code {
+        background-color: transparent !important;
+        border: 1px solid var(--border);
+    }
+}
+
+// === DEFAULT STYLES ===
 article h2:first-of-type {
     display: none;
 }

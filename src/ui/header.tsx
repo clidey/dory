@@ -11,6 +11,7 @@ import { ModeToggle } from '@clidey/ux';
 import { useIsEmbedded } from '../components/hooks';
 
 const config = docsConfig as DoryConfig;
+const isThemeForced = config.theme?.mode === 'dark' || config.theme?.mode === 'light';
 
 function TopLevelNavItem({ href, children, isActive }: { href: string; children: string; isActive?: boolean }) {
   return (
@@ -53,13 +54,13 @@ export function Header({ className }: { className?: string }) {
   return (
     <header
       className={classNames(
-        'sticky top-0 z-50 flex flex-none flex-wrap items-center justify-between bg-white px-4 py-5 shadow-md shadow-gray-900/5 sm:px-6 lg:px-8 dark:shadow-none',
+        'dory-header sticky top-0 z-50 flex flex-none flex-wrap items-center justify-between px-4 py-5 sm:px-6 lg:px-8 border-b',
         className,
         {
-          'dark:bg-gray-900/95 dark:backdrop-blur-sm dark:[@supports(backdrop-filter:blur(0))]:bg-neutral-900/75': isScrolled,
-          'dark:bg-transparent': !isScrolled,
+          'backdrop-blur-sm': isScrolled,
         },
       )}
+      style={{ backgroundColor: 'var(--background)', borderColor: 'var(--border)' }}
     >
       <div className="relative flex justify-between gap-6 sm:gap-8 md:grow items-center w-full px-4">
         <div className="flex items-center grow gap-2">
@@ -90,7 +91,7 @@ export function Header({ className }: { className?: string }) {
           <MobileSearch />
           <Search />
           {
-            !isEmbedded &&
+            !isEmbedded && !isThemeForced &&
             <ModeToggle data-testid="mode-toggle" />
           }
           <MobileNavigation />

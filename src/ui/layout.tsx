@@ -281,14 +281,14 @@ export default function Layout({ children }: LayoutProps) {
               <div className="flex justify-between items-start">
                 <header className="mb-8">
                   {title && (
-                    <h1 className="font-display text-lg tracking-tight">
+                    <p className="dory-subtitle text-sm font-medium tracking-widest uppercase mb-2">
                       {title}
-                    </h1>
+                    </p>
                   )}
                   {group && (
-                    <p className="text-4xl tracking-tight">
+                    <h1 className="dory-page-title text-4xl tracking-tight">
                       {group}
-                    </p>
+                    </h1>
                   )}
                 </header>
                 {

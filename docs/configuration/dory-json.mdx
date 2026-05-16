@@ -21,12 +21,34 @@ The `dory.json` file is the single configuration file for your Dory documentatio
   "colors": {
     "primary": "#6366f1",
     "light": "#818cf8",
-    "dark": "#4f46e5"
+    "dark": "#4f46e5",
+    "background": "#1a1a2e",
+    "surface": "#242440",
+    "surfaceElevated": "#2e2e4a",
+    "foreground": "#f5f5f7",
+    "mutedForeground": "#a0a0b0",
+    "border": "rgba(255, 255, 255, 0.1)",
+    "accent": "#60a5fa"
   },
   "fonts": {
     "family": "Inter",
     "source": "https://fonts.gstatic.com/s/inter/v19/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfAZ9hiJ-Ek-_EeA.woff2",
-    "format": "woff2"
+    "format": "woff2",
+    "heading": {
+      "family": "Fraunces",
+      "source": "https://fonts.gstatic.com/s/fraunces/v31/...",
+      "format": "woff2",
+      "weight": "300 900"
+    },
+    "mono": {
+      "family": "JetBrains Mono",
+      "source": "https://fonts.gstatic.com/s/jetbrainsmono/v18/...",
+      "format": "woff2"
+    }
+  },
+  "theme": {
+    "mode": "dark",
+    "radius": "0.5rem"
   },
   "logo": {
     "light": "./logo/logo.svg",
@@ -110,6 +132,22 @@ See [Theming](/configuration/theming) for more detail.
 | `format` | Font format — use `"woff2"` for best compatibility. |
 
 See [Fonts](/configuration/fonts) for more detail.
+
+## Theme
+
+```json
+"theme": {
+  "mode": "dark",
+  "radius": "0.5rem"
+}
+```
+
+| Field | Description |
+| --- | --- |
+| `mode` | `"dark"`, `"light"`, or `"system"` (default). Forces the site into a specific color scheme. |
+| `radius` | Base border-radius for UI elements. |
+
+See [Theming](/configuration/theming) for full theming documentation.
 
 ## Logo
 

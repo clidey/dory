@@ -4,14 +4,28 @@
   "description": "Static documentation site generator for modern teams. Build beautiful docs from MDX files.",
   "favicon": "./favicon.svg",
   "colors": {
-    "primary": "#6366f1",
-    "light": "#818cf8",
-    "dark": "#4f46e5"
+    "primary": "#F1BF4F",
+    "light": "#F1BF4F",
+    "dark": "#F1BF4F",
+    "background": "oklch(0.16 0.035 255)",
+    "surface": "oklch(0.20 0.04 255)",
+    "surfaceElevated": "oklch(0.24 0.05 255)",
+    "foreground": "oklch(0.97 0.005 250)",
+    "mutedForeground": "oklch(0.72 0.02 250)",
+    "border": "oklch(0.7 0.08 250 / 14%)"
+  },
+  "theme": {
+    "mode": "dark"
   },
   "fonts": {
-    "family": "Inter",
-    "source": "https://fonts.gstatic.com/s/inter/v19/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfAZ9hiJ-Ek-_EeA.woff2",
-    "format": "woff2"
+    "family": "Inter Tight",
+    "stylesheet": "https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700&family=Fraunces:opsz,wght,SOFT@9..144,300..600,30..100&family=JetBrains+Mono:wght@400;500&display=swap",
+    "heading": {
+      "family": "Fraunces"
+    },
+    "mono": {
+      "family": "JetBrains Mono"
+    }
   },
   "logo": {
     "light": "./logo/logo.svg",

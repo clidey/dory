@@ -36,7 +36,7 @@ export function Fence({
       theme={isDark ? themes.vsDark : themes.vsLight}>
       {({ className, style, tokens, getTokenProps }) => (
         <pre>
-          <Code className={classNames(className, "whitespace-pre-wrap")} style={style} title={supportedLanguage}>
+          <Code className={classNames(className, "whitespace-pre-wrap")} style={{ ...style, backgroundColor: 'transparent' }} title={supportedLanguage}>
             {tokens.map((line, lineIndex) => (
               <Fragment key={lineIndex}>
                 {line

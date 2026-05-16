@@ -5,9 +5,14 @@ import { withMDX } from './components/mdx-provider.tsx'
 import { ErrorBoundary } from './components/error-boundary.tsx'
 import { loadFonts } from './utils/fonts'
 import { loadColors } from './utils/colors'
+import { loadTheme } from './utils/theme'
 import { Toaster } from '@clidey/ux'
 import { ThemeProvider } from '@clidey/ux'
 import { preloadFrontmatter } from './components/store'
+import docsConfig from '../docs/dory.json' with { type: 'json' };
+import type { DoryConfig } from './types/config';
+
+const config = docsConfig as DoryConfig;
 
 // Start frontmatter loading immediately — if inlined from SSR, this is a no-op.
 preloadFrontmatter()
@@ -15,14 +20,17 @@ preloadFrontmatter()
 // Load fonts and colors before rendering the app
 loadFonts()
 loadColors()
+loadTheme()
 
 const AppWithMDX = withMDX(App)
 
 const appRoot = document.getElementById('app')!
 const hasSSRContent = appRoot.children.length > 0
 
+const defaultTheme = config.theme?.mode === 'dark' ? 'dark' : config.theme?.mode === 'light' ? 'light' : 'system';
+
 const tree = (
-    <ThemeProvider storageKey="@clidey/dory/theme">
+    <ThemeProvider defaultTheme={defaultTheme} storageKey="@clidey/dory/theme">
         <Toaster />
         <ErrorBoundary>
             <AppWithMDX />

@@ -1,13 +1,15 @@
 ---
 title: 'Theming'
-description: 'Customize your documentation site colors for light and dark mode using the colors config.'
+description: 'Customize your documentation site colors, fonts, and appearance to match your brand.'
 ---
 
 # Theming
 
-Dory uses three brand colors defined in `dory.json` to theme your documentation site. Both light and dark modes are supported.
+Dory provides a comprehensive theming system that lets you match your docs to your product's visual identity. You can control brand colors, background/surface colors, typography, and dark/light mode behavior.
 
 ## Color Configuration
+
+### Brand Colors
 
 ```json
 "colors": {
@@ -23,7 +25,83 @@ Dory uses three brand colors defined in `dory.json` to theme your documentation 
 | `light` | Lighter shade. Used for hover states and accents in light mode. |
 | `dark` | Darker shade. Used for hover states and accents in dark mode. |
 
-These three colors control the entire look of your site — active sidebar items, links, buttons, card borders, and more.
+### Extended Colors
+
+For deeper customization, you can control the entire page palette:
+
+```json
+"colors": {
+  "primary": "#F1BF4F",
+  "light": "#F1BF4F",
+  "dark": "#F1BF4F",
+  "background": "#1a1a2e",
+  "surface": "#242440",
+  "surfaceElevated": "#2e2e4a",
+  "foreground": "#f5f5f7",
+  "mutedForeground": "#a0a0b0",
+  "border": "rgba(255, 255, 255, 0.1)",
+  "accent": "#60a5fa"
+}
+```
+
+| Field | Description |
+| --- | --- |
+| `background` | Page background color. |
+| `surface` | Header and sidebar background. |
+| `surfaceElevated` | Elevated card/panel backgrounds. |
+| `foreground` | Primary text color. |
+| `mutedForeground` | Secondary/muted text color. |
+| `border` | Border and divider color. |
+| `accent` | Secondary accent color for interactive elements. |
+
+## Theme Mode
+
+Force your docs into dark or light mode regardless of the user's OS preference:
+
+```json
+"theme": {
+  "mode": "dark",
+  "radius": "0.5rem"
+}
+```
+
+| Field | Description |
+| --- | --- |
+| `mode` | `"dark"`, `"light"`, or `"system"` (default). Forces a specific color scheme. |
+| `radius` | Base border-radius value for UI elements. |
+
+## Typography
+
+Control heading, body, and code fonts independently:
+
+```json
+"fonts": {
+  "family": "Inter Tight",
+  "source": "https://fonts.gstatic.com/s/intertight/v7/...",
+  "format": "woff2",
+  "heading": {
+    "family": "Fraunces",
+    "source": "https://fonts.gstatic.com/s/fraunces/v31/...",
+    "format": "woff2",
+    "weight": "300 900"
+  },
+  "mono": {
+    "family": "JetBrains Mono",
+    "source": "https://fonts.gstatic.com/s/jetbrainsmono/v18/...",
+    "format": "woff2"
+  }
+}
+```
+
+| Field | Description |
+| --- | --- |
+| `family` / `source` / `format` | Body font (applied globally). |
+| `heading` | Optional separate font for h1-h4 headings. |
+| `mono` | Optional separate font for code blocks and inline code. |
+
+<Tip>
+  Combine `theme.mode: "dark"` with custom `background` and `surface` colors to create a dark-themed documentation site that matches your product's look and feel.
+</Tip>
 
 ## Dark Mode
 

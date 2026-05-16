@@ -115,7 +115,7 @@ function CodePanelHeader({ tag, label }: { tag?: string; label?: string }) {
   if (!tag && !label) return null
 
   return (
-    <div className="flex h-9 items-center gap-2 border-y border-t-transparent border-b-white/7.5 bg-white/2.5 px-4 dark:border-b-white/5 dark:bg-white/1">
+    <div className="flex h-9 items-center gap-2 border-b border-t-transparent px-4" style={{ borderColor: 'var(--border)' }}>
       {tag && (
         <div className="dark flex">
           <Tag variant="small">{tag}</Tag>
@@ -155,7 +155,7 @@ function CodePanel({
   }
 
   return (
-    <div className="group dark:bg-white/2.5">
+    <div className="group">
       <CodePanelHeader tag={tag} label={label} />
       <div className="relative">
         <pre className="overflow-x-auto p-4 text-xs">{children}</pre>

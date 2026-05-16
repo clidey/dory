@@ -6,12 +6,29 @@ export interface DoryColors {
   primary: string;
   light: string;
   dark: string;
+  background?: string;
+  surface?: string;
+  surfaceElevated?: string;
+  foreground?: string;
+  mutedForeground?: string;
+  border?: string;
+  accent?: string;
+}
+
+export interface DoryFontDefinition {
+  family: string;
+  source?: string;
+  format?: string;
+  weight?: string;
 }
 
 export interface DoryFonts {
   family: string;
-  source: string;
-  format: string;
+  source?: string;
+  format?: string;
+  stylesheet?: string;
+  heading?: DoryFontDefinition;
+  mono?: DoryFontDefinition;
 }
 
 export interface DoryLogo {
@@ -85,6 +102,11 @@ export interface DoryAnalytics {
   };
 }
 
+export interface DoryTheme {
+  mode?: 'light' | 'dark' | 'system';
+  radius?: string;
+}
+
 export interface DoryConfig {
   name: string;
   title?: string;
@@ -95,6 +117,7 @@ export interface DoryConfig {
   favicon: string;
   colors?: DoryColors;
   fonts?: DoryFonts;
+  theme?: DoryTheme;
   navigation: DoryNavigation;
   logo: DoryLogo;
   embed?: DoryEmbedConfig;
