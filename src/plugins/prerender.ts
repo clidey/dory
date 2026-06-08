@@ -126,7 +126,7 @@ export function prerender(): Plugin {
                 ]
               }
             ]
-          });
+          }).replace(/</g, '\\u003c');
 
           html = html.replace(
             '</head>',
