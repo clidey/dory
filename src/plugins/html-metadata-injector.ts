@@ -29,6 +29,12 @@ export function htmlMetadataInjector(): Plugin {
           ? `${siteUrl}${rawImage.startsWith('/') ? '' : '/'}${rawImage}`
           : rawImage;
 
+        // Favicon: config.favicon (copied to dist root by docs-assets), else
+        // fall back to the logo so sites without a dedicated favicon still
+        // get an icon instead of a broken link.
+        const rawFavicon: string = config.favicon || config.logo?.light || config.logo?.dark || '';
+        const faviconHref = rawFavicon ? `/${rawFavicon.replace(/^\.?\/*/, '')}` : '';
+
         // Function replacements everywhere so `$&` etc. in config values
         // cannot corrupt the output.
         const setTag = (re: RegExp, replacement: string) => {
@@ -43,6 +49,19 @@ export function htmlMetadataInjector(): Plugin {
 
         // Title
         setTag(/<title>.*?<\/title>/, `<title>${escapeHtml(defaultTitle)}</title>`);
+
+        // Favicon (icon + apple-touch-icon); left as empty attributes in
+        // index.html and removed entirely when there's nothing to point at.
+        if (faviconHref) {
+          setTag(/<link rel="icon" href=".*?" \/>/, `<link rel="icon" href="${escapeHtml(faviconHref)}" />`);
+          setTag(
+            /<link rel="apple-touch-icon" href=".*?" \/>/,
+            `<link rel="apple-touch-icon" href="${escapeHtml(faviconHref)}" />`
+          );
+        } else {
+          removeTag(/[ \t]*<link rel="icon" href=".*?" \/>\n?/);
+          removeTag(/[ \t]*<link rel="apple-touch-icon" href=".*?" \/>\n?/);
+        }
 
         // Description
         setTag(
