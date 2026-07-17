@@ -285,7 +285,7 @@ export function Code({
   children,
   ...props
 }: React.ComponentPropsWithoutRef<'code'>) {
-  const isBlock = props.className?.includes('language-');
+  const isBlock = typeof props.className === 'string' && props.className.includes('language-');
   return <code className={classNames(props.className, {
     'dory-mdx-code rounded-md py-0.5 text-sm px-1.5': !isBlock,
   })} {...props}>{children}</code>

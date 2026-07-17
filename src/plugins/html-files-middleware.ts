@@ -1,6 +1,14 @@
 import type { Plugin } from 'vite';
 import { readFileSync, existsSync, statSync } from 'fs';
-import { resolve, extname } from 'path';
+import { resolve, extname, sep } from 'path';
+
+/**
+ * Returns true if `target` is the `root` path itself or is contained within it.
+ * Both paths must already be resolved (absolute, normalized).
+ */
+export function isPathInside(root: string, target: string): boolean {
+  return target === root || target.startsWith(root + sep);
+}
 
 /**
  * Vite plugin to serve HTML files and assets directly from the docs directory
@@ -53,17 +61,24 @@ export function htmlFilesMiddleware(): Plugin {
 
         // Check if the request is for a file in the dist directory
         if (url.startsWith('/dist/')) {
+          const distRoot = resolve(process.cwd(), 'dist');
           const distPath = resolve(process.cwd(), url.slice(1));
+
+          // Reject paths that escape the dist directory (e.g. /dist/../../etc/passwd)
+          if (!isPathInside(distRoot, distPath)) {
+            res.statusCode = 403;
+            res.end('Forbidden');
+            return;
+          }
 
           if (existsSync(distPath)) {
             try {
-              const content = readFileSync(distPath, 'utf-8');
+              const content = readFileSync(distPath);
               const ext = extname(url).toLowerCase();
               const contentType = mimeTypes[ext] || 'application/octet-stream';
 
               res.setHeader('Content-Type', contentType);
               res.setHeader('Cache-Control', 'no-cache');
-              res.setHeader('Access-Control-Allow-Origin', '*');
               res.end(content);
               return;
             } catch (error) {
@@ -74,7 +89,15 @@ export function htmlFilesMiddleware(): Plugin {
 
         // Check if the request is for a file in the docs directory
         // This handles both direct file requests and directory requests
-        const docsPath = resolve(process.cwd(), 'docs', url.slice(1));
+        const docsRoot = resolve(process.cwd(), 'docs');
+        const docsPath = resolve(docsRoot, url.slice(1));
+
+        // Reject paths that escape the docs directory
+        if (!isPathInside(docsRoot, docsPath)) {
+          res.statusCode = 403;
+          res.end('Forbidden');
+          return;
+        }
 
         if (existsSync(docsPath)) {
           try {
@@ -91,7 +114,6 @@ export function htmlFilesMiddleware(): Plugin {
 
                 res.setHeader('Content-Type', contentType);
                 res.setHeader('Cache-Control', 'no-cache');
-                res.setHeader('Access-Control-Allow-Origin', '*');
                 res.end(content);
                 return;
               }

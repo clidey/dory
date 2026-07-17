@@ -1,11 +1,18 @@
+import type { ComponentType } from 'preact';
 import { renderToString } from 'preact-render-to-string';
 import { Router } from 'wouter-preact';
 import { MDXProvider } from '@mdx-js/preact';
 import { ThemeProvider } from '@clidey/ux';
 import * as mdxComponents from './mdx/mdx';
-import docsConfig from '../docs/dory.json';
+import docsConfig from '../docs/dory.json' with { type: 'json' };
+import type { DoryConfig } from './types/config';
 
-const config = docsConfig as any;
+const config = docsConfig as DoryConfig;
+
+const navigationTabs = config.navigation?.tabs ?? [];
+if (!config.navigation?.tabs) {
+  console.warn('dory.json has no navigation.tabs — SSR navigation will be empty.');
+}
 
 function pathFromFilename(filename: string): string {
   return filename
@@ -20,12 +27,27 @@ const allPages = Object.fromEntries(
   Object.entries(pages).map(([path, loader]) => [pathFromFilename(path), loader])
 );
 
-function buildNavigation(frontmatter?: Record<string, any>[]) {
-  return config.navigation.tabs.map((tab: any) => ({
+interface NavPage {
+  title: string;
+  href: string;
+}
+
+interface NavGroup {
+  title: string;
+  pages: NavPage[];
+}
+
+interface NavTab {
+  title: string;
+  groups: NavGroup[];
+}
+
+function buildNavigation(frontmatter?: Record<string, any>[]): NavTab[] {
+  return navigationTabs.map(tab => ({
     title: tab.tab,
-    groups: tab.groups.map((group: any) => ({
+    groups: tab.groups.map(group => ({
       title: group.group,
-      pages: group.pages.map((page: string) => {
+      pages: group.pages.map(page => {
         const href = `/${page}`;
         const fm = frontmatter?.find(f => f.path === href);
         return {
@@ -42,32 +64,32 @@ export async function render(routePath: string, frontmatter?: Record<string, any
   if (!loader) return '';
 
   try {
-    const module = await loader() as any;
+    const module = await loader() as { default: ComponentType };
     const Content = module.default;
 
     const navigation = buildNavigation(frontmatter);
-    const pageFm = frontmatter?.find((fm: any) => fm.path === routePath);
+    const pageFm = frontmatter?.find(fm => fm.path === routePath);
 
     // Find group/page titles (Layout uses swapped names: "title: group, group: title")
     let groupTitle = '';
-    const currentTab = navigation.find((tab: any) =>
-      tab.groups.some((group: any) =>
-        group.pages.some((page: any) => page.href === routePath)
+    const currentTab = navigation.find(tab =>
+      tab.groups.some(group =>
+        group.pages.some(page => page.href === routePath)
       )
     );
     if (currentTab) {
       for (const group of currentTab.groups) {
-        if (group.pages.some((p: any) => p.href === routePath)) {
+        if (group.pages.some(p => p.href === routePath)) {
           groupTitle = group.title;
         }
       }
     }
 
     // Prev/next
-    const allLinks = navigation.flatMap((tab: any) =>
-      tab.groups.flatMap((group: any) => group.pages)
+    const allLinks = navigation.flatMap(tab =>
+      tab.groups.flatMap(group => group.pages)
     );
-    const linkIndex = allLinks.findIndex((link: any) => link.href === routePath);
+    const linkIndex = allLinks.findIndex(link => link.href === routePath);
     const prevPage = linkIndex > 0 ? allLinks[linkIndex - 1] : null;
     const nextPage = linkIndex < allLinks.length - 1 ? allLinks[linkIndex + 1] : null;
 
@@ -76,17 +98,28 @@ export async function render(routePath: string, frontmatter?: Record<string, any
         <Router ssrPath={routePath}>
           <MDXProvider components={mdxComponents}>
                 <div class="flex w-full flex-col">
+                  {/* SYNC NOTE: the static shell below (header chrome, sidebar nav skeleton,
+                       main/article wrappers) hand-mirrors the client components:
+                       - <header> block  -> src/ui/header.tsx (Header component JSX)
+                       - #container/nav  -> src/ui/layout.tsx (non-landing return) + src/components/navigation.tsx
+                       When editing structure or classes in either place, update the counterpart,
+                       or hydration will mismatch. Client-only widgets (Search, ModeToggle,
+                       MobileNav) are intentionally NOT rendered here — see placeholder below. */}
                   {/* Header — matches src/ui/header.tsx structure */}
                   <header class="sticky top-0 z-50 flex flex-none flex-wrap items-center justify-between bg-white px-4 py-5 shadow-md shadow-gray-900/5 sm:px-6 lg:px-8 dark:shadow-none dark:bg-transparent">
                     <div class="relative flex justify-between gap-6 sm:gap-8 md:grow items-center w-full px-4">
                       <div class="flex items-center grow gap-2">
-                        <img src={`/${config.logo.light}`} alt="logo" class="w-8 hidden dark:block" />
-                        <img src={`/${config.logo.dark}`} alt="logo" class="w-8 block dark:hidden" />
+                        {config.logo && (
+                          <>
+                            <img src={`/${config.logo.light}`} alt="logo" class="w-8 hidden dark:block" />
+                            <img src={`/${config.logo.dark}`} alt="logo" class="w-8 block dark:hidden" />
+                          </>
+                        )}
                         <h1 class="text-base lg:text-2xl font-bold">{config.name}</h1>
                       </div>
                       <nav class="hidden md:block">
                         <ul role="list" class="flex items-center gap-8">
-                          {navigation.map((tab: any) => {
+                          {navigation.map(tab => {
                             const isActive = tab === currentTab;
                             return (
                               <li key={tab.title}>
@@ -117,11 +150,11 @@ export async function render(routePath: string, frontmatter?: Record<string, any
                             {currentTab && (
                               <li>
                                 <h2 class="font-display font-medium text-xs">{currentTab.title}</h2>
-                                {currentTab.groups.map((group: any) => (
+                                {currentTab.groups.map(group => (
                                   <div key={group.title}>
                                     <h3 class="mt-4 text-sm font-semibold">{group.title}</h3>
                                     <ul role="list" class="mt-2 space-y-2 border-l-2 border-slate-100 lg:mt-4 lg:space-y-4 lg:border-slate-200 dark:border-slate-800">
-                                      {group.pages.map((page: any) => (
+                                      {group.pages.map(page => (
                                         <li key={page.href} class="relative">
                                           <a
                                             href={page.href}

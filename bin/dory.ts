@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
 import { execSync } from 'child_process';
-import { existsSync, rmSync, mkdirSync, cpSync, readFileSync, readdirSync } from 'fs';
-import { resolve, dirname } from 'path';
+import { existsSync, rmSync, mkdirSync, cpSync, readFileSync, readdirSync, writeFileSync } from 'fs';
+import { resolve, dirname, basename } from 'path';
 import { tmpdir } from 'os';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 import { createServer } from 'http';
 import sirv from 'sirv';
 
@@ -14,19 +14,10 @@ const __dirname = dirname(__filename);
 // Get the root directory of the Dory package
 const getDoryRoot = (): string => {
   // In development: bin/dory.ts -> root is parent
-  // In production (local): bin/dist/dory.js -> root is parent of parent
-  // In production (installed): node_modules/@clidey/dory/bin/dist/dory.js -> root is parent of parent
-  const isDevelopment = __dirname.endsWith('bin');
-  const isLocalDist = __dirname.endsWith(resolve('bin', 'dist'));
-
-  if (isDevelopment) {
-    return resolve(__dirname, '..');
-  } else if (isLocalDist) {
-    return resolve(__dirname, '..', '..');
-  } else {
-    // Installed package: node_modules/@clidey/dory/bin/dist/dory.js
-    return resolve(__dirname, '..', '..');
-  }
+  // Compiled (local or installed): bin/dist/dory.js -> root is parent of parent
+  return basename(__dirname) === 'bin'
+    ? resolve(__dirname, '..')
+    : resolve(__dirname, '..', '..');
 };
 
 // Get the user's current working directory
@@ -114,8 +105,29 @@ const commands = {
       process.exit(1);
     }
 
+    // The build stages user files into the package's own docs/ directory, so a
+    // docs/ folder in the user's project cannot be included. Fail loudly
+    // instead of silently dropping it.
+    const userDocsDir = resolve(userRoot, 'docs');
+    if (existsSync(userDocsDir) && userDocsDir !== tempDocsDir) {
+      console.error('❌ Your project contains a docs/ directory');
+      console.error('   Dory currently cannot include a top-level docs/ folder in the build');
+      console.error('   Rename it (e.g. to guides/) and update dory.json navigation paths');
+      process.exit(1);
+    }
+
     // Detect package manager
     const pm = getPackageManager();
+
+    // Guard against concurrent builds mutating the package's docs/ directory
+    const lockPath = resolve(doryRoot, '.dory-build-lock');
+    if (existsSync(lockPath)) {
+      console.error('❌ Another dory build appears to be in progress');
+      console.error(`   Lock file: ${lockPath}`);
+      console.error('   If no other build is running, delete the lock file and retry');
+      process.exit(1);
+    }
+    writeFileSync(lockPath, String(process.pid), 'utf8');
 
     // Step 2: Backup existing docs directory to a safe temp location
     console.log('🧹 Preparing workspace...');
@@ -134,11 +146,35 @@ const commands = {
       if (origCount !== backupCount) {
         console.error(`❌ Backup verification failed (expected ${origCount} files, got ${backupCount})`);
         console.error(`   Backup location: ${safeBackupDir}`);
+        rmSync(lockPath, { force: true });
         process.exit(1);
       }
 
       rmSync(tempDocsDir, { recursive: true, force: true });
     }
+
+    // If the process is interrupted while the package's docs/ is mutated,
+    // restore the backup before exiting so no data is lost.
+    const restoreOnSignal = (): void => {
+      console.error('\n⚠️  Build interrupted — restoring docs directory...');
+      try {
+        if (docsExistedBefore && safeBackupDir && existsSync(safeBackupDir)) {
+          rmSync(tempDocsDir, { recursive: true, force: true });
+          cpSync(safeBackupDir, tempDocsDir, { recursive: true, force: true });
+          rmSync(safeBackupDir, { recursive: true, force: true });
+        } else if (!docsExistedBefore && existsSync(tempDocsDir)) {
+          rmSync(tempDocsDir, { recursive: true, force: true });
+        }
+      } catch {
+        if (safeBackupDir) {
+          console.error(`   Restore failed — backup preserved at: ${safeBackupDir}`);
+        }
+      }
+      rmSync(lockPath, { force: true });
+      process.exit(1);
+    };
+    process.on('SIGINT', restoreOnSignal);
+    process.on('SIGTERM', restoreOnSignal);
 
     try {
       // Step 3: Copy user files to temp docs directory
@@ -185,10 +221,7 @@ const commands = {
       // Verify critical files exist
       const doryJsonPath = resolve(tempDocsDir, 'dory.json');
       if (!existsSync(doryJsonPath)) {
-        console.error('❌ dory.json was not copied to docs directory');
-        console.error(`   Expected: ${doryJsonPath}`);
-        console.error('   This file is required for the build');
-        process.exit(1);
+        throw new Error(`dory.json was not copied to docs directory (expected: ${doryJsonPath})`);
       }
 
       // Step 4: Run the build
@@ -198,7 +231,9 @@ const commands = {
         execSync(`${pm.run} build:docs`, {
           stdio: 'inherit',
           cwd: doryRoot,
-          env: { ...process.env }
+          // Don't let corepack's strict packageManager pin fail the build for
+          // users running a different pnpm version.
+          env: { ...process.env, COREPACK_ENABLE_STRICT: '0' }
         });
       } catch (error) {
         console.error('❌ Build failed');
@@ -210,23 +245,34 @@ const commands = {
       console.log('🔍 Verifying build output...');
 
       if (!existsSync(doryDistDir)) {
-        console.error('❌ Build completed but dist folder was not created');
-        console.error(`   Expected: ${doryDistDir}`);
-        process.exit(1);
+        throw new Error(`Build completed but dist folder was not created (expected: ${doryDistDir})`);
       }
 
       const indexHtml = resolve(doryDistDir, 'index.html');
       if (!existsSync(indexHtml)) {
-        console.error('❌ Build incomplete: index.html not found');
-        console.error('   The build may have failed silently');
-        process.exit(1);
+        throw new Error('Build incomplete: index.html not found — the build may have failed silently');
       }
 
       // Check if dist has content
       const distFiles = readdirSync(doryDistDir);
       if (distFiles.length === 0) {
-        console.error('❌ Build completed but dist folder is empty');
-        process.exit(1);
+        throw new Error('Build completed but dist folder is empty');
+      }
+
+      // Verify SSR actually rendered content into at least one route
+      const hasSsrContent = (dir: string): boolean => {
+        for (const item of readdirSync(dir, { withFileTypes: true })) {
+          const itemPath = resolve(dir, item.name);
+          if (item.isDirectory()) {
+            if (hasSsrContent(itemPath)) return true;
+          } else if (item.name.endsWith('.html')) {
+            if (/<div id="app">\s*<\w/.test(readFileSync(itemPath, 'utf8'))) return true;
+          }
+        }
+        return false;
+      };
+      if (!hasSsrContent(doryDistDir)) {
+        throw new Error('Build verification failed: no route HTML contains server-rendered content in <div id="app">');
       }
 
       console.log('🎉 Build completed successfully!');
@@ -253,7 +299,7 @@ const commands = {
         execSync(`${pm.exec} vite build -c vite.config.embed-loader.ts`, {
           stdio: 'inherit',
           cwd: doryRoot,
-          env: { ...process.env }
+          env: { ...process.env, COREPACK_ENABLE_STRICT: '0' }
         });
 
         // Build embed widget
@@ -261,7 +307,7 @@ const commands = {
         execSync(`${pm.exec} vite build -c vite.config.embed-widget.ts`, {
           stdio: 'inherit',
           cwd: doryRoot,
-          env: { ...process.env }
+          env: { ...process.env, COREPACK_ENABLE_STRICT: '0' }
         });
 
         // Copy embed files to user's dist if different
@@ -304,6 +350,9 @@ const commands = {
     } finally {
       // Step 7: Always clean up and restore backup
       console.log('🧹 Cleaning up...');
+
+      process.removeListener('SIGINT', restoreOnSignal);
+      process.removeListener('SIGTERM', restoreOnSignal);
 
       if (docsExistedBefore && safeBackupDir && existsSync(safeBackupDir)) {
         console.log('📦 Restoring original docs directory...');
@@ -351,6 +400,8 @@ const commands = {
         console.warn('⚠️  Could not clean up dory dist directory');
       }
 
+      rmSync(lockPath, { force: true });
+
       console.log('✅ Done!');
     }
   },
@@ -360,7 +411,7 @@ const commands = {
 
     const userRoot = getUserRoot();
     const distDir = resolve(userRoot, 'dist');
-    let port = parseInt(process.env.PORT || '3000', 10);
+    const port = parseInt(process.env.PORT || '3000', 10);
 
     // Validate dist folder exists
     if (!existsSync(distDir)) {
@@ -386,23 +437,29 @@ const commands = {
       brotli: true,
     });
 
-    const server = createServer((req, res) => {
-      serve(req, res);
-    });
+    const maxAttempts = 20;
 
-    const tryPort = (currentPort: number): void => {
-      server.on('error', (err: NodeJS.ErrnoException) => {
-        if (err.code === 'EADDRINUSE') {
+    const tryPort = (currentPort: number, attempt: number): void => {
+      // Fresh server per attempt — reusing one server object stacks listeners
+      // and produces duplicate servers on retry.
+      const server = createServer((req, res) => {
+        serve(req, res);
+      });
+
+      server.once('error', (err: NodeJS.ErrnoException) => {
+        if (err.code === 'EADDRINUSE' && attempt + 1 < maxAttempts) {
           console.log(`⚠️  Port ${currentPort} in use, trying ${currentPort + 1}...`);
-          server.close(); // Close the failed attempt
-          tryPort(currentPort + 1);
+          tryPort(currentPort + 1, attempt + 1);
+        } else if (err.code === 'EADDRINUSE') {
+          console.error(`❌ No free port found in range ${port}-${currentPort}`);
+          process.exit(1);
         } else {
           console.error('❌ Failed to start server:', err.message);
           process.exit(1);
         }
       });
 
-      server.on('listening', () => {
+      server.once('listening', () => {
         console.log(`🚀 Documentation live at http://localhost:${currentPort}`);
         console.log('   Press Ctrl+C to stop the server');
       });
@@ -410,7 +467,7 @@ const commands = {
       server.listen(currentPort);
     };
 
-    tryPort(port);
+    tryPort(port, 0);
   },
 
   'verify:content': async () => {
@@ -453,8 +510,11 @@ const commands = {
         process.exit(1);
       }
 
-      // Use the shared MDX processor that matches the main build exactly
-      const { verifyMdxContent } = await import(processorPath);
+      // Use the shared MDX processor that matches the main build exactly.
+      // The processor uses extensionless .ts imports, so it must be loaded
+      // through tsx (a runtime dependency) rather than plain import().
+      const { tsImport } = await import('tsx/esm/api');
+      const { verifyMdxContent } = await tsImport(pathToFileURL(processorPath).href, import.meta.url);
       const result = await verifyMdxContent(content, fileName);
 
       if (!result.valid) {

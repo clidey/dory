@@ -46,18 +46,22 @@ export default defineConfig(({ command }) => ({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          'vendor-preact': ['preact', 'preact/compat', 'preact/hooks'],
-          'vendor-ui': ['@clidey/ux', '@headlessui/react'],
-          'vendor-icons': ['lucide-react'],
-          'katex': ['katex'],
-          'flexsearch': ['flexsearch'],
+        // Vite 8 (Rolldown) only supports the function form of manualChunks
+        manualChunks(id: string) {
+          if (!id.includes('node_modules')) return;
+          if (/node_modules\/preact($|\/)/.test(id)) return 'vendor-preact';
+          if (id.includes('node_modules/@clidey/ux') || id.includes('node_modules/@headlessui/react')) return 'vendor-ui';
+          if (id.includes('node_modules/lucide-react')) return 'vendor-icons';
+          if (id.includes('node_modules/katex')) return 'katex';
+          if (id.includes('node_modules/flexsearch')) return 'flexsearch';
         }
       }
     }
   },
   server: {
-    allowedHosts: true,
+    // Vite's default host allowlist (DNS-rebinding protection) applies.
+    // To serve behind a proxy with a custom hostname, add `server.allowedHosts`
+    // in a local override or via Vite CLI flags.
     port: 3000,
     strictPort: false,
   },

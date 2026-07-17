@@ -102,6 +102,22 @@ export interface DoryAnalytics {
   };
 }
 
+export interface DorySeo {
+  /** Applied to page titles, e.g. "%s — WhoDB"; %s is the page title. Default: no template. */
+  titleTemplate?: string;
+  keywords?: string[];
+  author?: string;
+  /** Absolute URL or path resolved against config.url. */
+  ogImage?: string;
+  twitterCard?: 'summary' | 'summary_large_image';
+  /** e.g. "en_US" */
+  locale?: string;
+  /** Extra lines appended to robots.txt. */
+  robotsTxt?: string[];
+  /** Site-wide meta robots noindex (for staging environments). */
+  noindex?: boolean;
+}
+
 export interface DoryTheme {
   mode?: 'light' | 'dark' | 'system';
   radius?: string;
@@ -122,4 +138,5 @@ export interface DoryConfig {
   logo: DoryLogo;
   embed?: DoryEmbedConfig;
   analytics?: DoryAnalytics;
+  seo?: DorySeo;
 }

@@ -1,6 +1,20 @@
 import { useCallback, useEffect, useState } from 'react'
 import classNames from 'classnames'
 
+/**
+ * Slugifies heading text matching rehype-slug (github-slugger) behavior:
+ * lowercase, strip punctuation, spaces to dashes. Used only as a fallback
+ * for headings that did not get an id at build time, so client-assigned
+ * anchors agree with SSR-assigned ones.
+ */
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\p{L}\p{N}\s_-]/gu, '')
+    .replace(/\s+/g, '-')
+}
+
 export type Section = {
   id: string
   title: string
@@ -33,8 +47,11 @@ export function TableOfContents() {
         const style = window.getComputedStyle(heading)
         if (style.display === 'none' || style.visibility === 'hidden') return
 
-        const id = heading.id || heading.textContent?.toLowerCase().replace(/\s+/g, '-') || ''
-        heading.id = id
+        // Prefer the build-time id from rehype-slug; only assign when missing
+        const id = heading.id || slugify(heading.textContent || '')
+        if (!heading.id && id) {
+          heading.id = id
+        }
 
         if (heading.tagName === 'H2') {
           currentSection = {

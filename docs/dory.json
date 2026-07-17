@@ -2,6 +2,9 @@
   "name": "Dory",
   "url": "https://dory.clidey.com",
   "description": "Static documentation site generator for modern teams. Build beautiful docs from MDX files.",
+  "seo": {
+    "titleTemplate": "%s — Dory"
+  },
   "favicon": "./favicon.svg",
   "colors": {
     "primary": "#F1BF4F",

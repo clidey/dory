@@ -1,7 +1,9 @@
 import type { ComponentChildren } from 'preact';
 import { useCallback, useEffect, useMemo, useState } from 'preact/hooks';
 import { Navigation } from '../components/navigation';
-import { ALL_NAVIGATION, ALL_OPENAPI, completeFrontMatter, loadMDXFrontMatterForPath, loadAllMDXFrontMatter, ALL_PAGES, pathFromFilename, preloadFrontmatter, ALL_ASYNCAPI, isFrontmatterReady } from '../components/store';
+import { ALL_NAVIGATION, ALL_OPENAPI, completeFrontMatter, loadMDXFrontMatterForPath, loadAllMDXFrontMatter, preloadFrontmatter, ALL_ASYNCAPI, isFrontmatterReady } from '../components/store';
+import docsConfig from '../../docs/dory.json' with { type: 'json' };
+import type { DoryConfig } from '../types/config';
 import { usePathname } from '../components/hooks';
 import { OpenAPI } from '../mdx/open-api';
 import { AsyncAPI } from '../mdx/async-api';
@@ -16,6 +18,8 @@ import { useIsEmbedded } from '../components/hooks';
 import { ErrorBoundary } from '../components/error-boundary';
 import { cn } from '@clidey/ux';
 
+const config = docsConfig as DoryConfig;
+
 interface LayoutProps {
   children: ComponentChildren;
 }
@@ -24,6 +28,15 @@ const prompt = (pathname: string) => `Please read and analyze the content from t
   `Then, help me understand and answer any questions I have about it. ` +
   `Please provide clear, detailed explanations and examples where relevant.`;
 
+/**
+ * Main documentation layout: header, sidebar navigation, article content,
+ * table of contents, and prev/next links.
+ *
+ * SYNC NOTE: src/entry-server.tsx renders a static SSR copy of this layout's
+ * shell (the #container / sidebar nav / main / article wrappers in render()).
+ * If you change that markup structure here, update entry-server.tsx to match
+ * or hydration will mismatch.
+ */
 export default function Layout({ children }: LayoutProps) {
   const [loading, setLoading] = useState(!isFrontmatterReady());
   const rawPathname = usePathname();
@@ -35,11 +48,17 @@ export default function Layout({ children }: LayoutProps) {
     window.open(`${window.location.origin}${pathname}.mdx`, '_blank');
   }, [pathname]);
 
-  const handleCopyMDX = useCallback(() => {
-    const mod = ALL_PAGES[pathFromFilename(pathname)];
-    if (mod) navigator.clipboard.writeText((mod as any).default.toString());
-    showNotification('Copied to clipboard');
-  }, []);
+  const handleCopyMDX = useCallback(async () => {
+    try {
+      const response = await fetch(`${pathname}.mdx`);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      await navigator.clipboard.writeText(await response.text());
+      showNotification('Copied to clipboard');
+    } catch (error) {
+      console.warn(`Failed to fetch ${pathname}.mdx:`, error);
+      showNotification('Could not copy MDX', 'The raw MDX file is not available.');
+    }
+  }, [pathname, showNotification]);
   const handleOpenChatGPT = useCallback(() => {
     const url = `https://chat.openai.com/?q=${encodeURIComponent(prompt(pathname))}`;
     window.open(url, '_blank');
@@ -102,7 +121,9 @@ export default function Layout({ children }: LayoutProps) {
   // Update document title and meta tags when page changes
   useEffect(() => {
     if (page?.title) {
-      document.title = page.title;
+      // Mirror the build-time SSR title template (config.seo.titleTemplate, e.g. "%s — Site")
+      const titleTemplate = (config as { seo?: { titleTemplate?: string } }).seo?.titleTemplate;
+      document.title = titleTemplate ? titleTemplate.replace('%s', page.title) : page.title;
 
       // Update Open Graph title
       const ogTitle = document.querySelector('meta[property="og:title"]');
@@ -152,42 +173,8 @@ export default function Layout({ children }: LayoutProps) {
     }
     canonical.setAttribute('href', `${window.location.origin}${window.location.pathname}`);
 
-    // Add/update JSON-LD structured data
-    const structuredData = {
-      '@context': 'https://schema.org',
-      '@graph': [
-        {
-          '@type': 'Article',
-          'headline': page?.title || document.title,
-          'description': page?.description || '',
-        },
-        {
-          '@type': 'BreadcrumbList',
-          'itemListElement': [
-            {
-              '@type': 'ListItem',
-              'position': 1,
-              'name': 'Home',
-              'item': window.location.origin
-            },
-            ...(page?.title ? [{
-              '@type': 'ListItem',
-              'position': 2,
-              'name': page.title,
-              'item': window.location.href
-            }] : [])
-          ]
-        }
-      ]
-    };
-
-    let ldScript = document.querySelector('script[type="application/ld+json"]');
-    if (!ldScript) {
-      ldScript = document.createElement('script');
-      ldScript.setAttribute('type', 'application/ld+json');
-      document.head.appendChild(ldScript);
-    }
-    ldScript.textContent = JSON.stringify(structuredData);
+    // JSON-LD structured data is emitted at build time (prerender) — crawlers consume
+    // that version, so it is intentionally not rewritten on client-side navigation.
   }, [page]);
 
   const isLandingPage = useMemo(() => {

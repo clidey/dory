@@ -1,34 +1,33 @@
 import type { Plugin } from 'vite';
-import { readFileSync, existsSync } from 'fs';
-import { resolve } from 'path';
+import { readDoryConfig } from './shared';
 
 /**
- * Generates robots.txt with a sitemap reference at build time.
+ * Generates robots.txt at build time. Emits `Disallow: /` when seo.noindex
+ * is set, appends any seo.robotsTxt lines, and references the sitemap when
+ * `url` is configured.
  */
 export function robotsGenerator(): Plugin {
   return {
     name: 'robots-generator',
     generateBundle() {
-      const doryJsonPath = resolve(process.cwd(), 'docs', 'dory.json');
+      const config = readDoryConfig() || {};
+      const seo = config.seo || {};
 
-      let sitemapLine = '';
-      if (existsSync(doryJsonPath)) {
-        try {
-          const config = JSON.parse(readFileSync(doryJsonPath, 'utf-8'));
-          if (config.url) {
-            sitemapLine = `\nSitemap: ${config.url}/sitemap.xml\n`;
-          }
-        } catch {
-          // Non-critical, continue without sitemap reference
-        }
+      const lines = ['User-agent: *'];
+      lines.push(seo.noindex ? 'Disallow: /' : 'Allow: /');
+
+      if (Array.isArray(seo.robotsTxt) && seo.robotsTxt.length > 0) {
+        lines.push('', ...seo.robotsTxt);
       }
 
-      const robots = `User-agent: *\nAllow: /\n${sitemapLine}`;
+      if (config.url && !seo.noindex) {
+        lines.push('', `Sitemap: ${config.url}/sitemap.xml`);
+      }
 
       this.emitFile({
         type: 'asset',
         fileName: 'robots.txt',
-        source: robots
+        source: lines.join('\n') + '\n'
       });
 
       console.log('✅ Generated robots.txt');

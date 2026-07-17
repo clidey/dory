@@ -37,8 +37,9 @@ export function docsAssetsPlugin(): Plugin {
       const shouldSkip = (name: string) => {
         if (skipPatterns.has(name)) return true;
         const ext = extname(name).toLowerCase();
-        // Skip MDX and JSON files (they're processed by Vite)
-        if (ext === '.mdx' || ext === '.md' || ext === '.json') return true;
+        // Skip Markdown and JSON files (they're processed by Vite).
+        // MDX sources ARE copied so /route.mdx URLs work (Open MDX / LLM prompts).
+        if (ext === '.md' || ext === '.json') return true;
         return false;
       };
 
@@ -60,8 +61,8 @@ export function docsAssetsPlugin(): Plugin {
               copyAssets(srcPath, destPath, itemRelativePath);
             } else if (stats.isFile()) {
               const ext = extname(item).toLowerCase();
-              // Copy if it's an asset file
-              if (assetExtensions.has(ext)) {
+              // Copy asset files, plus source .mdx files at their route paths
+              if (assetExtensions.has(ext) || ext === '.mdx') {
                 cpSync(srcPath, destPath, { force: true });
                 console.log(`[docs-assets] Copied ${itemRelativePath}`);
               }

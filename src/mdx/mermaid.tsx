@@ -16,6 +16,15 @@ function fixNodeLabelsWithSpecialChars(content: string): string {
     });
 }
 
+// Deterministic djb2 hash — btoa throws on non-Latin-1 content (e.g. "→", CJK, emoji)
+function hashContent(content: string): string {
+    let hash = 5381;
+    for (let i = 0; i < content.length; i++) {
+        hash = ((hash << 5) + hash + content.charCodeAt(i)) >>> 0;
+    }
+    return hash.toString(16);
+}
+
 export function MermaidRenderer({ content }: { content: string }) {
     const mermaidRef = useRef<HTMLDivElement>(null)
     const [isFullscreen, setIsFullscreen] = useState(false)
@@ -23,7 +32,7 @@ export function MermaidRenderer({ content }: { content: string }) {
     const [error, setError] = useState<string | null>(null)
     const [isValid, setIsValid] = useState<boolean | null>(null)
 
-    const diagramId = useMemo(() => `mermaid-${btoa(content).replace(/[^a-zA-Z0-9]/g, '').substring(0, 10)}`, [content])
+    const diagramId = useMemo(() => `mermaid-${hashContent(content)}`, [content])
 
     useEffect(() => {
         let mounted = true

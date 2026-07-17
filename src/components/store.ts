@@ -68,13 +68,13 @@ export function isFrontmatterReady() { return preloadedFrontMatter !== null; }
 let preloadedFrontMatter: Record<string, any>[] | null = null;
 
 // Check for inlined frontmatter from SSR (available synchronously, no fetch needed)
-if (typeof window !== 'undefined' && (window as any).__DORY_FRONTMATTER__) {
-    preloadedFrontMatter = (window as any).__DORY_FRONTMATTER__;
-    completeFrontMatter = [...preloadedFrontMatter!];
-    for (const fm of preloadedFrontMatter!) {
+if (typeof window !== 'undefined' && window.__DORY_FRONTMATTER__) {
+    preloadedFrontMatter = window.__DORY_FRONTMATTER__;
+    completeFrontMatter = [...preloadedFrontMatter];
+    for (const fm of preloadedFrontMatter) {
         updateNavigationTitle(fm.path, fm.title);
     }
-    delete (window as any).__DORY_FRONTMATTER__;
+    delete window.__DORY_FRONTMATTER__;
     // Build search index in the background after the page has fully rendered
     setTimeout(() => addPreloadedContentToSearch(), 2000);
 }

@@ -31,6 +31,13 @@ function TopLevelNavItem({ href, children, isActive }: { href: string; children:
   );
 }
 
+/**
+ * Site header with logo, top-level navigation, search, and theme toggle.
+ *
+ * SYNC NOTE: src/entry-server.tsx renders a static SSR copy of this header's
+ * structure (the <header> block inside render()). If you change the markup
+ * structure here, update entry-server.tsx to match or hydration will mismatch.
+ */
 export function Header({ className }: { className?: string }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();

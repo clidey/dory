@@ -51,21 +51,28 @@ export function Icon({
   }
 
   // --- Try Font Awesome ---
-  const faSet = iconSets[iconType] ?? solidIcons
-  const iconKey = `fa${pascalCase}` as keyof typeof faSet
-  const faIcon = faSet[iconKey]
+  // Fall back to the brands set: Lucide 1.x removed all brand icons
+  // (github, twitter, npm, ...), which live only in FA brands.
+  const iconKey = `fa${pascalCase}`
+  const setsToTry: Array<keyof typeof iconSets> =
+    iconType === 'brands' ? ['brands'] : [iconType, 'brands']
 
-  if (faIcon && typeof faIcon === 'object' && 'iconName' in faIcon) {
-    library.add(faIcon)
-    return (
-      <FontAwesomeIcon
-        icon={[prefixes[iconType] || 'fas', faIcon.iconName] as any}
-        className={classNames("stroke-black dark:stroke-white", className)}
-        color={color as any}
-        size={size as any}
-        {...rest as any}
-      />
-    )
+  for (const setName of setsToTry) {
+    const faSet = iconSets[setName] ?? solidIcons
+    const faIcon = faSet[iconKey as keyof typeof faSet]
+
+    if (faIcon && typeof faIcon === 'object' && 'iconName' in faIcon) {
+      library.add(faIcon)
+      return (
+        <FontAwesomeIcon
+          icon={[prefixes[setName] || 'fas', faIcon.iconName] as any}
+          className={classNames("stroke-black dark:stroke-white", className)}
+          color={color as any}
+          size={size as any}
+          {...rest as any}
+        />
+      )
+    }
   }
 
   console.warn(`⚠️ Icon not found: "${icon}" (converted to ${iconKey}) in ${iconType}`)

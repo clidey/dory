@@ -13,16 +13,8 @@ export default defineConfig({
     },
     outDir: 'dist',
     emptyOutDir: false,
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: false, // Keep console for user feedback
-        drop_debugger: true,
-        pure_funcs: ['console.debug'],
-      },
-      mangle: {
-        safari10: true,
-      },
-    },
+    // esbuild minification: works from the published package (terser is never
+    // installed for consumers since it's only an optional peer of vite)
+    minify: 'esbuild',
   },
 });
