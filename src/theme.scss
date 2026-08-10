@@ -4,10 +4,10 @@
     -moz-osx-font-smoothing: grayscale;
 
     // Brand colors (dynamically set from dory.json via loadColors())
-    --brand-foreground: #0ea5e9;
-    --brand-primary: #0ea5e9;
-    --brand-light: #38bdf8;
-    --brand-dark: #0284c7;
+    --brand-foreground: #2C6BD4;
+    --brand-primary: #2C6BD4;
+    --brand-light: #2C6BD4;
+    --brand-dark: #4787F3;
 
     // Font families
     --font-body: inherit;
@@ -103,8 +103,8 @@ html, body, #app {
     // Page title — large display serif
     .dory-page-title {
         font-family: var(--font-heading, var(--font-body, inherit));
-        font-weight: 380;
-        font-variation-settings: "opsz" 144, "SOFT" 30;
+        font-weight: 700;
+        font-variation-settings: "opsz" 96;
         letter-spacing: -0.02em;
     }
 
@@ -120,8 +120,8 @@ html, body, #app {
     // Article headings — serif with proper optical sizing
     article h2 {
         font-family: var(--font-heading, var(--font-body, inherit));
-        font-weight: 400;
-        font-variation-settings: "opsz" 48, "SOFT" 50;
+        font-weight: 600;
+        font-variation-settings: "opsz" 48;
         letter-spacing: -0.015em;
     }
 

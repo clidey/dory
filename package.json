@@ -49,7 +49,7 @@
   },
   "dependencies": {
     "@algolia/autocomplete-core": "1.19.9",
-    "@clidey/ux": "0.59.0",
+    "@clidey/ux": "1.2.2",
     "@fortawesome/fontawesome-svg-core": "7.3.0",
     "@fortawesome/free-brands-svg-icons": "7.3.0",
     "@fortawesome/free-regular-svg-icons": "7.3.0",
