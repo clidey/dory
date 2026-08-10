@@ -7,18 +7,9 @@
   },
   "favicon": "./favicon.svg",
   "colors": {
-    "primary": "#4787F3",
+    "primary": "#2C6BD4",
     "light": "#2C6BD4",
-    "dark": "#4787F3",
-    "background": "#0E2240",
-    "surface": "#162B4A",
-    "surfaceElevated": "#1D3151",
-    "foreground": "#FAF5EC",
-    "mutedForeground": "#86909F",
-    "border": "rgb(250 245 236 / 14%)"
-  },
-  "theme": {
-    "mode": "dark"
+    "dark": "#4787F3"
   },
   "fonts": {
     "family": "Hanken Grotesk",

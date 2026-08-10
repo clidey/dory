@@ -1,5 +1,6 @@
 import { render, hydrate } from 'preact'
 import '@clidey/ux/styles.css';
+import '@clidey/ux/brand.css';
 import { App } from './app.tsx'
 import { withMDX } from './components/mdx-provider.tsx'
 import { ErrorBoundary } from './components/error-boundary.tsx'
