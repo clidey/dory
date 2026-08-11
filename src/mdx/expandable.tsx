@@ -14,18 +14,18 @@ export function Expandable({
     <Accordion
       type="single"
       collapsible
-      className="my-6 rounded-xl border border-slate-200 dark:border-slate-700"
+      className="my-6 rounded-xl border border-border"
     >
       <AccordionItem value="expandable">
-        <AccordionTrigger className="group flex w-full items-start justify-between text-left text-slate-900 dark:text-white p-6">
+        <AccordionTrigger className="group flex w-full items-start justify-between text-left text-foreground dark:text-white p-6">
           <div className="flex items-center gap-2">
             {icon && <Icon icon={icon} className="h-8 w-8" />}
-            <span className="text-base font-display text-slate-900 dark:text-white">{title}</span>
+            <span className="text-base font-display text-foreground dark:text-white">{title}</span>
           </div>
         </AccordionTrigger>
         <AccordionContent asChild>
           <dd className="px-6 pb-6">
-            <div className="text-sm text-slate-700 dark:text-slate-400 leading-tight [&>p]:mb-0">
+            <div className="text-sm text-foreground/80 leading-tight [&>p]:mb-0">
               {children}
             </div>
           </dd>

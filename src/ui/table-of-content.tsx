@@ -138,7 +138,7 @@ export function TableOfContents() {
           <>
             <h2
               id="on-this-page-title"
-              className="font-display text-sm font-medium text-slate-900 dark:text-white"
+              className="font-display text-sm font-medium text-foreground dark:text-white"
             >
               On this page
             </h2>
@@ -150,13 +150,13 @@ export function TableOfContents() {
                       href={`#${section.id}`}
                       className={classNames({
                         "text-brand-foreground": isActive(section),
-                        "font-normal text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300": !isActive(section),
+                        "font-normal text-muted-foreground hover:text-foreground/80 dark:hover:text-slate-300": !isActive(section),
                       })}>
                       {section.title}
                     </a>
                   </h3>
                   {section.children.length > 0 && (
-                    <ol role="list" className="mt-2 space-y-3 pl-5 text-slate-500 dark:text-slate-400">
+                    <ol role="list" className="mt-2 space-y-3 pl-5 text-muted-foreground dark:text-muted-foreground">
                       {section.children.map((subSection) => (
                         <li key={subSection.id}>
                           <a
@@ -164,7 +164,7 @@ export function TableOfContents() {
                             className={
                               isActive(subSection)
                                 ? 'text-brand-foreground'
-                                : 'hover:text-slate-600 dark:hover:text-slate-300'
+                                : 'hover:text-muted-foreground dark:hover:text-slate-300'
                             }
                           >
                             {subSection.title}

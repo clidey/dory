@@ -86,11 +86,11 @@ function CopyButton({ code }: { code: string }) {
       <span
         aria-hidden={copied}
         className={classNames(
-          'pointer-events-none flex items-center gap-0.5 text-zinc-400 transition duration-300',
+          'pointer-events-none flex items-center gap-0.5 text-muted-foreground transition duration-300',
           copied && '-translate-y-1.5 opacity-0',
         )}
       >
-        <ClipboardIcon className="h-4 w-4 fill-zinc-500/20 stroke-zinc-500 transition-colors group-hover/button:stroke-zinc-400" />
+        <ClipboardIcon className="h-4 w-4 fill-zinc-500/20 stroke-muted-foreground transition-colors group-hover/button:stroke-muted-foreground" />
       </span>
       <span
         aria-hidden={!copied}
@@ -121,7 +121,7 @@ function APIPanelHeader({ tag, label }: { tag?: string; label?: string }) {
         <span className="h-0.5 w-0.5 rounded-full bg-zinc-500" />
       )}
       {label && (
-        <span className="font-mono text-xs text-zinc-400">{label}</span>
+        <span className="font-mono text-xs text-muted-foreground">{label}</span>
       )}
     </div>
   )
@@ -191,7 +191,7 @@ function APIGroupHeader({
                 'pt-2 transition data-selected:not-data-focus:outline-hidden',
                 childIndex === selectedIndex
                   ? 'border-sky-500 text-sky-400'
-                  : 'border-transparent text-zinc-400 hover:text-zinc-300',
+                  : 'border-transparent text-muted-foreground hover:text-zinc-300',
               )}
             >
               {/* @ts-expect-error child.props is not typed */}

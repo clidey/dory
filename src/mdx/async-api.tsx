@@ -254,7 +254,7 @@ export function AsyncAPI({
                                 >
                                   {prop.description}
                                   {prop.default !== undefined && (
-                                    <span className="text-gray-500 ml-1">(default: {JSON.stringify(prop.default)})</span>
+                                    <span className="text-muted-foreground ml-1">(default: {JSON.stringify(prop.default)})</span>
                                   )}
                                 </Property>
                               ))}

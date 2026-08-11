@@ -145,8 +145,8 @@ export const HeadersTab = ({ wsConfig, setWsConfig }: HeadersTabProps) => {
   return (
     <div className="flex flex-col gap-2 px-2 py-4">
       <div className="flex items-center gap-2 px-2">
-        <span className="text-sm font-medium text-zinc-400 w-32">Key</span>
-        <span className="text-sm font-medium text-zinc-400 flex-1">Value</span>
+        <span className="text-sm font-medium text-muted-foreground w-32">Key</span>
+        <span className="text-sm font-medium text-muted-foreground flex-1">Value</span>
       </div>
       {headersList.map((hdr, idx) => (
         <div key={idx} className="flex items-center gap-2">
@@ -264,7 +264,7 @@ export const SubprotocolsTab = ({ subprotocols, setWsConfig }: SubprotocolsTabPr
   return (
     <div className="flex flex-col gap-2 px-2 py-4">
       <div className="flex items-center gap-2">
-        <span className="text-sm font-medium text-zinc-400 flex-1">Subprotocol</span>
+        <span className="text-sm font-medium text-muted-foreground flex-1">Subprotocol</span>
       </div>
       {subprotocolsList.map((s, i) => (
         <div key={i} className="flex items-center gap-2">
@@ -460,7 +460,7 @@ function WebSocketPlaygroundInternal({
       case 'error':
         return 'text-red-400'
       default:
-        return 'text-zinc-400'
+        return 'text-muted-foreground'
     }
   }
 
@@ -498,7 +498,7 @@ function WebSocketPlaygroundInternal({
             className={classNames(
               'flex items-center gap-2',
               connectionState === 'connecting' || connectionState === 'connected'
-                ? 'bg-zinc-600 text-zinc-400 cursor-not-allowed'
+                ? 'bg-zinc-600 text-muted-foreground cursor-not-allowed'
                 : 'bg-green-600 text-white hover:bg-green-700'
             )}
           >
@@ -515,7 +515,7 @@ function WebSocketPlaygroundInternal({
             variant="destructive"
             className={classNames(
               'flex items-center gap-2',
-              connectionState === 'disconnected' && 'bg-zinc-600 text-zinc-400 cursor-not-allowed'
+              connectionState === 'disconnected' && 'bg-zinc-600 text-muted-foreground cursor-not-allowed'
             )}
           >
             <DisconnectButton className="h-4 w-4" />
@@ -554,7 +554,7 @@ function WebSocketPlaygroundInternal({
                         'px-4 py-3 text-sm font-medium transition border-b-2',
                         selected
                           ? 'border-brand-foreground text-brand-foreground'
-                          : 'border-transparent text-zinc-400 hover:text-zinc-300'
+                          : 'border-transparent text-muted-foreground hover:text-zinc-300'
                       )
                     }
                   >
@@ -659,7 +659,7 @@ function WebSocketPlaygroundInternal({
                 onClick={clearMessages}
                 variant="ghost"
                 size="sm"
-                className="text-xs text-zinc-400 hover:text-zinc-300"
+                className="text-xs text-muted-foreground hover:text-zinc-300"
               >
                 Clear
               </Button>
@@ -686,14 +686,14 @@ function WebSocketPlaygroundInternal({
                         msg.type === 'sent' && 'text-sky-400',
                         msg.type === 'received' && 'text-green-400',
                         msg.type === 'error' && 'text-red-400',
-                        msg.type === 'system' && 'text-zinc-400'
+                        msg.type === 'system' && 'text-muted-foreground'
                       )}>
                         {msg.type === 'sent' ? 'Sent' : 
                          msg.type === 'received' ? 'Received' : 
                          msg.type === 'error' ? 'Error' : 'System'}
                         {msg.binary && ' (Binary)'}
                       </span>
-                      <span className="text-xs text-zinc-500">
+                      <span className="text-xs text-muted-foreground">
                         {new Date(msg.timestamp).toLocaleTimeString()}
                       </span>
                     </div>
@@ -791,7 +791,7 @@ export function WebSocketPlayground(props: WebSocketPlaygroundProps) {
         <div className="px-4 py-3">
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-medium text-zinc-400">Endpoint:</span>
+              <span className="text-xs font-medium text-muted-foreground">Endpoint:</span>
               <Badge>
                 {props.servers?.[0]?.url || 'ws://localhost'}{props.url}
               </Badge>
@@ -799,7 +799,7 @@ export function WebSocketPlayground(props: WebSocketPlaygroundProps) {
 
             {props.subprotocols && props.subprotocols.length > 0 && (
               <div className="flex items-center gap-2">
-                <span className="text-xs font-medium text-zinc-400">Subprotocols:</span>
+                <span className="text-xs font-medium text-muted-foreground">Subprotocols:</span>
                 <div className="flex gap-1">
                   {props.subprotocols.map((protocol, idx) => (
                     <Badge key={idx}>
@@ -812,7 +812,7 @@ export function WebSocketPlayground(props: WebSocketPlaygroundProps) {
 
             {props.authType && props.authType !== 'none' && (
               <div className="flex items-center gap-2">
-                <span className="text-xs font-medium text-zinc-400">Authentication:</span>
+                <span className="text-xs font-medium text-muted-foreground">Authentication:</span>
                 <Badge>
                   {props.authType}
                 </Badge>

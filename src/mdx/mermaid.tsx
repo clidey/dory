@@ -137,7 +137,7 @@ export function MermaidRenderer({ content }: { content: string }) {
     return (
         <div className="mermaid-wrapper my-8">
             {!isLoaded && (
-                <div className="flex items-center justify-center py-8 text-gray-400">
+                <div className="flex items-center justify-center py-8 text-muted-foreground">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
                     <span className="ml-2">Loading diagram...</span>
                 </div>

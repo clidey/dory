@@ -37,7 +37,7 @@ export const Source = ({ url, branch = "main", paths }: SourceProps) => {
 
     return (
         <div>
-            <p className="text-sm text-slate-900 dark:text-white">Sources:</p>
+            <p className="text-sm text-foreground dark:text-white">Sources:</p>
             <ul className="list-none pl-0 flex flex-wrap gap-2 mt-2">
                 {paths.map(({ path, range }) => (
                     <li key={path + (range || '')}>
@@ -45,7 +45,7 @@ export const Source = ({ url, branch = "main", paths }: SourceProps) => {
                             href={createSourceUrl(path, range)}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="rounded px-3 py-1 font-mono text-sm text-slate-700 dark:text-slate-400 hover:opacity-80 transition-colors border border-slate-200 dark:border-slate-700"
+                            className="rounded px-3 py-1 font-mono text-sm text-foreground/80 hover:opacity-80 transition-colors border border-border"
                         >
                             {path}
                             {range && <span className="ml-2 opacity-70">{range}</span>}

@@ -35,7 +35,7 @@ export function Property({
       <div className="my-4 flex flex-wrap items-center gap-x-3 gap-2">
         <div className="flex gap-2 items-center grow">
           <Tag className="px-4 py-1">{name}</Tag>
-          <p className="font-mono text-xs text-zinc-400 dark:text-zinc-500">
+          <p className="font-mono text-xs text-muted-foreground/80">
             {type}
           </p>
           <div className="flex grow justify-end ">
@@ -63,7 +63,7 @@ export function ParamField({ body, type, default: defaultValue, required, childr
     <Property name={body} type={type} required={required}>
       {children}
       {defaultValue != null && (
-        <span className="text-gray-500 ml-1">(default: {defaultValue})</span>
+        <span className="text-muted-foreground ml-1">(default: {defaultValue})</span>
       )}
     </Property>
   );

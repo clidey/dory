@@ -32,7 +32,7 @@ export class DoryWidget {
       this.overlay.style.cssText = `
         position: fixed;
         inset: 0;
-        background: rgba(0, 0, 0, 0.5);
+        background: rgb(14 34 64 / 0.5);
         z-index: 999998;
         opacity: 0;
         pointer-events: none;

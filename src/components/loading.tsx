@@ -14,7 +14,7 @@ export const Loading = ({ className, showText = false, loadingText, textClassNam
       <Spinner className={className} />
       {
         showText &&
-        <div className={classNames("text-sm text-gray-500", textClassName)}>{ loadingText ?? "Loading..."}</div>
+        <div className={classNames("text-sm text-muted-foreground", textClassName)}>{ loadingText ?? "Loading..."}</div>
       }
     </div>
   )

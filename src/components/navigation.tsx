@@ -28,7 +28,7 @@ export function Navigation() {
                     {currentTab.groups.map(group => (
                         <div key={group.title}>
                             <h3 className="mt-4 text-sm font-semibold">{group.title}</h3>
-                            <ul role="list" className="mt-2 space-y-2 border-l-2 border-slate-100 lg:mt-4 lg:space-y-4 lg:border-slate-200 dark:border-slate-800">
+                            <ul role="list" className="mt-2 space-y-2 border-l-2 border-border lg:mt-4 lg:space-y-4 lg:border-border">
                                 {group.pages.map((page) => {
                                     const isActive = effectivePath === page.href;
                                     return (
@@ -39,7 +39,7 @@ export function Navigation() {
                                                 'block w-full pl-3.5 before:pointer-events-none before:absolute before:top-1/2 before:-left-1 before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full',
                                                 {
                                                     'font-semibold text-brand-foreground': isActive,
-                                                    'text-slate-500 before:hidden before:bg-slate-300 hover:text-slate-600 hover:before:block dark:text-slate-400 dark:before:bg-slate-700 dark:hover:text-slate-300': !isActive
+                                                    'text-muted-foreground before:hidden before:bg-slate-300 hover:text-muted-foreground hover:before:block dark:text-muted-foreground dark:before:bg-slate-700 dark:hover:text-slate-300': !isActive
                                                 },
                                             )}>
                                                 {page.title}

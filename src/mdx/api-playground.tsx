@@ -154,8 +154,8 @@ export const HeadersTab = ({ requestConfig, setRequestConfig }: HeadersTabProps)
   return (
     <div className="flex flex-col gap-2 px-2 py-4">
       <div className="flex items-center gap-2 px-2">
-        <span className="text-sm font-medium text-zinc-400 w-32">Key</span>
-        <span className="text-sm font-medium text-zinc-400 flex-1">Value</span>
+        <span className="text-sm font-medium text-muted-foreground w-32">Key</span>
+        <span className="text-sm font-medium text-muted-foreground flex-1">Value</span>
       </div>
       {headersList.map((hdr, idx) => (
         <div key={idx} className="flex items-center gap-2">
@@ -274,8 +274,8 @@ export const ParamsTab = ({ queryParams, setQueryParams }: ParamsTabProps) => {
   return (
     <div className="flex flex-col gap-2 px-2 py-4">
       <div className="flex items-center gap-2">
-        <span className="text-sm font-medium text-zinc-400 w-32">Name</span>
-        <span className="text-sm font-medium text-zinc-400 flex-1">Value</span>
+        <span className="text-sm font-medium text-muted-foreground w-32">Name</span>
+        <span className="text-sm font-medium text-muted-foreground flex-1">Value</span>
       </div>
       {paramsList.map((p, i) => (
         <div key={i} className="flex items-center gap-2">
@@ -472,7 +472,7 @@ export function APIPlayground({
                       'px-4 py-3 text-sm font-medium transition border-b-2',
                       selected
                         ? 'border-brand-foreground text-brand-foreground'
-                        : 'border-transparent text-zinc-400 hover:text-zinc-300'
+                        : 'border-transparent text-muted-foreground hover:text-zinc-300'
                     )
                   }
                 >
@@ -518,7 +518,7 @@ export function APIPlayground({
                     </Highlight>
                   </div>
                 ) : (
-                  <p className="text-sm text-zinc-400">Request body not applicable for {method.toUpperCase()} requests.</p>
+                  <p className="text-sm text-muted-foreground">Request body not applicable for {method.toUpperCase()} requests.</p>
                 )}
               </TabPanel>
 
@@ -624,7 +624,7 @@ export function APIPlayground({
                   )}>
                     {response.status} {response.statusText}
                   </span>
-                  <span className="text-xs text-zinc-400">{response.duration}ms</span>
+                  <span className="text-xs text-muted-foreground">{response.duration}ms</span>
                 </div>
 
                 <div className="space-y-2">
@@ -642,7 +642,7 @@ export function APIPlayground({
                   <div className="space-y-1">
                     {Object.entries(response.headers).map(([key, value]) => (
                       <div key={key} className="flex text-xs">
-                        <span className="text-zinc-400 w-32">{key}:</span>
+                        <span className="text-muted-foreground w-32">{key}:</span>
                         <span className="text-zinc-300">{value}</span>
                       </div>
                     ))}
