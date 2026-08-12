@@ -19,8 +19,8 @@ importers:
         specifier: 1.2.4
         version: 1.2.4(@types/react@19.1.6)(react-dom@19.1.0(react@19.1.0))(react-is@19.2.4)(react@19.1.0)(redux@5.0.1)
       '@fortawesome/fontawesome-svg-core':
-        specifier: 7.3.0
-        version: 7.3.0
+        specifier: 7.3.1
+        version: 7.3.1
       '@fortawesome/free-brands-svg-icons':
         specifier: 7.3.0
         version: 7.3.0
@@ -32,7 +32,7 @@ importers:
         version: 7.3.0
       '@fortawesome/react-fontawesome':
         specifier: 3.4.0
-        version: 3.4.0(@fortawesome/fontawesome-svg-core@7.3.0)(react@19.1.0)
+        version: 3.4.0(@fortawesome/fontawesome-svg-core@7.3.1)(react@19.1.0)
       '@headlessui/react':
         specifier: 2.2.10
         version: 2.2.10(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -497,8 +497,12 @@ packages:
     resolution: {integrity: sha512-X/vND0Y1l9fVJ9O79UgtZnXSpz4aNF3bXlDxiJAEAm6kgeSftp9wjjBPgqzazJV8YlmxfRoeXNfSCJ48sf/Hhw==}
     engines: {node: '>=6'}
 
-  '@fortawesome/fontawesome-svg-core@7.3.0':
-    resolution: {integrity: sha512-MFbTNLDWkLJwbozDvHOZ7hwyDjQcBMBattlcOQ6ZmV5YD9bBrqdl1rNtmVjQ/lzqveXXX3sMz2Ew6fAgXoxmkw==}
+  '@fortawesome/fontawesome-common-types@7.3.1':
+    resolution: {integrity: sha512-k0C0sdHmZtAo6dRDtd1Z/qcpyHbL0CKsjV8seMY/21xGhY5Wsv0XRmiI/xEEH4y2c9b1+jvgNs/3EqhV27yUEA==}
+    engines: {node: '>=6'}
+
+  '@fortawesome/fontawesome-svg-core@7.3.1':
+    resolution: {integrity: sha512-BoxVN3PKnMbgStHhjoaky/oWdxHomDqmBVA24IA3KEmssFGeI7u9YT/BJceOjIum/t6TpPa/vcMKaVYQeIQ/3Q==}
     engines: {node: '>=6'}
 
   '@fortawesome/free-brands-svg-icons@7.3.0':
@@ -1993,8 +1997,8 @@ packages:
     engines: {node: '>=0.4.0'}
     hasBin: true
 
-  acorn@8.17.0:
-    resolution: {integrity: sha512-xRQbDb9BnwDafYNn6Vwl839DYVjqXYb1XVGtWAZ1kcDc6iwAL4hg3B1dZlRiuENFeO2H53gFG3in621AdERVAg==}
+  acorn@8.18.0:
+    resolution: {integrity: sha512-lGq+9yr1/GuAWaVYIHRjvvySG5/4VfKIvC8EWxStPdcDh/Ka7FG3twP6v4d5BkravUilhIAsG4Qj83t02LWUPQ==}
     engines: {node: '>=0.4.0'}
     hasBin: true
 
@@ -4124,9 +4128,11 @@ snapshots:
 
   '@fortawesome/fontawesome-common-types@7.3.0': {}
 
-  '@fortawesome/fontawesome-svg-core@7.3.0':
+  '@fortawesome/fontawesome-common-types@7.3.1': {}
+
+  '@fortawesome/fontawesome-svg-core@7.3.1':
     dependencies:
-      '@fortawesome/fontawesome-common-types': 7.3.0
+      '@fortawesome/fontawesome-common-types': 7.3.1
 
   '@fortawesome/free-brands-svg-icons@7.3.0':
     dependencies:
@@ -4140,9 +4146,9 @@ snapshots:
     dependencies:
       '@fortawesome/fontawesome-common-types': 7.3.0
 
-  '@fortawesome/react-fontawesome@3.4.0(@fortawesome/fontawesome-svg-core@7.3.0)(react@19.1.0)':
+  '@fortawesome/react-fontawesome@3.4.0(@fortawesome/fontawesome-svg-core@7.3.1)(react@19.1.0)':
     dependencies:
-      '@fortawesome/fontawesome-svg-core': 7.3.0
+      '@fortawesome/fontawesome-svg-core': 7.3.1
       react: 19.1.0
 
   '@headlessui/react@2.2.10(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
@@ -5491,7 +5497,7 @@ snapshots:
 
   acorn@8.15.0: {}
 
-  acorn@8.17.0:
+  acorn@8.18.0:
     optional: true
 
   algoliasearch@5.25.0:
@@ -7312,7 +7318,7 @@ snapshots:
   terser@5.49.0:
     dependencies:
       '@jridgewell/source-map': 0.3.11
-      acorn: 8.17.0
+      acorn: 8.18.0
       commander: 2.20.3
       source-map-support: 0.5.21
     optional: true
