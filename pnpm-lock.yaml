@@ -16,8 +16,8 @@ importers:
         specifier: 1.19.9
         version: 1.19.9(@algolia/client-search@5.25.0)(algoliasearch@5.25.0)(search-insights@2.17.3)
       '@clidey/ux':
-        specifier: 1.2.3
-        version: 1.2.3(@types/react@19.1.6)(react-dom@19.1.0(react@19.1.0))(react-is@19.2.4)(react@19.1.0)(redux@5.0.1)
+        specifier: 1.2.4
+        version: 1.2.4(@types/react@19.1.6)(react-dom@19.1.0(react@19.1.0))(react-is@19.2.4)(react@19.1.0)(redux@5.0.1)
       '@fortawesome/fontawesome-svg-core':
         specifier: 7.3.0
         version: 7.3.0
@@ -301,8 +301,8 @@ packages:
   '@chevrotain/types@11.1.2':
     resolution: {integrity: sha512-U+HFai5+zmJCkK86QsaJtoITlboZHBqrVketcO2ROv865xfCMSFpELQoz1GkX5GzME8pTa+3kbKrZHQtI0gdbw==}
 
-  '@clidey/ux@1.2.3':
-    resolution: {integrity: sha512-LNYid0dJWETJoj/uTABLpst8GrU72r6QvAQ9QHovzbWTVjfzonQyHzCjDAoZU83QJyA/oXgYUh3QasBX8zMktw==}
+  '@clidey/ux@1.2.4':
+    resolution: {integrity: sha512-5M3acppA5N4RkzEbEoSdBVGzYCWeZGMZ+A5xSQOqUrbhfAtROEUlFb0923O4PUh469Bs5sb7iWVgHxJJMgkBJA==}
     peerDependencies:
       react: '>=18.3.0'
       react-dom: '>=18.3.0'
@@ -3964,7 +3964,7 @@ snapshots:
 
   '@chevrotain/types@11.1.2': {}
 
-  '@clidey/ux@1.2.3(@types/react@19.1.6)(react-dom@19.1.0(react@19.1.0))(react-is@19.2.4)(react@19.1.0)(redux@5.0.1)':
+  '@clidey/ux@1.2.4(@types/react@19.1.6)(react-dom@19.1.0(react@19.1.0))(react-is@19.2.4)(react@19.1.0)(redux@5.0.1)':
     dependencies:
       '@radix-ui/react-accordion': 1.2.17(@types/react@19.1.6)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@radix-ui/react-alert-dialog': 1.1.20(@types/react@19.1.6)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)

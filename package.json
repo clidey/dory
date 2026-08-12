@@ -1,7 +1,7 @@
 {
   "name": "@clidey/dory",
   "private": false,
-  "version": "1.0.3",
+  "version": "1.0.4",
   "type": "module",
   "description": "A CLI tool for building and previewing documentation sites",
   "keywords": [
@@ -49,7 +49,7 @@
   },
   "dependencies": {
     "@algolia/autocomplete-core": "1.19.9",
-    "@clidey/ux": "1.2.3",
+    "@clidey/ux": "1.2.4",
     "@fortawesome/fontawesome-svg-core": "7.3.0",
     "@fortawesome/free-brands-svg-icons": "7.3.0",
     "@fortawesome/free-regular-svg-icons": "7.3.0",
