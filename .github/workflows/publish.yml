@@ -10,6 +10,8 @@ permissions:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
     steps:
       - uses: actions/checkout@v4
 
@@ -27,9 +29,48 @@ jobs:
 
       - run: npm publish
 
+      - name: Determine version
+        id: version
+        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
         run: |
-          VERSION="v$(node -p "require('./package.json').version")"
-          gh release create "$VERSION" --generate-notes --title "$VERSION"
+          gh release create "v${VERSION}" --generate-notes --title "v${VERSION}"
+
+  build-and-push-docker:
+    name: Build and Push Docker Image
+    needs: [ publish ]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Wait for npm registry propagation
+        run: sleep 30
+
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5 # v4.1.0
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf # v7.2.0
+        with:
+          context: .
+          file: ./k8s/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          build-args: |
+            DORY_VERSION=${{ needs.publish.outputs.version }}
+          tags: |
+            clidey/dory:${{ needs.publish.outputs.version }}
+            clidey/dory:latest
