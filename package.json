@@ -50,7 +50,7 @@
   "dependencies": {
     "@algolia/autocomplete-core": "1.19.9",
     "@clidey/ux": "1.2.4",
-    "@fortawesome/fontawesome-svg-core": "7.3.0",
+    "@fortawesome/fontawesome-svg-core": "7.3.1",
     "@fortawesome/free-brands-svg-icons": "7.3.0",
     "@fortawesome/free-regular-svg-icons": "7.3.0",
     "@fortawesome/free-solid-svg-icons": "7.3.0",
@@ -67,7 +67,7 @@
     "gray-matter": "4.0.3",
     "katex": "0.17.0",
     "lucide-react": "1.24.0",
-    "mermaid": "11.16.0",
+    "mermaid": "11.16.1",
     "motion": "12.42.2",
     "preact": "10.29.7",
     "preact-render-to-string": "6.7.0",
