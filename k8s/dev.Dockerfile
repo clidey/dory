@@ -1,4 +1,4 @@
-FROM node:24.11.1-alpine3.22
+FROM node:26.3.0-alpine3.22
 
 WORKDIR /app
 RUN corepack enable && corepack prepare pnpm@latest --activate
