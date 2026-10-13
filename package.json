@@ -43,17 +43,18 @@
     "build:embed:loader": "vite build -c vite.config.embed-loader.ts",
     "build:embed:widget": "vite build -c vite.config.embed-widget.ts",
     "preview": "vite preview",
-    "test": "vitest run",
+    "test": "node scripts/check-trigger-children.mjs src && vitest run",
+    "lint:triggers": "node scripts/check-trigger-children.mjs src",
     "publish": "npm run build && npm publish --access public --no-git-checks",
     "prepublishOnly": "echo 'Skipping prepublishOnly - build handled by publish script'"
   },
   "dependencies": {
     "@algolia/autocomplete-core": "1.19.9",
-    "@clidey/ux": "1.2.4",
+    "@clidey/ux": "1.5.0",
     "@fortawesome/fontawesome-svg-core": "7.3.1",
-    "@fortawesome/free-brands-svg-icons": "7.3.0",
-    "@fortawesome/free-regular-svg-icons": "7.3.0",
-    "@fortawesome/free-solid-svg-icons": "7.3.0",
+    "@fortawesome/free-brands-svg-icons": "7.3.1",
+    "@fortawesome/free-regular-svg-icons": "7.3.1",
+    "@fortawesome/free-solid-svg-icons": "7.3.1",
     "@fortawesome/react-fontawesome": "3.4.0",
     "@headlessui/react": "2.2.10",
     "@heroicons/react": "2.2.0",
@@ -88,6 +89,7 @@
   "devDependencies": {
     "@types/node": "26.1.1",
     "@types/react-highlight-words": "0.20.1",
+    "@typescript/typescript6": "6.0.2",
     "vitest": "4.1.10"
   },
   "pnpm": {

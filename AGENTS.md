@@ -132,6 +132,8 @@ Plugins loaded in main config (in order):
 
 **External UI library:** `@clidey/ux` provides base UI components (ThemeProvider, Toaster, etc.).
 
+**ux triggers:** Wrap interactive children in `@clidey/ux` triggers (`DropdownMenuTrigger`, `TooltipTrigger`, `PopoverTrigger`, ...) **without** `asChild`; ux >= 1.4.0 infers it for `Button`, `Badge` and intrinsic `button`/`a`/`span`/`div` so one DOM button is rendered. Pass `asChild` only for non-ux elements that forward refs. Never slot a fragment, text, array, or conditional; `scripts/check-trigger-children.mjs` (deny list in `scripts/trigger-children.json`) enforces this and runs as part of `pnpm test` (`pnpm lint:triggers` runs it alone).
+
 **Styling:** Tailwind v4 (no separate config file — uses `@tailwindcss/vite` plugin). Custom theming via CSS variables in `src/theme.scss`, dynamically set from `dory.json` colors.
 
 **CLI build process** (`bin/dory.ts`): Copies user's docs into the package's `docs/` dir, runs the Vite build, copies output back. Uses a backup/restore pattern for the original `docs/`.
