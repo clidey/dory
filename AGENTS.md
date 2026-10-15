@@ -16,7 +16,7 @@ This is the canonical agent guidance for this repository. `CLAUDE.md` intentiona
 
 ## Project Overview
 
-**Dory** (`@clidey/dory` v0.33.0) is a static site generator for technical documentation, published on npm. Users install it as a dependency and run its CLI to build documentation sites from MDX files configured via a `dory.json`.
+**Dory** (`@clidey/dory`) is a static site generator for technical documentation, published on npm. Users install it as a dependency and run its CLI to build documentation sites from MDX files configured via a `dory.json`.
 
 **Core stack:** Preact, Vite 6, TypeScript (strict), Tailwind CSS v4, MDX, SCSS
 
