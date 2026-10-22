@@ -1,10 +1,10 @@
 FROM node:26.3.0-alpine3.22
 
 WORKDIR /app
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN npm install -g pnpm@12.13.0
 RUN apk add --no-cache git
 
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm i
 
 COPY . .

@@ -1,2 +1,36 @@
+# pnpm settings. Since pnpm 12, .npmrc only carries registry and auth settings;
+# everything else lives here. See https://pnpm.io/settings
+
+# Fail on missing or invalid peer dependencies
+strictPeerDependencies: true
+
+# Pin exact versions when adding new dependencies
+saveExact: true
+
+# Require the lockfile to match package.json
+preferFrozenLockfile: true
+
+# Fail `pnpm audit` on high or critical vulnerabilities
+auditLevel: high
+
+# Disable lifecycle scripts (preinstall, postinstall, etc.) to prevent arbitrary code execution
+ignoreScripts: true
+
+# Verify integrity of packages in the store before linking to node_modules
+verifyStoreIntegrity: true
+
+# Delay installation of packages published less than 7 days ago
+minimumReleaseAge: 10080
 minimumReleaseAgeExclude:
   - '@clidey/ux'
+
+# Block packages whose trust level dropped since earlier releases (e.g. lost
+# trusted publishing). semver 6.3.1 is a 2023 release required by @babel/core
+# that predates semver's trusted publishing; it is not a takeover.
+trustPolicy: no-downgrade
+trustPolicyExclude:
+  - 'semver@6.3.1'
+
+overrides:
+  reselect: 5.2.0
+  react-redux: 9.3.0

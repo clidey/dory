@@ -7,12 +7,12 @@
 # ─── Stage 1: Build ───────────────────────────────────────────────────────────
 FROM node:24.11.1-alpine3.22 AS builder
 
-RUN corepack enable && corepack prepare pnpm@10.10.0 --activate
+RUN npm install -g pnpm@12.13.0
 
 WORKDIR /app
 
 # Install dependencies first (cached layer)
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
 
 # Copy source and build

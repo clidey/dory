@@ -1,11 +1,11 @@
 FROM node:26.3.0-alpine3.22 AS builder
 
-RUN corepack enable && corepack prepare pnpm@10.10.0 --activate
+RUN npm install -g pnpm@12.13.0
 WORKDIR /app
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
 COPY . .
-RUN pnpm build
+RUN pnpm run build:docs
 
 FROM nginx:alpine
 COPY --from=builder /app/dist /usr/share/nginx/html
