@@ -70,7 +70,7 @@
     "lucide-react": "1.57.0",
     "mermaid": "11.16.1",
     "motion": "12.42.2",
-    "preact": "10.29.8",
+    "preact": "11.0.1",
     "preact-render-to-string": "6.8.1",
     "prism-react-renderer": "2.4.1",
     "react-highlight-words": "0.21.0",
