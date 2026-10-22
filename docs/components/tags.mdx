@@ -11,6 +11,8 @@ The `<Tag>` component renders colored badges. It has built-in support for HTTP m
 
 Tags automatically apply the correct color for HTTP methods:
 
+<Specimen label="&lt;Tag&gt;">
+
 ```mdx
 <Tag>GET</Tag>
 <Tag>POST</Tag>
@@ -20,18 +22,22 @@ Tags automatically apply the correct color for HTTP methods:
 
 <Tag>GET</Tag> <Tag>POST</Tag> <Tag>PUT</Tag> <Tag>DELETE</Tag>
 
+</Specimen>
+
 ## HTTP Method Colors
 
 | Method | Color |
 | --- | --- |
-| `GET` | Emerald (green) |
-| `POST` | Sky (blue) |
-| `PUT` | Amber (yellow) |
+| `GET` | Sky (blue) |
+| `POST` | Emerald (green) |
+| `PUT` | Amber (orange) |
 | `DELETE` | Rose (red) |
 
 ## Custom Colors
 
 Use the `color` prop for non-HTTP-method tags:
+
+<Specimen label="&lt;Tag&gt;">
 
 ```mdx
 <Tag color="emerald">Stable</Tag>
@@ -43,9 +49,13 @@ Use the `color` prop for non-HTTP-method tags:
 
 <Tag color="emerald">Stable</Tag> <Tag color="sky">Beta</Tag> <Tag color="amber">Deprecated</Tag> <Tag color="rose">Breaking</Tag> <Tag color="zinc">Internal</Tag>
 
+</Specimen>
+
 ## Tag Variants
 
 The `variant` prop controls padding size:
+
+<Specimen label="&lt;Tag&gt;">
 
 ```mdx
 <Tag variant="medium">Default size</Tag>
@@ -54,9 +64,13 @@ The `variant` prop controls padding size:
 
 <Tag variant="medium">Default size</Tag> <Tag variant="small">Compact</Tag>
 
+</Specimen>
+
 ## Tags in API Reference
 
 Tags are commonly used in API reference documentation to label HTTP methods:
+
+<Specimen label="**GET** `path`">
 
 ```mdx
 **GET** `/api/users` — Retrieve a list of all users.
@@ -66,7 +80,17 @@ Tags are commonly used in API reference documentation to label HTTP methods:
 **DELETE** `/api/users/:id` — Permanently delete a user.
 ```
 
+**GET** `/api/users` — Retrieve a list of all users.
+
+**POST** `/api/users` — Create a new user.
+
+**DELETE** `/api/users/:id` — Permanently delete a user.
+
+</Specimen>
+
 Or with the Tag component on its own line:
+
+<Specimen label="&lt;Tag&gt;">
 
 ```mdx
 <Tag>GET</Tag>
@@ -74,8 +98,16 @@ Or with the Tag component on its own line:
 `/api/users` — Retrieve a list of all users.
 ```
 
+<Tag>GET</Tag>
+
+`/api/users` — Retrieve a list of all users.
+
+</Specimen>
+
 ## Version and Status Tags
 
+<Specimen label="&lt;Tag&gt;">
+
 ```mdx
 **Authentication** <Tag color="emerald">v2.0</Tag>
 
@@ -86,6 +118,10 @@ The new authentication system uses OAuth 2.0 with PKCE.
 
 The new authentication system uses OAuth 2.0 with PKCE.
 
+</Specimen>
+
+<Specimen label="&lt;Tag&gt;">
+
 ```mdx
 **Legacy Auth** <Tag color="amber">Deprecated</Tag>
 
@@ -95,6 +131,8 @@ The API key authentication method is deprecated and will be removed in v3.0.
 **Legacy Auth** <Tag color="amber">Deprecated</Tag>
 
 The API key authentication method is deprecated and will be removed in v3.0.
+
+</Specimen>
 
 ## Props Reference
 

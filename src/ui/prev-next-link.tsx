@@ -15,15 +15,15 @@ function PageLink({
 }) {
   return (
     <div {...props}>
-      <p className="font-display text-sm font-medium">
+      <p className="font-display text-xs font-medium text-muted-foreground">
         {dir === 'next' ? 'Next' : 'Previous'}
       </p>
       <div className="mt-1">
-        <a href={href} className={classNames('flex items-center gap-x-1 text-base font-semibold hover:opacity-80', {
+        <a href={href} className={classNames('flex items-center gap-x-1 text-sm font-semibold hover:opacity-80', {
             'flex-row-reverse': dir === 'previous',
           },
         )}>
-          <p className={classNames("flex items-center gap-x-1 text-base font-semibold hover:opacity-80", {
+          <p className={classNames("flex items-center gap-x-1 text-sm font-semibold hover:opacity-80", {
             "flex-row-reverse": dir === "previous"
           })}>
             {title}

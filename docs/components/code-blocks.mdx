@@ -11,6 +11,8 @@ Dory provides rich code block components with syntax highlighting, tab groups, a
 
 Use triple backticks with an optional language identifier:
 
+<Specimen label="```lang">
+
 ````mdx
 ```python
 def greet(name: str) -> str:
@@ -20,14 +22,110 @@ print(greet("World"))
 ```
 ````
 
-**Output:**
-
 ```python
 def greet(name: str) -> str:
     return f"Hello, {name}!"
 
 print(greet("World"))
 ```
+
+</Specimen>
+
+## Filenames and Highlighted Lines
+
+Text after the language becomes the block's filename. Add line numbers or ranges in braces to highlight them. A filename or highlight also turns on line numbers.
+
+<Specimen label="```lang title {lines}">
+
+````mdx
+```json dory.json {4-6}
+{
+  "name": "Dory",
+  "logo": "./logo/logo.svg",
+  "colors": {
+    "primary": "#2C6BD4"
+  },
+  "fonts": {
+    "family": "Hanken Grotesk"
+  }
+}
+```
+````
+
+```json dory.json {4-6}
+{
+  "name": "Dory",
+  "logo": "./logo/logo.svg",
+  "colors": {
+    "primary": "#2C6BD4"
+  },
+  "fonts": {
+    "family": "Hanken Grotesk"
+  }
+}
+```
+
+<SpecimenProps>
+
+| Meta | Example | Description |
+|------|---------|-------------|
+| Filename | `dory.json` | Any text after the language. Shown in the header with the language. |
+| `title="..."` | `title="Fetch users"` | Same as a bare filename; use it when the title contains braces or quotes. |
+| `{lines}` | `{1,4-6}` | Comma-separated line numbers and ranges to highlight. |
+
+</SpecimenProps>
+
+</Specimen>
+
+## Diffs
+
+Use `diff` for a plain diff, or `diff-<lang>` to keep syntax highlighting. Lines starting with `+` or `-` are marked, and the header counts them.
+
+<Specimen label="```diff-json">
+
+````mdx
+```diff-json dory.json
+  "fonts": {
+-   "family": "Inter",
++   "family": "Hanken Grotesk",
+    "mono": { "family": "JetBrains Mono" }
+  }
+```
+````
+
+```diff-json dory.json
+  "fonts": {
+-   "family": "Inter",
++   "family": "Hanken Grotesk",
+    "mono": { "family": "JetBrains Mono" }
+  }
+```
+
+</Specimen>
+
+## Terminal Sessions
+
+A `bash`, `sh`, `shell`, `zsh` or `console` block with `$ ` prompts renders as a terminal. The command name is highlighted and other lines are output.
+
+<Specimen label="```sh">
+
+````mdx
+```sh
+$ dory dev
+✓ Compiled 48 pages in 1.2s
+$ dory build
+✓ Wrote 48 pages to ./dist
+```
+````
+
+```sh
+$ dory dev
+✓ Compiled 48 pages in 1.2s
+$ dory build
+✓ Wrote 48 pages to ./dist
+```
+
+</Specimen>
 
 ## Supported Languages
 
@@ -60,7 +158,9 @@ Dory supports syntax highlighting for 20+ languages:
 
 ## CodeGroup — Multi-Language Tabs
 
-Use `<CodeGroup>` to show the same code in multiple languages. Each child code block becomes a tab.
+Use `<CodeGroup>` to show the same code in multiple languages. Each child code block becomes a tab, labelled by its title or language.
+
+<Specimen label="&lt;CodeGroup&gt;">
 
 ````mdx
 <CodeGroup>
@@ -85,8 +185,6 @@ Use `<CodeGroup>` to show the same code in multiple languages. Each child code b
 </CodeGroup>
 ````
 
-**Output:**
-
 <CodeGroup>
   ```python
   import requests
@@ -107,11 +205,15 @@ Use `<CodeGroup>` to show the same code in multiple languages. Each child code b
   defer resp.Body.Close()
   ```
 </CodeGroup>
+
+</Specimen>
 
 ### CodeGroup with Title
 
 Add a `title` prop to label the group:
 
+<Specimen label="&lt;CodeGroup title&gt;">
+
 ````mdx
 <CodeGroup title="Fetch Users">
   ```python
@@ -124,8 +226,6 @@ Add a `title` prop to label the group:
 </CodeGroup>
 ````
 
-**Output:**
-
 <CodeGroup title="Fetch Users">
   ```python
   import requests
@@ -135,11 +235,15 @@ Add a `title` prop to label the group:
   const res = await fetch("https://api.example.com/users");
   ```
 </CodeGroup>
+
+</Specimen>
 
 ## HTTP Method Badges
 
 Add `tag` and `label` to a code block inside a `CodeGroup` to show HTTP method badges:
 
+<Specimen label="```lang tag label">
+
 ````mdx
 <CodeGroup>
   ```bash tag="GET" label="/api/users"
@@ -153,8 +257,6 @@ Add `tag` and `label` to a code block inside a `CodeGroup` to show HTTP method b
 </CodeGroup>
 ````
 
-**Output:**
-
 <CodeGroup>
   ```bash tag="GET" label="/api/users"
   curl https://api.example.com/users
@@ -165,6 +267,8 @@ Add `tag` and `label` to a code block inside a `CodeGroup` to show HTTP method b
     -d '{"name": "Alice"}'
   ```
 </CodeGroup>
+
+</Specimen>
 
 ## Inline Code
 
@@ -176,4 +280,4 @@ Call the `greet()` function with a `name` parameter.
 
 ## Copy Button
 
-All code blocks include a **copy button** that appears on hover. It copies the raw code to the clipboard and shows a checkmark for 1 second.
+All code blocks include a **copy button** in the header. It copies the raw code to the clipboard and shows a checkmark for 1 second.

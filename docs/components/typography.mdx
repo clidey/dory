@@ -20,8 +20,6 @@ Headings use standard Markdown syntax. All headings are automatically added to t
 ###### Heading 6
 ```
 
-**Output:**
-
 # Heading 1
 ## Heading 2
 ### Heading 3
@@ -45,9 +43,15 @@ This is a second paragraph, separated by a blank line.
 
 Use backticks for inline `code`. This is styled distinctly from surrounding text.
 
+<Specimen label="`code`">
+
 ```mdx
 Use backticks for inline `code`.
 ```
+
+Use backticks for inline `code`.
+
+</Specimen>
 
 ---
 
@@ -55,11 +59,15 @@ Use backticks for inline `code`.
 
 Use standard Markdown link syntax for hyperlinks:
 
+<Specimen label="[link](url)">
+
 ```mdx
 [Visit the Dory site](https://dory.clidey.com)
 ```
 
-**Output:** [Visit the Dory site](https://dory.clidey.com)
+[Visit the Dory site](https://dory.clidey.com)
+
+</Specimen>
 
 ---
 
@@ -67,31 +75,43 @@ Use standard Markdown link syntax for hyperlinks:
 
 Use `---` for a horizontal divider:
 
+<Specimen label="---">
+
 ```mdx
 ---
 ```
 
-**Output:**
-
 ---
+
+</Specimen>
 
 ## Line Break
 
 Use `<br/>` to insert explicit line breaks without starting a new paragraph:
 
+<Specimen label="&lt;br/&gt;">
+
 ```mdx
 First line<br/>Second line on a new line
 ```
+
+First line<br/>Second line on a new line
+
+</Specimen>
 
 ---
 
 ## Bold and Italic
 
+<Specimen label="**bold** *italic*">
+
 ```mdx
 **Bold text** and *italic text* and ***bold italic***.
 ```
 
 **Bold text** and *italic text* and ***bold italic***.
+
+</Specimen>
 
 ---
 
@@ -99,6 +119,8 @@ First line<br/>Second line on a new line
 
 Use `<Row>` and `<Col>` to create multi-column layouts for prose content:
 
+<Specimen label="&lt;Row&gt; &lt;Col&gt;">
+
 ```mdx
 <Row>
   <Col>
@@ -114,8 +136,6 @@ Use `<Row>` and `<Col>` to create multi-column layouts for prose content:
 </Row>
 ```
 
-**Output:**
-
 <Row>
   <Col>
     **Left column content**
@@ -128,6 +148,8 @@ Use `<Row>` and `<Col>` to create multi-column layouts for prose content:
     This text appears on the right side.
   </Col>
 </Row>
+
+</Specimen>
 
 ### Row Props
 

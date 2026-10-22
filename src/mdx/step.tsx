@@ -4,38 +4,30 @@ import { Children } from "preact/compat"
 export function Steps({ children }: { children: preact.ComponentChildren }) {
   const steps = Children.toArray(children) as preact.ComponentChildren[];
   return (
-    <nav aria-label="Progress" className="py-16">
-      <div className="overflow-hidden">
-        {steps.map((step, stepIdx) => {
-          const stepElement = Children.toArray(step)[0] as preact.JSX.Element;
-          return (
-            <div key={stepIdx} className={classNames(
-              {
-                "pb-10": stepIdx !== steps.length - 1,
-                "pb-2": stepIdx === steps.length - 1,
-              },
-              'relative'
+    <nav aria-label="Progress" className="my-6">
+      {steps.map((step, stepIdx) => {
+        const stepElement = Children.toArray(step)[0] as preact.JSX.Element;
+        const isLast = stepIdx === steps.length - 1;
+        return (
+          <div key={stepIdx} className={classNames('relative flex gap-3.5', { 'pb-6': !isLast })}>
+            {!isLast && <div aria-hidden="true" className="absolute left-[13.5px] top-9 bottom-1 w-px bg-[var(--border)]" />}
+            <span className={classNames(
+              'relative z-10 flex size-7 shrink-0 items-center justify-center rounded-md border text-xs font-semibold',
+              stepIdx === 0
+                ? 'border-transparent bg-[var(--primary)] text-white'
+                : 'border-[var(--border)] bg-muted text-foreground',
             )}>
-              <div aria-hidden="true" className="absolute top-10 left-4 h-full w-[0.5px]" style={{ top: '40px', height: 'calc(100% - 44px)', backgroundColor: 'color-mix(in oklch, var(--brand-foreground) 30%, transparent)' }} />
-              <div className="group relative flex items-start">
-                <span className="flex h-9 items-center">
-                  <span className="relative z-10 flex size-8 items-center justify-center rounded-full border" style={{ borderColor: 'var(--brand-foreground)', backgroundColor: 'color-mix(in oklch, var(--brand-foreground) 12%, transparent)' }}>
-                    <span className="text-sm font-medium" style={{ color: 'var(--brand-foreground)' }}>
-                      {stepIdx + 1}
-                    </span>
-                  </span>
-                </span>
-                <span className="ml-4 flex min-w-0 flex-col">
-                  <p className="text-lg font-medium text-inherit">{stepElement.props.title}</p>
-                </span>
-              </div>
-              <div className="ml-12 not-prose">
+              {stepIdx + 1}
+            </span>
+            <div className="min-w-0 flex-1 pt-0.5">
+              <p className="font-heading text-[15px] font-semibold tracking-tight text-foreground">{stepElement.props.title}</p>
+              <div className="not-prose mt-0.5 text-muted-foreground">
                 {stepElement.props.children}
               </div>
             </div>
-          )
-        })}
-      </div>
+          </div>
+        )
+      })}
     </nav>
   )
 }
@@ -47,5 +39,5 @@ export function Step({
   title?: string;
   children: preact.ComponentChildren
 }) {
-  return <p className='text-sm'>{children}</p>
+  return <p className='leading-relaxed'>{children}</p>
 }

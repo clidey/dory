@@ -29,5 +29,5 @@
     "noUncheckedSideEffectImports": true
   },
   "include": ["src"],
-  "exclude": ["src/plugins"]
+  "exclude": ["src/plugins", "src/config", "src/mdx/processor.ts", "src/mdx/processor.test.ts"]
 }

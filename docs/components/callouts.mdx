@@ -11,97 +11,109 @@ Callouts draw attention to important information. Dory provides five pre-configu
 
 Use `<Note>` for supplementary information:
 
+<Specimen label="&lt;Note&gt;">
+
 ```mdx
 <Note>
   This feature requires Node.js 18 or later. Check your version with `node --version`.
 </Note>
 ```
 
-**Output:**
-
 <Note>
   This feature requires Node.js 18 or later. Check your version with `node --version`.
 </Note>
+
+</Specimen>
 
 ## Warning
 
 Use `<Warning>` for critical caveats or destructive actions:
 
+<Specimen label="&lt;Warning&gt;">
+
 ```mdx
 <Warning>
   This action is **irreversible**. All data in the selected namespace will be permanently deleted.
 </Warning>
 ```
 
-**Output:**
-
 <Warning>
   This action is **irreversible**. All data in the selected namespace will be permanently deleted.
 </Warning>
+
+</Specimen>
 
 ## Info
 
 Use `<Info>` for contextual information:
 
+<Specimen label="&lt;Info&gt;">
+
 ```mdx
 <Info>
   Rate limiting applies to all API endpoints. The default limit is 1000 requests per hour per API key.
 </Info>
 ```
 
-**Output:**
-
 <Info>
   Rate limiting applies to all API endpoints. The default limit is 1000 requests per hour per API key.
 </Info>
+
+</Specimen>
 
 ## Tip
 
 Use `<Tip>` for helpful hints and best practices:
 
+<Specimen label="&lt;Tip&gt;">
+
 ```mdx
 <Tip>
   Enable response caching to reduce API calls. Cache keys are scoped to the authenticated user.
 </Tip>
 ```
 
-**Output:**
-
 <Tip>
   Enable response caching to reduce API calls. Cache keys are scoped to the authenticated user.
 </Tip>
+
+</Specimen>
 
 ## Check
 
 Use `<Check>` for success states, confirmations, or completed items:
 
+<Specimen label="&lt;Check&gt;">
+
 ```mdx
 <Check>
   Your API key has been generated and is ready to use. Store it securely — it won't be shown again.
 </Check>
 ```
 
-**Output:**
-
 <Check>
   Your API key has been generated and is ready to use. Store it securely — it won't be shown again.
 </Check>
+
+</Specimen>
 
 ## Custom Callout
 
 Use `<Callout>` with a `type` and `title` for full control:
 
+<Specimen label="&lt;Callout&gt;">
+
 ```mdx
 <Callout type="warning" title="Breaking Change in v2.0">
   The `authenticate()` method signature has changed. Update your integration before upgrading.
 </Callout>
 ```
 
-**Output:**
-
 <Callout type="warning" title="Breaking Change in v2.0">
   The `authenticate()` method signature has changed. Update your integration before upgrading.
 </Callout>
+
+</Specimen>
 
 ### Callout Props
 
@@ -115,8 +127,8 @@ Use `<Callout>` with a `type` and `title` for full control:
 
 | Component | Color | Icon | Use Case |
 | --- | --- | --- | --- |
-| `<Note>` | Emerald | Info | Supplementary information |
-| `<Warning>` | Amber | Alert Triangle | Destructive or risky actions |
+| `<Note>` | Neutral | Info | Supplementary information |
+| `<Warning>` | Yellow outline | Alert Triangle | Destructive or risky actions |
 | `<Info>` | Blue | Info Circle | Contextual facts |
-| `<Tip>` | Green | Lightbulb | Helpful hints, best practices |
-| `<Check>` | Purple | Check Circle | Success states, confirmations |
+| `<Tip>` | Green | Star | Helpful hints, best practices |
+| `<Check>` | Outlined, green badge | Check | Success states, confirmations |

@@ -1,25 +1,19 @@
-import { Badge } from '@clidey/ux'
 import classNames from 'classnames'
 
-const valueColorMap = {
-  GET: 'default',
-  POST: 'secondary',
-  PUT: 'outline',
-  DELETE: 'destructive',
-} as const
-
 const customColorClasses = {
-  emerald: 'bg-emerald-400/10 text-emerald-500 dark:text-emerald-400 border-emerald-300 dark:border-emerald-400/30',
-  sky: 'bg-sky-400/10 text-sky-500 dark:text-sky-400 border-sky-300 dark:border-sky-400/30',
-  amber: 'bg-amber-400/10 text-amber-500 dark:text-amber-400 border-amber-300 dark:border-amber-400/30',
-  rose: 'bg-rose-50 text-red-500 dark:bg-rose-400/10 dark:text-rose-400 border-rose-200 dark:border-rose-500/20',
-  zinc: 'bg-zinc-50 text-zinc-500 dark:bg-zinc-400/10 dark:text-zinc-400 border-zinc-200 dark:border-zinc-500/20',
+  emerald: 'bg-[var(--success-muted)] text-foreground border-transparent',
+  sky: 'bg-accent text-[var(--primary)] border-transparent',
+  amber: 'bg-transparent text-[var(--brand-readable,#B65401)] border-current',
+  rose: 'bg-transparent text-red-700 dark:text-red-400 border-current',
+  zinc: 'bg-transparent text-muted-foreground border-border',
+  yellow: 'bg-[var(--highlight)] text-[var(--highlight-foreground)] border-transparent',
 }
 
 const methodColors: Record<string, keyof typeof customColorClasses> = {
-  GET: 'emerald',
-  POST: 'sky',
+  GET: 'sky',
+  POST: 'emerald',
   PUT: 'amber',
+  PATCH: 'amber',
   DELETE: 'rose',
 }
 
@@ -35,19 +29,17 @@ export function Tag({
   className?: string
 }) {
   const colorKey = color || methodColors[children] || 'zinc'
-  const badgeVariant = valueColorMap[children as keyof typeof valueColorMap] || 'outline'
 
   return (
-    <Badge
-      variant={badgeVariant}
+    <span
       className={classNames(
-        'font-mono text-[0.625rem]/6 font-semibold',
+        'mr-1.5 inline-flex w-fit items-center rounded-[5px] border font-mono font-semibold align-middle',
+        variant === 'small' ? 'px-1.5 py-0 text-[0.625rem]/5' : 'px-2 py-px text-[11px]/5',
         customColorClasses[colorKey],
-        variant === 'small' && 'px-1 py-0',
         className,
       )}
     >
       {children}
-    </Badge>
+    </span>
   )
 }

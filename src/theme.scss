@@ -165,6 +165,11 @@ article hr:first-of-type {
     display: none;
 }
 
+// A rule inside a specimen is the example itself, not a page divider.
+article .dory-specimen hr:first-of-type {
+    display: block;
+}
+
 article img {
     margin-top: 1rem;
     margin-bottom: 1rem;
@@ -192,4 +197,222 @@ article img {
     outline: none !important;
     border: 0px;
     box-shadow: none !important;
+}
+
+// === EDITORIAL STYLE (Dory v2) ===
+:root {
+    --dory-code-string: #b65401;
+}
+
+:root.dark {
+    --dory-code-string: #f4a261;
+}
+
+.font-heading {
+    font-family: var(--font-heading, var(--font-body, inherit));
+}
+
+.dory-page-title {
+    font-family: var(--font-heading, var(--font-body, inherit));
+    font-size: 1.625rem;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+}
+
+.dory-subtitle {
+    font-family: var(--font-mono, monospace);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    color: var(--muted-foreground);
+}
+
+article {
+    counter-reset: dory-section;
+    font-size: 0.875rem;
+    line-height: 1.6;
+
+    .dory-h1 {
+        font-size: 1.625rem;
+        font-weight: 700;
+        line-height: 1.15;
+        letter-spacing: -0.025em;
+    }
+
+    .dory-h2 {
+        counter-increment: dory-section;
+        display: flex;
+        align-items: center;
+        gap: 0.625rem;
+        font-size: 1.3125rem;
+        font-weight: 700;
+        line-height: 1.2;
+        letter-spacing: -0.02em;
+
+        &::before {
+            content: counter(dory-section, decimal-leading-zero);
+            flex-shrink: 0;
+            padding: 0.0625rem 0.375rem;
+            border: 1px solid var(--border);
+            border-radius: 0.3125rem;
+            background: var(--muted);
+            font-family: var(--font-mono, monospace);
+            font-size: 0.6875rem;
+            font-weight: 400;
+            letter-spacing: 0;
+            color: var(--muted-foreground);
+        }
+
+        + p {
+            color: var(--muted-foreground);
+        }
+    }
+
+    .dory-h3 {
+        font-size: 1.0625rem;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+    }
+
+    .dory-h4 {
+        font-size: 0.9375rem;
+        font-weight: 600;
+        letter-spacing: -0.005em;
+    }
+
+    // Unordered: small brand-colored squares. Ordered: mono two-digit counters.
+    .dory-ul > li::before {
+        content: "";
+        position: absolute;
+        left: 0.5rem;
+        top: 0.7em;
+        width: 0.375rem;
+        height: 0.375rem;
+        border-radius: 0.125rem;
+        background: var(--primary);
+    }
+
+    .dory-ul .dory-ul > li {
+        color: var(--muted-foreground);
+
+        &::before {
+            background: var(--muted-foreground);
+        }
+    }
+
+    .dory-ol {
+        counter-reset: dory-ol;
+
+        > li {
+            counter-increment: dory-ol;
+
+            &::before {
+                content: counter(dory-ol, decimal-leading-zero);
+                position: absolute;
+                left: 0;
+                top: 0.15em;
+                font-family: var(--font-mono, monospace);
+                font-size: 0.6875rem;
+                color: var(--primary);
+            }
+        }
+    }
+
+    // Task lists (GFM) render a checkbox as the first child, so drop the bullet.
+    li:has(> input[type="checkbox"]) {
+        padding-left: 0;
+
+        &::before {
+            display: none;
+        }
+    }
+
+    input[type="checkbox"] {
+        width: 0.9375rem;
+        height: 0.9375rem;
+        margin-right: 0.5rem;
+        vertical-align: -0.2em;
+        accent-color: var(--primary);
+    }
+
+    blockquote {
+        margin: 1.5rem 0;
+        padding-left: 1rem;
+        border-left: 2px solid var(--primary);
+        font-size: 0.9375rem;
+    }
+
+    kbd {
+        padding: 0.0625rem 0.375rem;
+        border: 1px solid var(--border);
+        border-bottom-width: 2px;
+        border-radius: 0.375rem;
+        background: var(--card);
+        font-family: var(--font-mono, monospace);
+        font-size: 0.8125em;
+    }
+
+    mark {
+        padding: 0.0625rem 0.3rem;
+        border-radius: 0.25rem;
+        background: var(--highlight);
+        color: var(--highlight-foreground);
+    }
+}
+
+// === CODE LINES ===
+// Lines bleed to the frame edges (CodeBody padding is 1rem left / 3rem right)
+// so highlighted and diff rows read as full-width bands.
+.dory-code {
+    .dory-line {
+        display: block;
+        margin: 0 -3rem 0 -1rem;
+        padding: 0 3rem 0 calc(1rem - 2px);
+        border-left: 2px solid transparent;
+    }
+
+    .dory-line-highlight {
+        background: var(--accent);
+        border-left-color: var(--primary);
+    }
+
+    .dory-line-add {
+        background: var(--success-muted);
+        border-left-color: #2f7d4a;
+    }
+
+    .dory-line-del {
+        background: color-mix(in oklch, var(--destructive) 10%, transparent);
+        border-left-color: var(--destructive);
+    }
+
+    .dory-line-number {
+        display: inline-block;
+        width: 1.25rem;
+        margin-right: 1rem;
+        color: var(--muted-foreground);
+        user-select: none;
+    }
+
+    .dory-line-marker {
+        display: inline-block;
+        width: 2rem;
+        user-select: none;
+    }
+
+    .dory-line-add .dory-line-marker {
+        color: #2f7d4a;
+    }
+
+    .dory-line-del .dory-line-marker {
+        color: var(--destructive);
+    }
+}
+
+:root.dark .dory-code .dory-line-add {
+    border-left-color: #6fbf87;
+
+    .dory-line-marker {
+        color: #6fbf87;
+    }
 }

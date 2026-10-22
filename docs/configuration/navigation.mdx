@@ -176,3 +176,20 @@ description: 'Install and configure Dory for your project.'
 <Tip>
   Keep `title` concise (2–5 words). The `description` is used for SEO meta tags and appears in search results, so make it a full sentence.
 </Tip>
+
+### Page Metadata Strip
+
+Add a `meta` map to show a row of labelled facts under the page title. Keys are the labels and values are shown as written. YAML dates such as `2026-10-12` render as `12 Oct 2026`.
+
+```mdx
+---
+title: 'Introduction'
+description: 'What WhoDB is and how to get started.'
+meta:
+  Edition: Community
+  Updated: 2026-10-12
+  Read: 4 min
+---
+```
+
+Pages without `meta` show no strip.

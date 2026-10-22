@@ -1,5 +1,5 @@
 import type { ComponentChildren } from 'preact';
-import { useCallback, useEffect, useMemo, useState } from 'preact/hooks';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { Navigation } from '../components/navigation';
 import { ALL_NAVIGATION, ALL_OPENAPI, completeFrontMatter, loadMDXFrontMatterForPath, loadAllMDXFrontMatter, preloadFrontmatter, ALL_ASYNCAPI, isFrontmatterReady } from '../components/store';
 import docsConfig from '../../docs/dory.json' with { type: 'json' };
@@ -10,6 +10,7 @@ import { AsyncAPI } from '../mdx/async-api';
 import { Header } from './header';
 import { PrevNextLinks } from './prev-next-link';
 import { TableOfContents } from './table-of-content';
+import { PageMeta } from './page-meta';
 import { Loading } from '../components/loading';
 import Dropdown from '../components/dropdown';
 import { useNotification } from '../components/notification';
@@ -43,6 +44,20 @@ export default function Layout({ children }: LayoutProps) {
   const pathname = rawPathname === '/' ? ALL_NAVIGATION[0]?.groups[0]?.pages[0]?.href ?? '/' : rawPathname;
   const { showNotification } = useNotification();
   const isEmbedded = useIsEmbedded();
+
+  // Client-side navigation keeps the previous scroll position, so start each new
+  // page at the top. The initial load keeps the browser's own position, and a
+  // hash means an in-page anchor is the target.
+  const isFirstRender = useRef(true);
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    if (!window.location.hash) {
+      window.scrollTo(0, 0);
+    }
+  }, [pathname]);
 
   const handleOpenMDX = useCallback(() => {
     window.open(`${window.location.origin}${pathname}.mdx`, '_blank');
@@ -283,6 +298,7 @@ export default function Layout({ children }: LayoutProps) {
                   <Dropdown className="gap-0" buttonLabel={<SparkleIcon className="w-4 h-4" />} items={dropdownItems} />
                 }
               </div>
+              <PageMeta meta={page?.meta} />
               <div className="flex-1 min-h-[calc(100vh-2rem)]">
                 <ErrorBoundary fallback={(error) => (
                   <div className="flex flex-col items-center justify-center py-16 px-6 text-center">

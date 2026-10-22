@@ -19,8 +19,10 @@ export { ResponseField, Properties, Property } from './open-api';
 export { Steps, Step } from './step';
 export { Table as table, Th as th, Td as td } from './table';
 export { UnorderedList as ul, OrderedList as ol, ListItem as li } from './list';
+export { UnorderedList, OrderedList, ListItem } from './list';
 export { AsyncAPI } from './async-api';
 export { Source } from './source';
+export { Specimen, SpecimenProps } from './specimen';
 
 // Lazy-loaded heavy components — only downloaded when a page uses them.
 // SSR guard at this level prevents Suspense from rendering in Node.js
@@ -65,6 +67,6 @@ export const wrapper = ({ children }: { children: preact.ComponentChildren }) =>
 };
 
 
-export const hr = () => <hr className="my-4 text-muted-foreground/25 dark:text-gray-200/25" />;
+export const hr = () => <hr className="my-6 border-0 border-t border-[var(--border)]" />;
 
 export const br = () => <br />;

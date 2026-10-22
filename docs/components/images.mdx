@@ -11,25 +11,29 @@ Images in Dory support click-to-fullscreen functionality. Clicking any image ope
 
 Use standard Markdown image syntax:
 
+<Specimen label="![alt](src)">
+
 ```mdx
-![Dory logo](./assets/dory.jpeg)
+![Dory logo](../assets/dory.jpeg)
 ```
 
-**Output:**
+![Dory logo](../assets/dory.jpeg)
 
-![Dory logo](./assets/dory.jpeg)
+</Specimen>
 
 ## HTML img Tag
 
 You can also use the HTML `<img>` tag for more control:
 
+<Specimen label="&lt;img&gt;">
+
 ```mdx
-<img src="./assets/dory.jpeg" alt="Dory logo" className="w-32 h-32 object-cover rounded" />
+<img src="../assets/dory.jpeg" alt="Dory logo" className="w-32 h-32 object-cover rounded" />
 ```
 
-**Output:**
+<img src="../assets/dory.jpeg" alt="Dory logo" className="w-32 h-32 object-cover rounded" />
 
-<img src="./assets/dory.jpeg" alt="Dory logo" className="w-32 h-32 object-cover rounded" />
+</Specimen>
 
 ## Fullscreen Behavior
 
@@ -49,12 +53,12 @@ Images can be combined with `<Row>` and `<Col>` for side-by-side layouts:
   <Col>
     **Light Mode**
 
-    ![Light mode](./assets/light-mode.png)
+    ![Light mode](../assets/light-mode.png)
   </Col>
   <Col>
     **Dark Mode**
 
-    ![Dark mode](./assets/dark-mode.png)
+    ![Dark mode](../assets/dark-mode.png)
   </Col>
 </Row>
 ```
@@ -62,7 +66,7 @@ Images can be combined with `<Row>` and `<Col>` for side-by-side layouts:
 ## Best Practices
 
 <Note>
-  Store images in the `assets/` directory inside your docs folder. Reference them with relative paths from the MDX file location (e.g. `./assets/image.png`).
+  Store images in the `assets/` directory inside your docs folder. Reference them with paths relative to the MDX file, as your editor previews them (e.g. `../assets/image.png` from a page in `components/`). Dory rewrites relative paths to site-root paths at build time, so they work on every page and host. Root paths such as `/assets/image.png` also work.
 </Note>
 
 <Tip>

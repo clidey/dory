@@ -22,5 +22,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["vite.config.ts", "src/plugins/**/*.ts", "bin/**/*.ts"]
+  "include": ["vite.config.ts", "src/plugins/**/*.ts", "src/config/**/*.ts", "src/mdx/processor*.ts", "bin/**/*.ts"]
 }

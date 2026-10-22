@@ -11,6 +11,8 @@ The `<Source>` component renders styled links that point directly to source code
 
 Link to a single file:
 
+<Specimen label="&lt;Source&gt;">
+
 ```mdx
 <Source
   url="https://github.com/clidey/dory"
@@ -19,18 +21,20 @@ Link to a single file:
 />
 ```
 
-**Output:**
-
 <Source
   url="https://github.com/clidey/dory"
   branch="main"
   paths={[{ path: "src/mdx/code.tsx" }]}
 />
+
+</Specimen>
 
 ## Multiple Files
 
 Link to multiple files at once:
 
+<Specimen label="&lt;Source&gt;">
+
 ```mdx
 <Source
   url="https://github.com/clidey/dory"
@@ -43,8 +47,6 @@ Link to multiple files at once:
 />
 ```
 
-**Output:**
-
 <Source
   url="https://github.com/clidey/dory"
   branch="main"
@@ -54,11 +56,15 @@ Link to multiple files at once:
     { path: "src/mdx/card.tsx" }
   ]}
 />
+
+</Specimen>
 
 ## With Line Range
 
 Link to a specific range of lines:
 
+<Specimen label="&lt;Source&gt;">
+
 ```mdx
 <Source
   url="https://github.com/clidey/dory"
@@ -67,13 +73,13 @@ Link to a specific range of lines:
 />
 ```
 
-**Output:**
-
 <Source
   url="https://github.com/clidey/dory"
   branch="main"
   paths={[{ path: "src/mdx/code.tsx", range: "1-50" }]}
 />
+
+</Specimen>
 
 ## Platform Support
 
@@ -89,6 +95,8 @@ Dory automatically detects the platform from the URL and formats the link accord
 
 Source links are ideal for documentation that references implementation details:
 
+<Specimen label="&lt;Source&gt;">
+
 ```mdx
 The MDX preprocessing pipeline is defined here:
 
@@ -101,8 +109,6 @@ The MDX preprocessing pipeline is defined here:
 This file is the single source of truth for MDX compilation settings.
 ```
 
-**Output:**
-
 The MDX preprocessing pipeline is defined here:
 
 <Source
@@ -112,6 +118,8 @@ The MDX preprocessing pipeline is defined here:
 />
 
 This file is the single source of truth for MDX compilation settings.
+
+</Specimen>
 
 ## Props Reference
 

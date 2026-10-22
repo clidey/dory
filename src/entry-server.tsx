@@ -6,6 +6,7 @@ import { ThemeProvider } from '@clidey/ux';
 import * as mdxComponents from './mdx/mdx';
 import docsConfig from '../docs/dory.json' with { type: 'json' };
 import type { DoryConfig } from './types/config';
+import { PageMeta } from './ui/page-meta';
 
 const config = docsConfig as DoryConfig;
 
@@ -185,6 +186,7 @@ export async function render(routePath: string, frontmatter?: Record<string, any
                               {pageFm?.title && <p class="text-4xl tracking-tight">{pageFm.title}</p>}
                             </header>
                           </div>
+                          <PageMeta meta={pageFm?.meta} />
                           <div class="flex-1 min-h-[calc(100vh-2rem)]">
                             {/* Matches App > div.antialiased > div.flex > Routes > Content */}
                             <div class="h-full antialiased">

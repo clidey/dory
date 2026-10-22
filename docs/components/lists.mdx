@@ -11,6 +11,8 @@ Dory supports standard Markdown lists and provides explicit `<UnorderedList>`, `
 
 Use standard Markdown syntax:
 
+<Specimen label="- item">
+
 ```mdx
 - First item
 - Second item
@@ -19,16 +21,18 @@ Use standard Markdown syntax:
 - Third item
 ```
 
-**Output:**
-
 - First item
 - Second item
   - Nested item
   - Another nested item
 - Third item
+
+</Specimen>
 
 ## Ordered List
 
+<Specimen label="1. item">
+
 ```mdx
 1. Clone the repository
 2. Install dependencies
@@ -36,17 +40,19 @@ Use standard Markdown syntax:
 4. Run the development server
 ```
 
-**Output:**
-
 1. Clone the repository
 2. Install dependencies
 3. Configure your environment
 4. Run the development server
+
+</Specimen>
 
 ## Mixed Lists
 
 Combine ordered and unordered lists:
 
+<Specimen label="1. item - nested">
+
 ```mdx
 1. Choose an authentication method:
    - Bearer token (recommended)
@@ -56,19 +62,21 @@ Combine ordered and unordered lists:
 3. Include credentials in every request
 ```
 
-**Output:**
-
 1. Choose an authentication method:
    - Bearer token (recommended)
    - API key in query string
    - Basic authentication
 2. Generate credentials in the dashboard
 3. Include credentials in every request
+
+</Specimen>
 
 ## Explicit Components
 
 Use explicit components when building lists programmatically or with dynamic content:
 
+<Specimen label="&lt;UnorderedList&gt; &lt;ListItem&gt;">
+
 ```mdx
 <UnorderedList>
   <ListItem>Supports 20+ programming languages</ListItem>
@@ -77,13 +85,15 @@ Use explicit components when building lists programmatically or with dynamic con
 </UnorderedList>
 ```
 
-**Output:**
-
 <UnorderedList>
   <ListItem>Supports 20+ programming languages</ListItem>
   <ListItem>Copy button on all code blocks</ListItem>
   <ListItem>Multi-language tab groups</ListItem>
 </UnorderedList>
+
+</Specimen>
+
+<Specimen label="&lt;OrderedList&gt; &lt;ListItem&gt;">
 
 ```mdx
 <OrderedList>
@@ -94,19 +104,21 @@ Use explicit components when building lists programmatically or with dynamic con
 </OrderedList>
 ```
 
-**Output:**
-
 <OrderedList>
   <ListItem>Install the Dory CLI</ListItem>
   <ListItem>Create your dory.json config</ListItem>
   <ListItem>Write MDX pages</ListItem>
   <ListItem>Run dory build</ListItem>
 </OrderedList>
+
+</Specimen>
 
 ## Rich List Items
 
 Standard Markdown list items support inline formatting:
 
+<Specimen label="- **bold** *italic* `code`">
+
 ```mdx
 - **Bold item** — important information
 - *Italic item* — supplementary detail
@@ -114,9 +126,9 @@ Standard Markdown list items support inline formatting:
 - Item with a [link](https://dory.clidey.com) — external reference
 ```
 
-**Output:**
-
 - **Bold item** — important information
 - *Italic item* — supplementary detail
 - Item with `inline code` — technical terms
 - Item with a [link](https://dory.clidey.com) — external reference
+
+</Specimen>

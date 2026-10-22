@@ -9,6 +9,8 @@ The `<Row>` and `<Col>` components create responsive multi-column layouts inside
 
 ## Basic Two-Column Layout
 
+<Specimen label="&lt;Row&gt; &lt;Col&gt;">
+
 ```mdx
 <Row>
   <Col>
@@ -33,10 +35,14 @@ The `<Row>` and `<Col>` components create responsive multi-column layouts inside
   </Col>
 </Row>
 
+</Specimen>
+
 ## Prose + Code Pattern
 
 The most common layout: prose on the left, a sticky code column on the right.
 Use `sticky` on the code column so it stays visible while the prose scrolls.
+
+<Specimen label="&lt;Row&gt; &lt;Col&gt;">
 
 ```mdx
 <Row>
@@ -82,7 +88,11 @@ Use `sticky` on the code column so it stays visible while the prose scrolls.
   </Col>
 </Row>
 
+</Specimen>
+
 ## Three Columns
+
+<Specimen label="&lt;Row&gt; &lt;Col&gt;">
 
 ```mdx
 <Row cols={3}>
@@ -109,6 +119,47 @@ Use `sticky` on the code column so it stays visible while the prose scrolls.
     Third piece of content.
   </Col>
 </Row>
+
+</Specimen>
+
+## Specimen
+
+`<Specimen>` frames a component example with **Preview**, **Code** and **Props** tabs. Put the MDX source in an ` ```mdx ` fence, the rendered example after it, and an optional props table inside `<SpecimenProps>`. Tabs only appear for the parts you include.
+
+<Specimen label="&lt;Specimen&gt; &lt;SpecimenProps&gt;">
+
+`````mdx
+<Specimen label="&lt;Tag&gt;">
+
+````mdx
+<Tag color="sky">Beta</Tag>
+````
+
+<Tag color="sky">Beta</Tag>
+
+<SpecimenProps>
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `color` | `string` | Badge color. |
+
+</SpecimenProps>
+
+</Specimen>
+`````
+
+<Tag color="sky">Beta</Tag>
+
+<SpecimenProps>
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `label` | `string` | — | Mono caption in the header, usually the component tag. Write angle brackets as `&lt;` and `&gt;`. |
+| `children` | `ReactNode` | — | An ` ```mdx ` fence (Code tab), a `<SpecimenProps>` block (Props tab), and the preview. |
+
+</SpecimenProps>
+
+</Specimen>
 
 ## Props Reference
 

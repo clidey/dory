@@ -60,6 +60,11 @@ describe('preprocessMdxTags', () => {
     expect(run('<Note>hello</Note>')).toBe('<Note>hello</Note>');
   });
 
+  it('preserves explicit list components', () => {
+    const input = '<UnorderedList>\n  <ListItem>One</ListItem>\n</UnorderedList>\n<OrderedList><ListItem>Two</ListItem></OrderedList>';
+    expect(run(input)).toBe(input);
+  });
+
   it('escapes known components without a closing tag', () => {
     expect(run('<div>no closing tag')).toBe('`<div>`no closing tag');
   });

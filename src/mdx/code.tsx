@@ -8,9 +8,11 @@ import {
   useEffect,
   useState
 } from 'react'
+import { File, SquareTerminal } from 'lucide-react'
 import { Tag } from './tag'
+import { diffBaseLanguage, isTerminalSession, parseFenceMeta, type FenceMeta } from './fence-meta'
 import { toTitleCase } from '../utils/functions'
-import { Button, Card } from '@clidey/ux'
+import { Button } from '@clidey/ux'
 import { CheckIcon } from 'lucide-react'
 
 export const supportedLanguages = {
@@ -52,15 +54,37 @@ export const supportedLanguages = {
   'js-extras': 'JavaScript Extras',
   'reason': 'Reason',
   'graphql': 'GraphQL',
+  'mdx': 'MDX',
+  'sh': 'Shell',
+  'sql': 'SQL',
 }
 
-function getPanelTitle(props: { className?: string }) {
-  const { className } = props
-  if (className) {
-    const language = className.replace('language-', '') as keyof typeof supportedLanguages;
-    return supportedLanguages[language] || toTitleCase(language)
+/** Language, raw code and parsed meta for a fenced code block (an MDX `pre` element). */
+export interface FenceProps {
+  language: string
+  code: string
+  meta: FenceMeta
+}
+
+/** Reads the fence a `pre` element wraps: `<pre><code className="language-x" metastring="...">`. */
+export function fencePropsOf(pre: preact.JSX.Element | undefined): FenceProps {
+  return fencePropsOfCode(pre?.props?.children)
+}
+
+/** Reads a fence from its `code` element. */
+export function fencePropsOfCode(code: preact.JSX.Element | undefined): FenceProps {
+  const codeProps = code?.props ?? {}
+  const className = typeof codeProps.className === 'string' ? codeProps.className : ''
+  return {
+    language: className.replace('language-', ''),
+    code: typeof codeProps.children === 'string' ? codeProps.children : '',
+    meta: parseFenceMeta(codeProps.metastring),
   }
-  return 'Code'
+}
+
+function languageName(language: string) {
+  if (!language) return 'Code'
+  return supportedLanguages[language as keyof typeof supportedLanguages] || toTitleCase(language)
 }
 
 function CopyButton({ code }: { code: string }) {
@@ -76,11 +100,12 @@ function CopyButton({ code }: { code: string }) {
 
   return (
     <Button
+      aria-label="Copy code"
       className={classNames(
-        'group/button absolute top-1 right-2 overflow-hidden rounded-full py-1 pr-3 pl-2 text-2xs font-medium opacity-0 backdrop-blur-sm transition group-hover:opacity-100 focus:opacity-100',
+        'group/button absolute top-1.5 right-2 z-10 overflow-hidden rounded-md p-1.5 shadow-none transition',
         {
-          'bg-emerald-400/10 ring-1 ring-emerald-400/20 ring-inset': copied,
-          'bg-white/5 hover:bg-white/7.5 dark:bg-white/2.5 dark:hover:bg-white/5': !copied,
+          'bg-[var(--success-muted)]': copied,
+          'bg-transparent hover:bg-card': !copied,
         }
       )}
       onClick={() => {
@@ -96,71 +121,83 @@ function CopyButton({ code }: { code: string }) {
           copied && '-translate-y-1.5 opacity-0',
         )}
       >
-        <ClipboardIcon className="h-4 w-4 fill-zinc-500/20 stroke-muted-foreground transition-colors group-hover/button:stroke-muted-foreground" />
+        <ClipboardIcon className="h-3.5 w-3.5 stroke-muted-foreground transition-colors group-hover/button:stroke-foreground" />
       </span>
       <span
         aria-hidden={!copied}
         className={classNames(
-          'pointer-events-none absolute inset-0 flex items-center justify-center text-emerald-400 transition duration-300 text-sm',
+          'pointer-events-none absolute inset-0 flex items-center justify-center text-foreground transition duration-300 text-sm',
           !copied && 'translate-y-1.5 opacity-0',
         )}
       >
-        <CheckIcon className="h-4 w-4" />
+        <CheckIcon className="h-3.5 w-3.5" />
       </span>
     </Button>
   )
+}
+
+/** Small mono pill used in code headers, e.g. JSON, SH, DIFF. */
+function LanguagePill({ children }: { children: string }) {
+  return (
+    <span className="rounded-[5px] border border-[var(--border)] bg-card px-1.5 py-px font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+      {children}
+    </span>
+  )
+}
+
+/**
+ * Header bar for a standalone fence: icon + filename (or language) on the
+ * left; diff stats and a language pill on the right.
+ */
+export function FenceHeader({ language, code, meta }: FenceProps) {
+  const diff = diffBaseLanguage(language) !== null
+  const terminal = isTerminalSession(language, code)
+  const title = meta.title ?? (terminal ? 'Terminal' : languageName(language))
+  const showPill = Boolean(meta.title) || terminal || diff
+  const lines = code.split('\n')
+  const additions = diff ? lines.filter((line) => line.startsWith('+')).length : 0
+  const deletions = diff ? lines.filter((line) => line.startsWith('-')).length : 0
+
+  return (
+    <div className="flex min-h-10 items-center gap-2 border-b border-[var(--border)] bg-muted pl-4 pr-12">
+      {terminal
+        ? <SquareTerminal aria-hidden="true" className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+        : meta.title && <File aria-hidden="true" className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />}
+      <p className="mr-auto truncate font-mono text-xs font-medium text-foreground">{title}</p>
+      {diff && (
+        <span className="font-mono text-xs">
+          <span className="text-green-700 dark:text-green-400">+{additions}</span>{' '}
+          <span className="text-[var(--destructive)]">-{deletions}</span>
+        </span>
+      )}
+      {showPill && <LanguagePill>{diff ? 'diff' : language}</LanguagePill>}
+    </div>
+  )
+}
+
+/** Rounded frame shared by standalone fences and code groups. The copy button sits in the header row. */
+export function CodeFrame({ header, code, children }: { header?: preact.ComponentChildren; code: string; children: preact.ComponentChildren }) {
+  return (
+    <div className="dory-code not-prose relative my-5 overflow-hidden rounded-lg border border-[var(--border)] bg-card">
+      {header}
+      <CopyButton code={code} />
+      {children}
+    </div>
+  )
+}
+
+/** Padded, horizontally scrollable code area inside a CodeFrame. */
+export function CodeBody({ children }: { children: preact.ComponentChildren }) {
+  return <div className="overflow-x-auto bg-card py-3 pl-4 pr-12 font-mono text-[12.5px] leading-[1.7]">{children}</div>
 }
 
 function CodePanelHeader({ tag, label }: { tag?: string; label?: string }) {
   if (!tag && !label) return null
 
   return (
-    <div className="flex h-9 items-center gap-2 border-b border-t-transparent px-4" style={{ borderColor: 'var(--border)' }}>
-      {tag && (
-        <div className="dark flex">
-          <Tag variant="small">{tag}</Tag>
-        </div>
-      )}
-      {tag && label && <span className="h-0.5 w-0.5 rounded-full bg-zinc-500" />}
+    <div className="flex h-9 items-center gap-2 border-b border-[var(--border)] bg-card px-4">
+      {tag && <Tag variant="small">{tag}</Tag>}
       {label && <span className="font-mono text-xs text-muted-foreground">{label}</span>}
-    </div>
-  )
-}
-
-function CodePanel({
-  children,
-  tag,
-  label,
-  code,
-}: {
-  children: React.ReactNode
-  tag?: string
-  label?: string
-  code?: string
-}) {
-  const child = Children.only(children)
-
-  if (isValidElement(child)) {
-    // @ts-expect-error
-    tag = child.props.tag ?? tag
-    // @ts-expect-error
-    label = child.props.label ?? label
-    // @ts-expect-error
-    code = child.props.code ?? code
-  }
-
-  if (!code) {
-    // @ts-expect-error
-    code = child.props.children
-  }
-
-  return (
-    <div className="group">
-      <CodePanelHeader tag={tag} label={label} />
-      <div className="relative">
-        <pre className="overflow-x-auto p-4 text-xs">{children}</pre>
-        <CopyButton code={code ?? ''} />
-      </div>
     </div>
   )
 }
@@ -171,7 +208,7 @@ function CodeGroupHeader({
   selectedIndex,
 }: {
   title: string
-  children: React.ReactNode
+  children: preact.ComponentChildren
   selectedIndex: number
 }) {
   const hasTabs = Children.count(children) > 1
@@ -179,9 +216,9 @@ function CodeGroupHeader({
   if (!title && !hasTabs) return null
 
   return (
-    <div className="flex flex-wrap items-start gap-x-4 px-4 pb-2">
+    <div className="flex min-h-10 flex-wrap items-end gap-x-4 border-b border-[var(--border)] bg-muted pl-4 pr-12">
       {title && (
-        <p className="mr-auto pt-3 text-xs font-semibold">
+        <p className="mr-auto self-center py-2.5 font-mono text-xs font-medium text-foreground">
           {title}
         </p>
       )}
@@ -189,21 +226,19 @@ function CodeGroupHeader({
         <TabList className="-mb-px flex gap-4 text-xs font-medium">
           {Children.map(children, (child, index) => {
             if (!isValidElement(child)) return null
-
-            const childProps = (child as preact.JSX.Element).props?.children?.props ?? {}
-            const panelTitle = getPanelTitle(childProps)
+            const fence = fencePropsOf(child as preact.JSX.Element)
 
             return (
               <Tab
                 key={index}
                 className={classNames(
-                  'pt-2 transition data-selected:not-data-focus:outline-hidden',
+                  'border-b-2 pb-2.5 pt-3 transition data-selected:not-data-focus:outline-hidden',
                   index === selectedIndex
-                    ? 'border-emerald-500 text-emerald-400'
-                    : 'border-transparent text-muted-foreground hover:text-zinc-300',
+                    ? 'border-[var(--primary)] text-foreground'
+                    : 'border-transparent text-muted-foreground hover:text-foreground',
                 )}
               >
-                {panelTitle}
+                {fence.meta.title ?? languageName(fence.language)}
               </Tab>
             )
           })}
@@ -213,69 +248,57 @@ function CodeGroupHeader({
   )
 }
 
-function CodeGroupPanels({
-  children,
-  ...props
-}: React.ComponentPropsWithoutRef<typeof CodePanel>) {
-  const hasTabs = Children.count(children) > 1
-
-  if (hasTabs) {
-    return (
-      <TabPanels>
-        {Children.map(children, (child, index) => (
-          <TabPanel key={index}>
-            <CodePanel {...props}>{child}</CodePanel>
-          </TabPanel>
-        ))}
-      </TabPanels>
-    )
-  }
-
-  return <CodePanel {...props}>{children}</CodePanel>
-}
-
 export const CodeGroupContext = createContext(false)
 
+/**
+ * Groups fences into one frame. Several fences become tabs labelled by each
+ * fence's title (e.g. ```bash cURL) or language; `tag`/`label` meta adds a
+ * method badge row.
+ */
 export function CodeGroup({
   children,
   title,
-  ...props
-}: React.ComponentPropsWithoutRef<typeof CodeGroupPanels> & { title: string }) {
+}: {
+  children: preact.ComponentChildren
+  title: string
+}) {
   const [selectedIndex, setSelectedIndex] = useState(0)
-
-  const childrenArray = Children.toArray(children)
-
+  const childrenArray = Children.toArray(children) as preact.JSX.Element[]
   const hasTabs = childrenArray.length > 1
+  const selected = fencePropsOf(childrenArray[hasTabs ? selectedIndex : 0])
 
   const header = (
     <CodeGroupHeader title={title} selectedIndex={selectedIndex}>
       {children}
     </CodeGroupHeader>
   )
-  const panels = <CodeGroupPanels {...props}>{children}</CodeGroupPanels>
+
+  const panel = (child: preact.JSX.Element) => {
+    const { meta } = fencePropsOf(child)
+    return (
+      <>
+        <CodePanelHeader tag={meta.tag} label={meta.label} />
+        <CodeBody>{child}</CodeBody>
+      </>
+    )
+  }
 
   return (
     <CodeGroupContext.Provider value={true}>
       {hasTabs ? (
-        <Card className="p-0 border-black/10 bg-none overflow-hidden mb-4">
-          <TabGroup
-            as="div"
-            selectedIndex={selectedIndex}
-            onChange={setSelectedIndex}
-          >
-            <div className="not-prose">
-              {header}
-              {panels}
-            </div>
-          </TabGroup>
-        </Card>
+        <TabGroup as="div" selectedIndex={selectedIndex} onChange={setSelectedIndex}>
+          <CodeFrame header={header} code={selected.code}>
+            <TabPanels>
+              {childrenArray.map((child, index) => (
+                <TabPanel key={index}>{panel(child)}</TabPanel>
+              ))}
+            </TabPanels>
+          </CodeFrame>
+        </TabGroup>
       ) : (
-        <Card className="p-0 border-black/10 bg-none overflow-hidden mb-4">
-          <div className="not-prose">
-            {header}
-            {panels}
-          </div>
-        </Card>
+        <CodeFrame header={header} code={selected.code}>
+          {panel(childrenArray[0])}
+        </CodeFrame>
       )}
     </CodeGroupContext.Provider>
   )
@@ -286,7 +309,7 @@ export function Code({
   ...props
 }: React.ComponentPropsWithoutRef<'code'>) {
   const isBlock = typeof props.className === 'string' && props.className.includes('language-');
-  return <code className={classNames(props.className, {
-    'dory-mdx-code rounded-md py-0.5 text-sm px-1.5': !isBlock,
-  })} {...props}>{children}</code>
+  return <code {...props} className={classNames(props.className, {
+    'dory-mdx-code rounded-md border border-[var(--border)] bg-muted py-0.5 text-[0.875em] px-1.5': !isBlock,
+  })}>{children}</code>
 }

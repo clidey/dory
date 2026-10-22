@@ -15,65 +15,97 @@ The `<Latex>` component renders mathematical expressions using [KaTeX](https://k
 
 Simple expressions without curly braces work directly:
 
+<Specimen label="&lt;Latex&gt;">
+
 ```mdx
 <Latex>E = mc^2</Latex>
 ```
 
 <Latex>E = mc^2</Latex>
 
+</Specimen>
+
+<Specimen label="&lt;Latex&gt;">
+
 ```mdx
 <Latex>a^2 + b^2 = c^2</Latex>
 ```
 
 <Latex>a^2 + b^2 = c^2</Latex>
+
+</Specimen>
 
 ## Fractions and Derivatives
 
 For LaTeX with curly braces, wrap in a JS string literal:
 
+<Specimen label="&lt;Latex&gt;">
+
 ```mdx
 <Latex>{'\\frac{d}{dx}\\left(\\int_0^x f(t)\\,dt\\right) = f(x)'}</Latex>
 ```
 
 <Latex>{'\\frac{d}{dx}\\left(\\int_0^x f(t)\\,dt\\right) = f(x)'}</Latex>
 
+</Specimen>
+
+<Specimen label="&lt;Latex&gt;">
+
 ```mdx
 <Latex>{'x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}'}</Latex>
 ```
 
 <Latex>{'x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}'}</Latex>
+
+</Specimen>
 
 ## Summation
 
+<Specimen label="&lt;Latex&gt;">
+
 ```mdx
 <Latex>{'\\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}'}</Latex>
 ```
 
 <Latex>{'\\sum_{i=1}^{n} i = \\frac{n(n+1)}{2}'}</Latex>
+
+</Specimen>
 
 ## Integrals
 
+<Specimen label="&lt;Latex&gt;">
+
 ```mdx
 <Latex>{'\\int_{-\\infty}^{\\infty} e^{-x^2}\\,dx = \\sqrt{\\pi}'}</Latex>
 ```
 
 <Latex>{'\\int_{-\\infty}^{\\infty} e^{-x^2}\\,dx = \\sqrt{\\pi}'}</Latex>
+
+</Specimen>
 
 ## Normal Distribution
 
+<Specimen label="&lt;Latex&gt;">
+
 ```mdx
 <Latex>{'f(x) = \\frac{1}{\\sigma\\sqrt{2\\pi}}e^{-\\frac{(x-\\mu)^2}{2\\sigma^2}}'}</Latex>
 ```
 
 <Latex>{'f(x) = \\frac{1}{\\sigma\\sqrt{2\\pi}}e^{-\\frac{(x-\\mu)^2}{2\\sigma^2}}'}</Latex>
 
+</Specimen>
+
 ## Euler's Identity
+
+<Specimen label="&lt;Latex&gt;">
 
 ```mdx
 <Latex>e^{i\pi} + 1 = 0</Latex>
 ```
 
 <Latex>{'e^{i\\pi} + 1 = 0'}</Latex>
+
+</Specimen>
 
 ## Using Strings vs Direct Content
 

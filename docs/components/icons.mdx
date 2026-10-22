@@ -9,17 +9,21 @@ The `<Icon>` component renders icons inline within text or as standalone visual 
 
 ## Basic Usage
 
+<Specimen label="&lt;Icon&gt;">
+
 ```mdx
 <Icon icon="rocket" />
 <Icon icon="code-2" />
 <Icon icon="check-circle" />
 ```
 
-**Output:**
-
 <Icon icon="rocket" /> <Icon icon="code-2" /> <Icon icon="check-circle" />
 
+</Specimen>
+
 ## With Color
+
+<Specimen label="&lt;Icon&gt;">
 
 ```mdx
 <Icon icon="heart" color="#ef4444" />
@@ -27,11 +31,13 @@ The `<Icon>` component renders icons inline within text or as standalone visual 
 <Icon icon="shield-check" color="#22c55e" />
 ```
 
-**Output:**
-
 <Icon icon="heart" color="#ef4444" /> <Icon icon="star" color="#f59e0b" /> <Icon icon="shield-check" color="#22c55e" />
 
+</Specimen>
+
 ## With Size
+
+<Specimen label="&lt;Icon&gt;">
 
 ```mdx
 <Icon icon="zap" size={16} />
@@ -39,13 +45,15 @@ The `<Icon>` component renders icons inline within text or as standalone visual 
 <Icon icon="zap" size={40} />
 ```
 
-**Output:**
-
 <Icon icon="zap" size={16} /> <Icon icon="zap" size={24} /> <Icon icon="zap" size={40} />
+
+</Specimen>
 
 ## Lucide Icons in Context
 
 Icons work well alongside text:
+
+<Specimen label="&lt;Icon&gt;">
 
 ```mdx
 <Icon icon="terminal" size={16} /> Run `dory build` to compile your site.
@@ -55,17 +63,19 @@ Icons work well alongside text:
 <Icon icon="git-branch" size={16} /> Push the `dist/` directory to your hosting provider.
 ```
 
-**Output:**
-
 <Icon icon="terminal" size={16} /> Run `dory build` to compile your site.
 
 <Icon icon="package" size={16} /> Install with `npm install -g @clidey/dory`.
 
 <Icon icon="git-branch" size={16} /> Push the `dist/` directory to your hosting provider.
 
+</Specimen>
+
 ## FontAwesome Fallback
 
 When a Lucide icon isn't found, Dory falls back to FontAwesome. Specify the icon type with `iconType`:
+
+<Specimen label="&lt;Icon&gt;">
 
 ```mdx
 <Icon icon="github" iconType="brands" size={24} />
@@ -73,9 +83,9 @@ When a Lucide icon isn't found, Dory falls back to FontAwesome. Specify the icon
 <Icon icon="npm" iconType="brands" size={24} />
 ```
 
-**Output:**
-
 <Icon icon="github" iconType="brands" size={24} /> <Icon icon="twitter" iconType="brands" size={24} /> <Icon icon="npm" iconType="brands" size={24} />
+
+</Specimen>
 
 ## Common Lucide Icon Names
 

@@ -11,6 +11,8 @@ The `Expandable` component and its companion components (`ResponseField`, `Prope
 
 A collapsible section with a title and optional icon:
 
+<Specimen label="&lt;Expandable&gt;">
+
 ```mdx
 <Expandable title="Response Body">
   The response includes the following fields:
@@ -21,8 +23,6 @@ A collapsible section with a title and optional icon:
 </Expandable>
 ```
 
-**Output:**
-
 <Expandable title="Response Body">
   The response includes the following fields:
 
@@ -30,9 +30,13 @@ A collapsible section with a title and optional icon:
   - `name` — Display name
   - `created_at` — ISO 8601 timestamp
 </Expandable>
+
+</Specimen>
 
 ## Expandable with Icon
 
+<Specimen label="&lt;Expandable&gt;">
+
 ```mdx
 <Expandable title="Advanced Options" icon="settings-2">
   These options are optional and have sensible defaults.
@@ -42,19 +46,21 @@ A collapsible section with a title and optional icon:
 </Expandable>
 ```
 
-**Output:**
-
 <Expandable title="Advanced Options" icon="settings-2">
   These options are optional and have sensible defaults.
 
   - `timeout` — Request timeout in milliseconds (default: `5000`)
   - `retries` — Number of retries on failure (default: `3`)
 </Expandable>
+
+</Specimen>
 
 ## ResponseField
 
 Document a single API response field with its type and description:
 
+<Specimen label="&lt;ResponseField&gt;">
+
 ```mdx
 <ResponseField name="id" type="string" required>
   Unique identifier for the resource. Format: UUID v4.
@@ -73,8 +79,6 @@ Document a single API response field with its type and description:
 </ResponseField>
 ```
 
-**Output:**
-
 <ResponseField name="id" type="string" required>
   Unique identifier for the resource. Format: UUID v4.
 </ResponseField>
@@ -90,11 +94,15 @@ Document a single API response field with its type and description:
 <ResponseField name="created_at" type="string (ISO 8601)">
   Timestamp when the resource was created.
 </ResponseField>
+
+</Specimen>
 
 ## Properties and Property
 
 Document a group of schema properties:
 
+<Specimen label="&lt;Properties&gt; &lt;Property&gt;">
+
 ```mdx
 <Properties>
   <Property name="user_id" type="string">
@@ -109,8 +117,6 @@ Document a group of schema properties:
 </Properties>
 ```
 
-**Output:**
-
 <Properties>
   <Property name="user_id" type="string">
     ID of the authenticated user making the request.
@@ -122,11 +128,15 @@ Document a group of schema properties:
     If `true`, validates the request without making changes.
   </Property>
 </Properties>
+
+</Specimen>
 
 ## Nested Schema Example
 
 Combine `Expandable` with `ResponseField` and `Properties` for complex nested schemas:
 
+<Specimen label="&lt;ResponseField&gt; &lt;Expandable&gt;">
+
 ```mdx
 <ResponseField name="user" type="object" required>
   The authenticated user object.
@@ -139,8 +149,6 @@ Combine `Expandable` with `ResponseField` and `Properties` for complex nested sc
 </ResponseField>
 ```
 
-**Output:**
-
 <ResponseField name="user" type="object" required>
   The authenticated user object.
 
@@ -150,6 +158,8 @@ Combine `Expandable` with `ResponseField` and `Properties` for complex nested sc
     <ResponseField name="user.role" type="string">One of: `admin`, `editor`, `viewer`.</ResponseField>
   </Expandable>
 </ResponseField>
+
+</Specimen>
 
 ## Props Reference
 
