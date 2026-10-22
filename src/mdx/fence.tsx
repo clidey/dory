@@ -77,12 +77,14 @@ function HighlightedLines({
   lineNumbers,
   highlight,
   markers,
+  startLine = 1,
 }: {
   code: string
   language: string
   lineNumbers: boolean
   highlight: Set<number>
   markers?: Array<'+' | '-' | ' '>
+  startLine?: number
 }) {
   return (
     <Highlight code={code} language={language} theme={codeTheme}>
@@ -91,7 +93,7 @@ function HighlightedLines({
           {tokens.map((line, index) => (
             <Line
               key={index}
-              number={lineNumbers ? index + 1 : undefined}
+              number={lineNumbers ? startLine + index : undefined}
               marker={markers?.[index]}
               highlighted={highlight.has(index + 1)}
             >
@@ -117,10 +119,13 @@ export function Fence({
   children,
   language,
   meta = parseFenceMeta(),
+  startLine,
 }: {
   children: string
   language: string
   meta?: FenceMeta
+  /** First line number to show; forces line numbers on. */
+  startLine?: number
 }) {
   if (language === 'mermaid') {
     return (
@@ -155,8 +160,9 @@ export function Fence({
       <HighlightedLines
         code={code}
         language={language}
-        lineNumbers={Boolean(meta.title) || meta.highlight.size > 0}
+        lineNumbers={Boolean(meta.title) || meta.highlight.size > 0 || startLine !== undefined}
         highlight={meta.highlight}
+        startLine={startLine}
       />
     )
   }
@@ -172,7 +178,9 @@ export function Pre(props: { children: preact.JSX.Element }) {
   const fence = fencePropsOfCode(props.children)
   const isInCodeGroup = useContext(CodeGroupContext);
 
-  const rendered = <Fence language={fence.language} meta={fence.meta}>{fence.code}</Fence>
+  // Inside a CodeGroup the title is the tab label, not a filename, so it must not turn on line numbers.
+  const meta = isInCodeGroup ? { ...fence.meta, title: undefined } : fence.meta
+  const rendered = <Fence language={fence.language} meta={meta}>{fence.code}</Fence>
 
   if (isInCodeGroup || fence.language === 'mermaid') {
     return rendered

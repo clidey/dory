@@ -18,20 +18,29 @@ Simple expressions without curly braces work directly:
 <Specimen label="&lt;Latex&gt;">
 
 ```mdx
-<Latex>E = mc^2</Latex>
+<Row cols={2}>
+  <Col><Latex>E = mc^2</Latex></Col>
+  <Col><Latex>a^2 + b^2 = c^2</Latex></Col>
+</Row>
+
+Inline math sits in the sentence: sorting the index costs <Latex inline>O(n \log n)</Latex> comparisons.
 ```
 
-<Latex>E = mc^2</Latex>
+<Row cols={2} className="py-0">
+  <Col><Latex>E = mc^2</Latex></Col>
+  <Col><Latex>a^2 + b^2 = c^2</Latex></Col>
+</Row>
 
-</Specimen>
+Inline math sits in the sentence: sorting the index costs <Latex inline>O(n \log n)</Latex> comparisons.
 
-<Specimen label="&lt;Latex&gt;">
+<SpecimenProps>
 
-```mdx
-<Latex>a^2 + b^2 = c^2</Latex>
-```
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `children` | `string` | — | LaTeX expression. |
+| `inline` | `boolean` | `false` | Render inline with the text instead of as a display tile. |
 
-<Latex>a^2 + b^2 = c^2</Latex>
+</SpecimenProps>
 
 </Specimen>
 

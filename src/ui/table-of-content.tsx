@@ -41,6 +41,14 @@ export function TableOfContents() {
       const sections: Section[] = []
       let currentSection: Section | null = null
 
+      // Heading text without the trailing "#" anchor link
+      const headingText = (heading: Element) =>
+        Array.from(heading.childNodes)
+          .filter((node) => !(node instanceof Element && node.classList.contains('dory-anchor')))
+          .map((node) => node.textContent ?? '')
+          .join('')
+          .trim()
+
       headings.forEach((heading) => {
         // Check if heading is a valid Element and is visible
         if (!(heading instanceof Element)) return
@@ -48,7 +56,7 @@ export function TableOfContents() {
         if (style.display === 'none' || style.visibility === 'hidden') return
 
         // Prefer the build-time id from rehype-slug; only assign when missing
-        const id = heading.id || slugify(heading.textContent || '')
+        const id = heading.id || slugify(headingText(heading))
         if (!heading.id && id) {
           heading.id = id
         }
@@ -56,14 +64,14 @@ export function TableOfContents() {
         if (heading.tagName === 'H2') {
           currentSection = {
             id,
-            title: heading.textContent || '',
+            title: headingText(heading),
             children: []
           }
           sections.push(currentSection)
         } else if (heading.tagName === 'H3' && currentSection) {
           currentSection.children.push({
             id,
-            title: heading.textContent || ''
+            title: headingText(heading)
           })
         }
       })

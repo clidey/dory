@@ -23,6 +23,10 @@ export { UnorderedList, OrderedList, ListItem } from './list';
 export { AsyncAPI } from './async-api';
 export { Source } from './source';
 export { Specimen, SpecimenProps } from './specimen';
+export { Chip, ChipGroup } from './chip';
+export { Tabs, Tab } from './tabs';
+export { IconGrid } from './icon-grid';
+export { TypeScale } from './type-scale';
 
 // Lazy-loaded heavy components — only downloaded when a page uses them.
 // SSR guard at this level prevents Suspense from rendering in Node.js

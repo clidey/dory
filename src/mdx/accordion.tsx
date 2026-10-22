@@ -4,12 +4,13 @@ import {
   AccordionTrigger,
   AccordionContent
 } from '@clidey/ux'
+import classNames from 'classnames'
 import { Plus } from 'lucide-react'
 import { Icon } from './icon'
 
-export function AccordionGroup({ children }: { children: React.ReactNode }) {
+export function AccordionGroup({ children, numbered = false }: { children: React.ReactNode; numbered?: boolean }) {
   return (
-    <UXAccordion type="single" collapsible className="dory-accordion my-5 overflow-hidden rounded-lg border border-[var(--border)] bg-muted/40">
+    <UXAccordion type="single" collapsible className={classNames('dory-accordion my-5 overflow-hidden rounded-lg border border-[var(--border)] bg-muted/40', { 'dory-accordion-numbered': numbered })}>
       {children}
     </UXAccordion>
   )

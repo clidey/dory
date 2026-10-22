@@ -111,6 +111,28 @@ Use `<CardGroup>` to arrange cards in a responsive grid:
 
 </Specimen>
 
+## Numbered Cards
+
+Add `numbered` to a `CardGroup` to label each card 01, 02, 03 in reading order.
+
+<Specimen label="&lt;CardGroup numbered&gt;">
+
+```mdx
+<CardGroup cols={2} numbered>
+  <Card title="Install" description="One Docker command. Runs on your machine." />
+  <Card title="Connect a database" description="Pick an engine, test, connect." />
+  <Card title="Explore the graph" description="Tables as nodes, keys as edges." />
+</CardGroup>
+```
+
+<CardGroup cols={2} numbered>
+  <Card title="Install" description="One Docker command. Runs on your machine." />
+  <Card title="Connect a database" description="Pick an engine, test, connect." />
+  <Card title="Explore the graph" description="Tables as nodes, keys as edges." />
+</CardGroup>
+
+</Specimen>
+
 ## Props Reference
 
 ### Card Props
@@ -128,3 +150,4 @@ Use `<CardGroup>` to arrange cards in a responsive grid:
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `cols` | `1 \| 2 \| 3 \| 4` | `2` | Number of columns in the grid. Responsive — collapses to 1 on mobile. |
+| `numbered` | `boolean` | `false` | Label cards 01, 02, 03 in order. |

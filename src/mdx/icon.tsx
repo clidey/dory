@@ -42,7 +42,7 @@ export function Icon({
   if (LucideComponent) {
     return (
       <LucideComponent
-        className={classNames("stroke-black dark:stroke-white", className)}
+        className={classNames("inline-block align-[-0.2em] stroke-black dark:stroke-white", className)}
         color={color}
         size={size}
         {...rest}
@@ -66,7 +66,7 @@ export function Icon({
       return (
         <FontAwesomeIcon
           icon={[prefixes[setName] || 'fas', faIcon.iconName] as any}
-          className={classNames("stroke-black dark:stroke-white", className)}
+          className={classNames("inline-block align-[-0.2em] stroke-black dark:stroke-white", className)}
           color={color as any}
           size={size as any}
           {...rest as any}

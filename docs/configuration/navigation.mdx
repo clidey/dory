@@ -177,14 +177,15 @@ description: 'Install and configure Dory for your project.'
   Keep `title` concise (2–5 words). The `description` is used for SEO meta tags and appears in search results, so make it a full sentence.
 </Tip>
 
-### Page Metadata Strip
+### Lead Paragraph and Metadata Strip
 
-Add a `meta` map to show a row of labelled facts under the page title. Keys are the labels and values are shown as written. YAML dates such as `2026-10-12` render as `12 Oct 2026`.
+Add a `lead` string to show a larger introductory paragraph directly under the page title. Add a `meta` map to show a row of labelled facts below it. Keys are the labels and values are shown as written. YAML dates such as `2026-10-12` render as `12 Oct 2026`.
 
 ```mdx
 ---
 title: 'Introduction'
 description: 'What WhoDB is and how to get started.'
+lead: 'WhoDB is a database management tool for exploring schemas, managing data and visualizing relationships.'
 meta:
   Edition: Community
   Updated: 2026-10-12
@@ -192,4 +193,4 @@ meta:
 ---
 ```
 
-Pages without `meta` show no strip.
+Pages without `lead` or `meta` show neither.

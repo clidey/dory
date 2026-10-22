@@ -9,14 +9,30 @@ Use fenced code blocks with the `mermaid` language identifier to render diagrams
 
 **Syntax:**
 
-```
+````mdx
 ```mermaid
 flowchart TD
     A[Start] --> B[End]
 ```
-```
+````
 
-## Flowchart
+## Diagrams
+
+Any code block tagged `mermaid` renders as a diagram using the site palette. It re-renders when the theme changes.
+
+<Specimen label="```mermaid">
+
+````mdx
+```mermaid
+flowchart TD
+    A[Start] --> B{Is data clean?}
+    B -->|Yes| C[Analyze]
+    B -->|No| D[Clean data]
+```
+````
+
+<Tabs>
+  <Tab title="Flowchart">
 
 ```mermaid
 flowchart TD
@@ -28,7 +44,8 @@ flowchart TD
     D --> F[Deploy to hosting]
 ```
 
-## Sequence Diagram
+  </Tab>
+  <Tab title="Sequence">
 
 ```mermaid
 sequenceDiagram
@@ -42,7 +59,8 @@ sequenceDiagram
     API-->>Client: 201 Created
 ```
 
-## Entity Relationship Diagram
+  </Tab>
+  <Tab title="Entity relationship">
 
 ```mermaid
 erDiagram
@@ -65,6 +83,11 @@ erDiagram
     USER ||--o{ WORKSPACE : owns
     WORKSPACE ||--o{ DOCUMENT : contains
 ```
+
+  </Tab>
+</Tabs>
+
+</Specimen>
 
 ## State Diagram
 

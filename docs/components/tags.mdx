@@ -40,14 +40,14 @@ Use the `color` prop for non-HTTP-method tags:
 <Specimen label="&lt;Tag&gt;">
 
 ```mdx
-<Tag color="emerald">Stable</Tag>
 <Tag color="sky">Beta</Tag>
-<Tag color="amber">Deprecated</Tag>
-<Tag color="rose">Breaking</Tag>
-<Tag color="zinc">Internal</Tag>
+<Tag color="yellow">New</Tag>
+<Tag color="rose">Deprecated</Tag>
+<Tag color="emerald">Stable</Tag>
+<Tag color="zinc">v1.2.2</Tag>
 ```
 
-<Tag color="emerald">Stable</Tag> <Tag color="sky">Beta</Tag> <Tag color="amber">Deprecated</Tag> <Tag color="rose">Breaking</Tag> <Tag color="zinc">Internal</Tag>
+<Tag color="sky">Beta</Tag> <Tag color="yellow">New</Tag> <Tag color="rose">Deprecated</Tag> <Tag color="emerald">Stable</Tag> <Tag color="zinc">v1.2.2</Tag>
 
 </Specimen>
 
@@ -123,14 +123,51 @@ The new authentication system uses OAuth 2.0 with PKCE.
 <Specimen label="&lt;Tag&gt;">
 
 ```mdx
-**Legacy Auth** <Tag color="amber">Deprecated</Tag>
+**Legacy Auth** <Tag color="rose">Deprecated</Tag>
 
 The API key authentication method is deprecated and will be removed in v3.0.
 ```
 
-**Legacy Auth** <Tag color="amber">Deprecated</Tag>
+**Legacy Auth** <Tag color="rose">Deprecated</Tag>
 
 The API key authentication method is deprecated and will be removed in v3.0.
+
+</Specimen>
+
+## Chips
+
+`<Chip>` is a pill with a brand-colored dot for short, scannable lists such as supported platforms. Wrap several in `<ChipGroup>` so they flow in rows.
+
+<Specimen label="&lt;ChipGroup&gt; &lt;Chip&gt;">
+
+```mdx
+<ChipGroup>
+  <Chip>Postgres</Chip>
+  <Chip>MySQL</Chip>
+  <Chip href="/components/cards">SQLite</Chip>
+</ChipGroup>
+```
+
+<ChipGroup>
+  <Chip>Postgres</Chip>
+  <Chip>MySQL</Chip>
+  <Chip>MariaDB</Chip>
+  <Chip>SQLite</Chip>
+  <Chip>MongoDB</Chip>
+  <Chip>Redis</Chip>
+  <Chip>ClickHouse</Chip>
+  <Chip>ElasticSearch</Chip>
+  <Chip>DuckDB</Chip>
+</ChipGroup>
+
+<SpecimenProps>
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `children` | `string` | — | Chip label. |
+| `href` | `string` | — | Makes the chip a link. |
+
+</SpecimenProps>
 
 </Specimen>
 
@@ -139,6 +176,6 @@ The API key authentication method is deprecated and will be removed in v3.0.
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
 | `children` | `string` | — | Tag label text (e.g. `"GET"`, `"Beta"`). |
-| `color` | `string` | Auto-detected | Badge color: `emerald`, `sky`, `amber`, `rose`, `zinc`. HTTP methods auto-apply color. |
+| `color` | `string` | Auto-detected | Badge color: `emerald`, `sky`, `amber`, `rose`, `zinc`, `yellow`. HTTP methods auto-apply color. |
 | `variant` | `string` | `'medium'` | Padding size: `medium` or `small`. |
 | `className` | `string` | — | Additional CSS classes. |

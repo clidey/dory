@@ -1,48 +1,37 @@
-import { useState } from "preact/hooks"
-import { APIGroup } from "./api"
-import { PlayButton } from "./api-playground"
-import { Fence } from "./fence"
 import { Properties, Property } from "./open-api"
-import { Tag } from "./tag"
-import { Col, Row } from "./text"
-import { WebSocketPlayground, type WebSocketServer } from "./websocket-playground"
-import { Button, Sheet, SheetContent, SheetHeader, SheetTitle } from "@clidey/ux"
+import { Table, Td, Th } from "./table"
+import { WebSocketPanel, type WebSocketServer } from "./websocket-playground"
+
+interface Schema {
+  $ref?: string
+  type?: string
+  format?: string
+  enum?: unknown[]
+  items?: Schema
+  properties?: Record<string, Schema>
+  required?: string[]
+  description?: string
+  default?: unknown
+  example?: unknown
+}
 
 interface AsyncAPIMessage {
+  $ref?: string
   name?: string
   title?: string
   summary?: string
   description?: string
   payload?: Schema
   headers?: Schema
-  correlationId?: {
-    description?: string
-    location?: string
-  }
-  schemaFormat?: string
   contentType?: string
-  examples?: any[]
+  examples?: unknown[]
 }
 
 interface AsyncAPIOperation {
   operationId?: string
   summary?: string
   description?: string
-  tags?: Array<{
-    name: string
-    description?: string
-  }>
-  message?: AsyncAPIMessage | {
-    oneOf?: AsyncAPIMessage[]
-  }
-  bindings?: {
-    ws?: {
-      method?: string
-      query?: Schema
-      headers?: Schema
-      bindingVersion?: string
-    }
-  }
+  message?: AsyncAPIMessage | { oneOf?: AsyncAPIMessage[] }
 }
 
 interface AsyncAPIChannel {
@@ -52,302 +41,142 @@ interface AsyncAPIChannel {
   description?: string
   subscribe?: AsyncAPIOperation
   publish?: AsyncAPIOperation
-  parameters?: Record<string, Parameter>
-  messages?: Record<string, AsyncAPIMessage>
-  bindings?: {
-    ws?: {
-      method?: string
-      query?: Schema
-      headers?: Schema
-      bindingVersion?: string
-    }
-  }
-}
-
-interface Schema {
-  $ref?: string
-  type?: string
-  items?: Schema
-  properties?: Record<string, Schema>
-  required?: string[]
-  description?: string
-  default?: any
-  example?: any
-  format?: string
-  enum?: any[]
-  oneOf?: Schema[]
-  anyOf?: Schema[]
-  allOf?: Schema[]
-}
-
-interface Parameter {
-  description?: string
-  schema?: Schema
-  location?: string
-  default?: any
 }
 
 interface Components {
   schemas?: Record<string, Schema>
   messages?: Record<string, AsyncAPIMessage>
-  parameters?: Record<string, Parameter>
-}
-
-interface Info {
-  title: string
-  version: string
-  description?: string
-  termsOfService?: string
-  contact?: {
-    name?: string
-    url?: string
-    email?: string
-  }
-  license?: {
-    name: string
-    url?: string
-  }
 }
 
 export interface AsyncAPIJson {
   asyncapi: string
-  info: Info
-  servers?: Record<string, WebSocketServer & {
-    host?: string
-    pathname?: string
-    protocol?: string
-    protocolVersion?: string
-    description?: string
-    title?: string
-    summary?: string
-    variables?: Record<string, any>
-    security?: any[]
-    tags?: Array<{
-      name: string
-      description?: string
-    }>
-    bindings?: any
-  }>
+  info: { title: string; version: string; description?: string }
+  servers?: Record<string, WebSocketServer & { host?: string; pathname?: string; protocol?: string; description?: string; title?: string }>
   channels: Record<string, AsyncAPIChannel>
   components?: Components
-  defaultContentType?: string
 }
+
+type Direction = 'SEND' | 'RECV'
 
 function resolveSchema(schema: Schema | undefined, components: Components): Schema {
   if (!schema) return {}
-
   if (schema.$ref) {
-    const refPath = schema.$ref.replace(/^#\/components\/schemas\//, '')
-    return resolveSchema(components.schemas?.[refPath], components)
+    const name = schema.$ref.replace(/^#\/components\/schemas\//, '')
+    return resolveSchema(components.schemas?.[name], components)
   }
-
-  if (schema.type === 'array' && schema.items) {
-    return {
-      ...schema,
-      items: resolveSchema(schema.items, components)
-    }
-  }
-
+  if (schema.type === 'array' && schema.items) return { ...schema, items: resolveSchema(schema.items, components) }
   if (schema.properties) {
-    const resolvedProps: Record<string, Schema> = {}
-    for (const [key, value] of Object.entries(schema.properties)) {
-      resolvedProps[key] = resolveSchema(value, components)
-    }
-    return {
-      ...schema,
-      properties: resolvedProps
-    }
+    const properties: Record<string, Schema> = {}
+    for (const [key, value] of Object.entries(schema.properties)) properties[key] = resolveSchema(value, components)
+    return { ...schema, properties }
   }
-
   return schema
 }
 
-function isDirectMessage(message: AsyncAPIMessage | { oneOf?: AsyncAPIMessage[] } | undefined): message is AsyncAPIMessage {
-  return message != null && !('oneOf' in message);
+/** Messages an operation carries, with `$ref` and `oneOf` resolved against components. */
+function messagesOf(operation: AsyncAPIOperation | undefined, components: Components): AsyncAPIMessage[] {
+  if (!operation?.message) return []
+  const list = 'oneOf' in operation.message && operation.message.oneOf ? operation.message.oneOf : [operation.message as AsyncAPIMessage]
+  return list.map((message) => {
+    if (!message.$ref) return message
+    const name = message.$ref.replace(/^#\/components\/messages\//, '')
+    return { name, ...(components.messages?.[name] ?? {}) }
+  })
 }
 
-export function AsyncAPI({ 
-  asyncAPIJson, 
-  channel: selectedChannel, 
-  operation: selectedOperation 
-}: { 
+function typeLabel(schema: Schema): string {
+  if (schema.enum) return `enum<${schema.type ?? 'string'}>`
+  if (schema.type === 'array') return `array<${schema.items ? typeLabel(schema.items) : 'any'}>`
+  if (schema.format) return `${schema.type ?? 'string'} · ${schema.format}`
+  return schema.type ?? 'object'
+}
+
+/**
+ * WebSocket operation page: a numbered "Connect" section with the live panel,
+ * a "Message types" table (SEND for publish, RECV for subscribe) and the payload fields.
+ */
+export function AsyncAPI({
+  asyncAPIJson,
+  channel: selectedChannel,
+  operation: selectedOperation,
+}: {
   asyncAPIJson: AsyncAPIJson
   channel: string
   operation: 'subscribe' | 'publish'
 }) {
-  const { channels, components, servers } = asyncAPIJson;
-  const [showPlayground, setShowPlayground] = useState(false)
+  const { channels, components = {}, servers } = asyncAPIJson
+  const channel = channels[selectedChannel]
+  const operation = channel?.[selectedOperation]
+  if (!channel || !operation) return null
 
-  const handleShowPlayground = () => {
-    setShowPlayground(true)
+  const wsServers: WebSocketServer[] = servers
+    ? Object.entries(servers).map(([key, server]) => ({
+        url: `${server.protocol}://${server.host}${server.pathname || ''}`,
+        description: server.description || server.title || key,
+        protocol: server.protocol,
+      }))
+    : []
+
+  const rows: Array<{ name: string; direction: Direction; description?: string }> = [
+    ...messagesOf(channel.publish, components).map((m) => ({ name: m.name ?? m.title ?? 'message', direction: 'SEND' as Direction, description: m.summary ?? m.description })),
+    ...messagesOf(channel.subscribe, components).map((m) => ({ name: m.name ?? m.title ?? 'message', direction: 'RECV' as Direction, description: m.summary ?? m.description })),
+  ]
+  const primary = messagesOf(operation, components)[0]
+  const payload = primary?.payload ? resolveSchema(primary.payload, components) : undefined
+  const headerExample = primary?.headers ? resolveSchema(primary.headers, components) : undefined
+  const defaultHeaders: Record<string, string> = {}
+  for (const [name, schema] of Object.entries(headerExample?.properties ?? {})) {
+    if (schema.example !== undefined) defaultHeaders[name] = String(schema.example)
   }
 
-  // Convert AsyncAPI servers to WebSocket servers
-  const wsServers: WebSocketServer[] = servers ? Object.entries(servers).map(([key, server]) => ({
-    url: `${server.protocol}://${server.host}${server.pathname || ''}`,
-    description: server.description || server.title || key,
-    protocol: server.protocol
-  })) : [];
-
   return (
-    <div className="max-w-none w-full">
-      <Sheet open={showPlayground} onOpenChange={setShowPlayground} modal={true}>
-        <SheetContent side="bottom" className="h-[90vh] w-full overflow-y-auto p-8">
-          <SheetHeader className="p-0">
-            <SheetTitle>WebSocket Playground</SheetTitle>
-          </SheetHeader>
-          <WebSocketPlayground
-            url={selectedChannel}
-            servers={wsServers}
-          />
-        </SheetContent>
-      </Sheet>
+    <div className="dory-asyncapi max-w-none w-full">
+      {(operation.description || operation.summary) && <p className="dory-lead -mt-4 mb-6">{operation.description || operation.summary}</p>}
 
-      {Object.entries(channels).map(([channelPath, channelDetails]) => {
-        if (channelPath !== selectedChannel) {
-          return null
-        }
+      <h2 id="connect" className="dory-h2 font-heading mb-3 mt-10"><span>Connect</span></h2>
+      <WebSocketPanel url={channel.address ?? selectedChannel} servers={wsServers} headers={defaultHeaders} />
 
-        const operation = channelDetails[selectedOperation]
-        if (!operation) {
-          return null
-        }
+      {rows.length > 0 && (
+        <>
+          <h2 id="message-types" className="dory-h2 font-heading mb-3 mt-10"><span>Message types</span></h2>
+          <Table>
+            <thead>
+              <tr>
+                <Th>Type</Th>
+                <Th>Dir</Th>
+                <Th>Description</Th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row) => (
+                <tr key={`${row.direction}-${row.name}`}>
+                  <Td><span className="font-mono text-xs">{row.name}</span></Td>
+                  <Td>
+                    <span className={row.direction === 'SEND' ? 'font-mono text-xs font-semibold text-[var(--brand-readable,#b65401)]' : 'font-mono text-xs font-semibold text-[var(--primary)]'}>
+                      {row.direction}
+                    </span>
+                  </Td>
+                  <Td>{row.description}</Td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </>
+      )}
 
-        const { summary, description, message } = operation
-        const resolvedMessage = isDirectMessage(message) ? message : 
-          (message?.oneOf && message.oneOf.length > 0 ? message.oneOf[0] : undefined)
-
-        return (
-          <div key={channelPath} className="my-8">
-            <Row cols={2}>
-              <Col>
-                <h2 className="flex items-center mt-4">
-                  <Tag variant="medium" className="mr-2 py-1 px-4 rounded-lg">
-                    {selectedOperation.toUpperCase()}
-                  </Tag>
-                  <span className="ml-2 font-mono">{channelPath}</span>
-                </h2>
-
-                {(summary || description) && (
-                  <p>{summary || description}</p>
-                )}
-
-                {resolvedMessage && (
-                  <div className="mt-4">
-                    <h3>Message</h3>
-                    {resolvedMessage.title && <h4>{resolvedMessage.title}</h4>}
-                    {resolvedMessage.description && <p>{resolvedMessage.description}</p>}
-                    
-                    {resolvedMessage.payload && (
-                      <div className="mt-4">
-                        <h4>Payload</h4>
-                        {(() => {
-                          const resolvedPayload = resolveSchema(resolvedMessage.payload, components || {})
-                          return (
-                            <Properties>
-                              {Object.entries(resolvedPayload.properties || {}).map(([propName, prop]) => (
-                                <Property
-                                  key={propName}
-                                  name={propName}
-                                  type={prop.type || 'string'}
-                                  required={resolvedPayload.required?.includes(propName)}
-                                >
-                                  {prop.description}
-                                  {prop.default !== undefined && (
-                                    <span className="text-muted-foreground ml-1">(default: {JSON.stringify(prop.default)})</span>
-                                  )}
-                                </Property>
-                              ))}
-                            </Properties>
-                          )
-                        })()}
-                      </div>
-                    )}
-
-                    {resolvedMessage.headers && (
-                      <div className="mt-4">
-                        <h4>Headers</h4>
-                        {(() => {
-                          const resolvedHeaders = resolveSchema(resolvedMessage.headers, components || {})
-                          return (
-                            <Properties>
-                              {Object.entries(resolvedHeaders.properties || {}).map(([headerName, header]) => (
-                                <Property
-                                  key={headerName}
-                                  name={headerName}
-                                  type={header.type || 'string'}
-                                  required={resolvedHeaders.required?.includes(headerName)}
-                                >
-                                  {header.description}
-                                </Property>
-                              ))}
-                            </Properties>
-                          )
-                        })()}
-                      </div>
-                    )}
-
-                    {resolvedMessage?.examples && resolvedMessage.examples.length > 0 && (
-                      <div className="mt-4">
-                        <h4>Examples</h4>
-                        {resolvedMessage.examples.map((example: any, idx: number) => (
-                          <Fence key={idx} language="json">
-                            {JSON.stringify(example, null, 2)}
-                          </Fence>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {components?.schemas && (
-                  <div className="mt-4">
-                    <h3>Schemas</h3>
-                    {Object.entries(components.schemas).filter(([, schema]) => schema.properties).map(([name, schema]) => (
-                      <div key={name} className="mt-4">
-                        <h4>{name}</h4>
-                        <Properties>
-                          {Object.entries(schema.properties || {}).map(([propName, prop]) => (
-                            <Property
-                              key={propName}
-                              name={propName}
-                              type={prop.type || 'string'}
-                              required={schema.required?.includes(propName)}
-                            >
-                              {prop.description}
-                            </Property>
-                          ))}
-                        </Properties>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </Col>
-              <Col sticky>
-                <Button
-                  onClick={handleShowPlayground}
-                  className='ml-auto mt-3 flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium'
-                >
-                  Try
-                  <PlayButton className="h-4 w-4" />
-                </Button>
-                <APIGroup title="Message" tag={selectedOperation.toUpperCase()} label={channelPath}>
-                  <>
-                    {resolvedMessage?.payload && (() => {
-                      const resolvedPayload = resolveSchema(resolvedMessage.payload, components || {})
-                      return (
-                        <Fence language="json">
-                          {JSON.stringify(resolvedPayload, null, 2)}
-                        </Fence>
-                      )
-                    })()}
-                  </>
-                </APIGroup>
-              </Col>
-            </Row>
-          </div>
-        )
-      })}
+      {payload?.properties && (
+        <>
+          <h2 id="payload" className="dory-h2 font-heading mb-3 mt-10"><span>Payload</span></h2>
+          {primary?.contentType && <p className="-mt-2 mb-2 font-mono text-xs text-muted-foreground">{primary.contentType}</p>}
+          <Properties>
+            {Object.entries(payload.properties).map(([name, schema]) => (
+              <Property key={name} name={name} type={typeLabel(schema)} required={payload.required?.includes(name)} defaultValue={schema.default}>
+                {schema.description}
+              </Property>
+            ))}
+          </Properties>
+        </>
+      )}
     </div>
   )
 }

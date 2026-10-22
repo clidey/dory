@@ -25,14 +25,90 @@ function hashContent(content: string): string {
     return hash.toString(16);
 }
 
+/** Reads the site palette so diagrams follow dory.json colors in both themes. */
+function paletteThemeVariables() {
+    const css = getComputedStyle(document.documentElement)
+    const v = (name: string) => css.getPropertyValue(name).trim()
+    return {
+        fontFamily: v('--font-body') || 'inherit',
+        fontSize: '13px',
+        background: v('--card'),
+        mainBkg: v('--accent'),
+        primaryColor: v('--accent'),
+        primaryTextColor: v('--foreground'),
+        primaryBorderColor: v('--primary'),
+        secondaryColor: v('--muted'),
+        secondaryTextColor: v('--foreground'),
+        secondaryBorderColor: v('--border'),
+        tertiaryColor: v('--card'),
+        tertiaryTextColor: v('--foreground'),
+        tertiaryBorderColor: v('--border'),
+        lineColor: v('--muted-foreground'),
+        textColor: v('--foreground'),
+        titleColor: v('--foreground'),
+        nodeBorder: v('--primary'),
+        nodeTextColor: v('--foreground'),
+        clusterBkg: v('--muted'),
+        clusterBorder: v('--border'),
+        edgeLabelBackground: v('--card'),
+        actorBkg: v('--accent'),
+        actorBorder: v('--primary'),
+        actorTextColor: v('--foreground'),
+        actorLineColor: v('--border'),
+        signalColor: v('--foreground'),
+        signalTextColor: v('--foreground'),
+        labelBoxBkgColor: v('--muted'),
+        labelBoxBorderColor: v('--border'),
+        noteBkgColor: v('--muted'),
+        noteBorderColor: v('--border'),
+        noteTextColor: v('--foreground'),
+        attributeBackgroundColorOdd: v('--card'),
+        attributeBackgroundColorEven: v('--muted'),
+        pie1: v('--primary'),
+        pie2: v('--highlight'),
+        pie3: v('--success-muted'),
+        pie4: v('--accent'),
+        pie5: v('--muted'),
+        pieStrokeColor: v('--card'),
+        pieTitleTextColor: v('--foreground'),
+        pieLegendTextColor: v('--foreground'),
+        pieSectionTextColor: v('--foreground'),
+        git0: v('--primary'),
+        git1: v('--brand-readable'),
+        git2: v('--highlight'),
+        git3: v('--muted-foreground'),
+        gitBranchLabel0: v('--card'),
+        gitBranchLabel1: v('--card'),
+        commitLabelColor: v('--foreground'),
+        commitLabelBackground: v('--muted'),
+        tagLabelBackground: v('--accent'),
+        tagLabelBorder: v('--primary'),
+        tagLabelColor: v('--foreground'),
+        nodePadding: 16,
+        nodeBorderRadius: 6,
+    }
+}
+
+/** Bumps whenever the html class list changes, so diagrams re-render on theme switch. */
+function useThemeVersion() {
+    const [version, setVersion] = useState(0)
+    useEffect(() => {
+        const observer = new MutationObserver(() => setVersion((n) => n + 1))
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+        return () => observer.disconnect()
+    }, [])
+    return version
+}
+
 export function MermaidRenderer({ content }: { content: string }) {
+    const themeVersion = useThemeVersion()
     const mermaidRef = useRef<HTMLDivElement>(null)
     const [isFullscreen, setIsFullscreen] = useState(false)
     const [isLoaded, setIsLoaded] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [isValid, setIsValid] = useState<boolean | null>(null)
 
-    const diagramId = useMemo(() => `mermaid-${hashContent(content)}`, [content])
+    const diagramId = useMemo(() => `mermaid-${hashContent(content)}-${themeVersion}`, [content, themeVersion])
 
     useEffect(() => {
         let mounted = true
@@ -44,15 +120,9 @@ export function MermaidRenderer({ content }: { content: string }) {
                 if (!mounted || !mermaidRef.current) return
 
                 mermaid.initialize({
-                    startOnLoad: true,
+                    startOnLoad: false,
                     theme: 'base',
-                    themeVariables: {
-                        fontSize: '14px',
-                        nodePadding: 20,
-                        notePadding: 15,
-                        padding: 10,
-                        nodeBorderRadius: 8,
-                    },
+                    themeVariables: paletteThemeVariables(),
                     flowchart: {
                         nodeSpacing: 50,
                         rankSpacing: 80,
@@ -105,7 +175,7 @@ export function MermaidRenderer({ content }: { content: string }) {
         return () => {
             mounted = false
         }
-    }, [content, diagramId])
+    }, [content, diagramId, themeVersion])
 
     const toggleFullscreen = () => {
         setIsFullscreen(!isFullscreen)
@@ -144,7 +214,7 @@ export function MermaidRenderer({ content }: { content: string }) {
             )}
             <div
                 ref={mermaidRef}
-                className={classNames('mermaid cursor-pointer transition-all duration-300 rounded-lg p-4 bg-white', {
+                className={classNames('mermaid cursor-pointer transition-all duration-300 rounded-lg p-4 bg-card', {
                     'fixed inset-0 z-50 bg-black/90 flex items-center justify-center backdrop-blur-sm': isFullscreen,
                     'opacity-0': !isLoaded,
                     'opacity-100': isLoaded,

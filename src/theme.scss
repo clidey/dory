@@ -157,10 +157,6 @@ html, body, #app {
 }
 
 // === DEFAULT STYLES ===
-article h2:first-of-type {
-    display: none;
-}
-
 article hr:first-of-type {
     display: none;
 }
@@ -415,4 +411,64 @@ article {
     .dory-line-marker {
         color: #6fbf87;
     }
+}
+
+// === PDF DETAILS ===
+.dory-lead {
+    margin-top: 0.75rem;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: var(--foreground);
+}
+
+article .dory-h2 .dory-anchor {
+    margin-left: auto;
+    font-family: var(--font-mono, monospace);
+    font-size: 0.8125rem;
+    font-weight: 400;
+    letter-spacing: 0;
+    color: var(--muted-foreground);
+    text-decoration: none;
+
+    &:hover {
+        color: var(--primary);
+    }
+}
+
+// Optional numbering for CardGroup and AccordionGroup (numbered prop)
+.dory-cards-numbered {
+    counter-reset: dory-card;
+
+    .dory-card {
+        counter-increment: dory-card;
+
+        &::before {
+            content: counter(dory-card, decimal-leading-zero);
+            display: block;
+            margin-bottom: 1.25rem;
+            font-family: var(--font-mono, monospace);
+            font-size: 0.75rem;
+            color: var(--primary);
+        }
+    }
+}
+
+.dory-accordion-numbered {
+    counter-reset: dory-accordion;
+
+    [data-slot="accordion-item"] {
+        counter-increment: dory-accordion;
+    }
+
+    [data-slot="accordion-trigger"] > div::before {
+        content: counter(dory-accordion, decimal-leading-zero);
+        margin-right: 0.25rem;
+        font-family: var(--font-mono, monospace);
+        font-size: 0.6875rem;
+        color: var(--primary);
+    }
+}
+
+.dory-latex-inline .katex {
+    font-size: 1.05em;
 }

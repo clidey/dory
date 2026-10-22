@@ -12,13 +12,15 @@ function extractText(node: React.ReactNode): string {
 
 interface LatexProps {
   children: React.ReactNode
+  /** Render inline with the surrounding text instead of as a display tile. */
+  inline?: boolean
 }
 
-export function Latex({ children }: LatexProps) {
+export function Latex({ children, inline = false }: LatexProps) {
   const expression = extractText(children).trim();
 
   if (typeof window === 'undefined') {
-    return <div className="my-4"><code>{expression}</code></div>
+    return inline ? <code>{expression}</code> : <div className="my-4"><code>{expression}</code></div>
   }
 
   const containerRef = useRef<HTMLDivElement>(null)
@@ -42,7 +44,7 @@ export function Latex({ children }: LatexProps) {
         if (!mounted || !containerRef.current) return
 
         katex.render(expression, containerRef.current, {
-          displayMode: true,
+          displayMode: !inline,
           throwOnError: false,
         })
         setIsLoading(false)
@@ -60,7 +62,11 @@ export function Latex({ children }: LatexProps) {
     return () => {
       mounted = false
     }
-  }, [expression])
+  }, [expression, inline])
+
+  if (inline) {
+    return <span ref={containerRef as unknown as preact.RefObject<HTMLSpanElement>} className="dory-latex-inline">{isLoading && expression}</span>
+  }
 
   if (error) {
     return (
@@ -86,13 +92,14 @@ export function Latex({ children }: LatexProps) {
   }
 
   return (
-    <div className="my-4">
+    <div className="dory-latex not-prose my-5 rounded-lg border border-[var(--border)] bg-muted/50 px-5 pb-5 pt-3">
+      <span className="block font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Display</span>
       {isLoading && (
         <div className="flex items-center justify-center py-4">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500" />
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[var(--primary)]" />
         </div>
       )}
-      <div ref={containerRef} className={isLoading ? 'hidden' : ''} />
+      <div ref={containerRef} className={isLoading ? 'hidden' : 'mt-3 text-center'} />
     </div>
   )
 }

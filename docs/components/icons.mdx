@@ -87,6 +87,29 @@ When a Lucide icon isn't found, Dory falls back to FontAwesome. Specify the icon
 
 </Specimen>
 
+## Icon Set
+
+One stroke icon set, used by Card, Accordion and Icon. Click an icon to copy its tag.
+
+<Specimen label="&lt;Icon icon=&quot;…&quot; /&gt; &lt;IconGrid&gt;">
+
+```mdx
+<IconGrid icons={["database", "box", "share-2", "table", "columns-3", "code", "square-terminal", "search"]} />
+```
+
+<IconGrid icons={["database", "box", "share-2", "table", "columns-3", "code", "square-terminal", "search", "file-text", "folder", "circle-check", "lock", "shield", "sparkles", "chart-column", "git-fork", "arrow-left-right", "cloud", "globe", "sliders-horizontal"]} />
+
+<SpecimenProps>
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `icons` | `string[]` | — | Lucide icon names to show. |
+| `cols` | `number` | `4` | Tiles per row. |
+
+</SpecimenProps>
+
+</Specimen>
+
 ## Common Lucide Icon Names
 
 Icons use **kebab-case** names from the [Lucide icon library](https://lucide.dev):

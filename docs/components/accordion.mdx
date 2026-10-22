@@ -105,6 +105,28 @@ Add a `icon` prop using any Lucide icon name:
 
 </Specimen>
 
+## Numbered Rows
+
+Add `numbered` to an `AccordionGroup` for reference lists readers scan by position.
+
+<Specimen label="&lt;AccordionGroup numbered&gt;">
+
+```mdx
+<AccordionGroup numbered>
+  <Accordion title="Database Connectivity">Connect to any supported engine.</Accordion>
+  <Accordion title="Schema Explorer">Browse tables, columns and keys.</Accordion>
+  <Accordion title="Interactive Data Grid">Edit rows inline.</Accordion>
+</AccordionGroup>
+```
+
+<AccordionGroup numbered>
+  <Accordion title="Database Connectivity">Connect to any supported engine.</Accordion>
+  <Accordion title="Schema Explorer">Browse tables, columns and keys.</Accordion>
+  <Accordion title="Interactive Data Grid">Edit rows inline.</Accordion>
+</AccordionGroup>
+
+</Specimen>
+
 ## Props Reference
 
 ### AccordionGroup Props
@@ -112,6 +134,7 @@ Add a `icon` prop using any Lucide icon name:
 | Prop | Type | Description |
 | --- | --- | --- |
 | `children` | `ReactNode` | One or more `Accordion` components. |
+| `numbered` | `boolean` | Label rows 01, 02, 03 in order. |
 
 ### Accordion Props
 
