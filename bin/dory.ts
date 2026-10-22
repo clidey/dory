@@ -66,7 +66,26 @@ const validateDoryConfig = (config: DoryConfig): void => {
   if (!config || typeof config !== 'object') {
     throw new Error('Configuration must be a valid object');
   }
-  // Add more validation as needed
+  if (config.basePath !== undefined && typeof config.basePath !== 'string') {
+    throw new Error('"basePath" must be a string such as "/docs"');
+  }
+};
+
+// Reads dory.json when present; preview must not fail without one.
+const readOptionalDoryConfig = (configPath: string): DoryConfig | null => {
+  if (!existsSync(configPath)) return null;
+  try {
+    return JSON.parse(readFileSync(configPath, 'utf8')) as DoryConfig;
+  } catch {
+    return null;
+  }
+};
+
+// Same normalization as src/utils/base-path.ts (the CLI is compiled separately).
+const normalizeBasePath = (value: unknown): string => {
+  if (typeof value !== 'string') return '';
+  const trimmed = value.trim().replace(/^\/+|\/+$/g, '');
+  return trimmed ? `/${trimmed}` : '';
 };
 
 const commands = {
@@ -437,12 +456,26 @@ const commands = {
       brotli: true,
     });
 
+    // Mirror the production layout: a `basePath` build is served under that
+    // prefix, so strip it before handing the request to sirv.
+    const basePath = normalizeBasePath(readOptionalDoryConfig(resolve(userRoot, 'dory.json'))?.basePath);
+
     const maxAttempts = 20;
 
     const tryPort = (currentPort: number, attempt: number): void => {
       // Fresh server per attempt — reusing one server object stacks listeners
       // and produces duplicate servers on retry.
       const server = createServer((req, res) => {
+        if (basePath && req.url) {
+          if (req.url === basePath || req.url.startsWith(`${basePath}/`) || req.url.startsWith(`${basePath}?`)) {
+            req.url = req.url.slice(basePath.length) || '/';
+          } else {
+            res.statusCode = 302;
+            res.setHeader('Location', `${basePath}/`);
+            res.end();
+            return;
+          }
+        }
         serve(req, res);
       });
 
@@ -460,7 +493,7 @@ const commands = {
       });
 
       server.once('listening', () => {
-        console.log(`🚀 Documentation live at http://localhost:${currentPort}`);
+        console.log(`🚀 Documentation live at http://localhost:${currentPort}${basePath}`);
         console.log('   Press Ctrl+C to stop the server');
       });
 

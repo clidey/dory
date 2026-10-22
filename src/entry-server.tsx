@@ -7,6 +7,7 @@ import * as mdxComponents from './mdx/mdx';
 import docsConfig from '../docs/dory.json' with { type: 'json' };
 import type { DoryConfig } from './types/config';
 import { PageMeta } from './ui/page-meta';
+import { BASE_PATH, assetUrl, withBase } from './utils/base-path';
 
 const config = docsConfig as DoryConfig;
 
@@ -96,7 +97,7 @@ export async function render(routePath: string, frontmatter?: Record<string, any
 
     return renderToString(
       <ThemeProvider>
-        <Router ssrPath={routePath}>
+        <Router base={BASE_PATH} ssrPath={withBase(routePath)}>
           <MDXProvider components={mdxComponents}>
                 <div class="flex w-full flex-col">
                   {/* SYNC NOTE: the static shell below (header chrome, sidebar nav skeleton,
@@ -112,8 +113,8 @@ export async function render(routePath: string, frontmatter?: Record<string, any
                       <div class="flex items-center grow gap-2">
                         {config.logo && (
                           <>
-                            <img src={`/${config.logo.light}`} alt="logo" class="w-8 hidden dark:block" />
-                            <img src={`/${config.logo.dark}`} alt="logo" class="w-8 block dark:hidden" />
+                            <img src={assetUrl(config.logo.light)} alt="logo" class="w-8 hidden dark:block" />
+                            <img src={assetUrl(config.logo.dark)} alt="logo" class="w-8 block dark:hidden" />
                           </>
                         )}
                         <h1 class="text-base lg:text-2xl font-bold">{config.name}</h1>
@@ -125,7 +126,7 @@ export async function render(routePath: string, frontmatter?: Record<string, any
                             return (
                               <li key={tab.title}>
                                 <a
-                                  href={tab.groups[0].pages[0].href}
+                                  href={withBase(tab.groups[0].pages[0].href)}
                                   class={`text-xs transition hover:opacity-80${isActive ? ' text-brand-foreground' : ''}`}
                                 >
                                   {tab.title}
@@ -158,7 +159,7 @@ export async function render(routePath: string, frontmatter?: Record<string, any
                                       {group.pages.map(page => (
                                         <li key={page.href} class="relative">
                                           <a
-                                            href={page.href}
+                                            href={withBase(page.href)}
                                             class={routePath === page.href
                                               ? 'block w-full pl-3.5 font-semibold text-brand-foreground before:pointer-events-none before:absolute before:top-1/2 before:-left-1 before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full'
                                               : 'block w-full pl-3.5 text-muted-foreground before:hidden before:bg-slate-300 hover:text-muted-foreground hover:before:block dark:text-muted-foreground dark:before:bg-slate-700 dark:hover:text-slate-300 before:pointer-events-none before:absolute before:top-1/2 before:-left-1 before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full'}
@@ -184,6 +185,7 @@ export async function render(routePath: string, frontmatter?: Record<string, any
                             <header class="mb-8">
                               {groupTitle && <h1 class="font-display text-lg tracking-tight">{groupTitle}</h1>}
                               {pageFm?.title && <p class="text-4xl tracking-tight">{pageFm.title}</p>}
+                              {pageFm?.lead && <p class="dory-lead">{pageFm.lead}</p>}
                             </header>
                           </div>
                           <PageMeta meta={pageFm?.meta} />
@@ -201,7 +203,7 @@ export async function render(routePath: string, frontmatter?: Record<string, any
                                 <div>
                                   <p class="font-display text-sm font-medium">Previous</p>
                                   <div class="mt-1">
-                                    <a href={prevPage.href} class="text-base font-semibold hover:opacity-80">{prevPage.title}</a>
+                                    <a href={withBase(prevPage.href)} class="text-base font-semibold hover:opacity-80">{prevPage.title}</a>
                                   </div>
                                 </div>
                               )}
@@ -209,7 +211,7 @@ export async function render(routePath: string, frontmatter?: Record<string, any
                                 <div class="ml-auto text-right">
                                   <p class="font-display text-sm font-medium">Next</p>
                                   <div class="mt-1">
-                                    <a href={nextPage.href} class="text-base font-semibold hover:opacity-80">{nextPage.title}</a>
+                                    <a href={withBase(nextPage.href)} class="text-base font-semibold hover:opacity-80">{nextPage.title}</a>
                                   </div>
                                 </div>
                               )}

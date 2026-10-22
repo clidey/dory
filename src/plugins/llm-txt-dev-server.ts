@@ -1,6 +1,7 @@
 import type { Plugin } from 'vite';
 import path from 'path';
 import { generateLlmsIndex, generateLlmContent } from './llm-txt-generator';
+import { getBasePath, readDoryConfig } from './shared';
 
 /**
  * Dev server plugin that serves llms.txt and llms-full.txt on demand,
@@ -30,8 +31,10 @@ export function llmTxtDevServer(): Plugin {
   return {
     name: 'llm-txt-dev-server',
     configureServer(server) {
-      server.middlewares.use('/llms.txt', serveText(generateLlmsIndex));
-      server.middlewares.use('/llms-full.txt', serveText(generateLlmContent));
+      // Plugin middlewares run before Vite strips `base`, so mount under it.
+      const basePath = getBasePath(readDoryConfig());
+      server.middlewares.use(`${basePath}/llms.txt`, serveText(generateLlmsIndex));
+      server.middlewares.use(`${basePath}/llms-full.txt`, serveText(generateLlmContent));
     }
   };
 }

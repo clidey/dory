@@ -1,5 +1,5 @@
 import type { Plugin } from 'vite';
-import { readDoryConfig } from './shared';
+import { readDoryConfig, getBasePath, getSiteUrl } from './shared';
 
 /**
  * Generates robots.txt at build time. Emits `Disallow: /` when seo.noindex
@@ -13,15 +13,17 @@ export function robotsGenerator(): Plugin {
       const config = readDoryConfig() || {};
       const seo = config.seo || {};
 
+      const basePath = getBasePath(config);
       const lines = ['User-agent: *'];
-      lines.push(seo.noindex ? 'Disallow: /' : 'Allow: /');
+      lines.push(seo.noindex ? `Disallow: ${basePath}/` : `Allow: ${basePath}/`);
 
       if (Array.isArray(seo.robotsTxt) && seo.robotsTxt.length > 0) {
         lines.push('', ...seo.robotsTxt);
       }
 
-      if (config.url && !seo.noindex) {
-        lines.push('', `Sitemap: ${config.url}/sitemap.xml`);
+      const siteUrl = getSiteUrl(config);
+      if (siteUrl && !seo.noindex) {
+        lines.push('', `Sitemap: ${siteUrl}/sitemap.xml`);
       }
 
       this.emitFile({

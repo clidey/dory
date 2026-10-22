@@ -1,11 +1,13 @@
 import classNames from "classnames";
+import { withBase } from '../utils/base-path';
 import { Icon } from "./icon";
 import type { ComponentChildren } from "preact";
 
-export function CardGroup({ children, cols = 2 }: { children: React.ReactNode; cols?: number }) {
+export function CardGroup({ children, cols = 2, numbered = false }: { children: React.ReactNode; cols?: number; numbered?: boolean }) {
   return (
     <div className={classNames(
       'not-prose my-6 grid grid-cols-1 gap-3',
+      numbered && 'dory-cards-numbered',
       cols === 2 && 'sm:grid-cols-2',
       cols === 3 && 'sm:grid-cols-3',
       cols === 4 && 'sm:grid-cols-4'
@@ -30,7 +32,7 @@ export function Card({
 }) {
   return (
     <div className="dory-card group relative flex flex-col rounded-lg border border-[var(--border)] bg-card p-4 transition-shadow hover:shadow-[0_2px_10px_rgb(14_34_64/0.07)]">
-      {href && <a href={href} className="absolute inset-0 z-10 rounded-lg" aria-label={title} />}
+      {href && <a href={withBase(href)} className="absolute inset-0 z-10 rounded-lg" aria-label={title} />}
       {(icon || href) && (
         <div className="mb-3 flex items-start justify-between">
           {icon ? (

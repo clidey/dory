@@ -7,6 +7,7 @@ import {
   pathFromFilename,
   parseFrontmatter,
   escapeHtml,
+  getSiteUrl,
 } from './shared';
 
 /**
@@ -26,7 +27,7 @@ export function sitemapGenerator(): Plugin {
         return;
       }
 
-      const baseUrl: string = config.url || '';
+      const baseUrl: string = getSiteUrl(config);
       if (!baseUrl) {
         console.warn(
           '⚠️  sitemap-generator: `url` is not set in dory.json — sitemap.xml will NOT be generated. Set `url` to enable it.'

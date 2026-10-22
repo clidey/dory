@@ -1,6 +1,7 @@
 import type { Plugin } from 'vite';
 import path from 'path';
 import { generateFrontmatterJson, generateSearchContentJson } from './frontmatter-generator';
+import { getBasePath, readDoryConfig } from './shared';
 
 /**
  * Dev server plugin that serves frontmatter.json and search-content.json
@@ -10,8 +11,11 @@ export function frontmatterDevServer(): Plugin {
   return {
     name: 'frontmatter-dev-server',
     configureServer(server) {
+      // Plugin middlewares run before Vite strips `base`, so mount under it.
+      const basePath = getBasePath(readDoryConfig());
+
       // Serve search content for client-side indexing
-      server.middlewares.use('/search-content.json', (req, res, next) => {
+      server.middlewares.use(`${basePath}/search-content.json`, (req, res, next) => {
         if (req.method !== 'GET') return next();
         try {
           const docsDir = path.join(process.cwd(), 'docs');
@@ -27,7 +31,7 @@ export function frontmatterDevServer(): Plugin {
         }
       });
 
-      server.middlewares.use('/frontmatter.json', (req, res, next) => {
+      server.middlewares.use(`${basePath}/frontmatter.json`, (req, res, next) => {
         if (req.method !== 'GET') {
           return next();
         }

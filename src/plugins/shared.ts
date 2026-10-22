@@ -1,6 +1,7 @@
 import matter from 'gray-matter';
 import fs from 'fs';
 import path from 'path';
+import { normalizeBasePath } from '../utils/base-path';
 
 /**
  * Shared helpers for build plugins that read docs/*.mdx and docs/dory.json.
@@ -31,6 +32,22 @@ export function readDoryConfig(docsDir?: string): Record<string, any> | null {
     console.error(`Failed to parse ${doryJsonPath}: ${detail}`);
     return null;
   }
+}
+
+/**
+ * The base path the site is served under ("" or "/docs"), from `basePath`.
+ */
+export function getBasePath(config: Record<string, any> | null): string {
+  return normalizeBasePath(config?.basePath);
+}
+
+/**
+ * Absolute site URL including the base path, e.g. "https://x.dev/docs", for
+ * canonical, sitemap and llms.txt links. "" when `url` is not configured.
+ */
+export function getSiteUrl(config: Record<string, any> | null): string {
+  const url: string = typeof config?.url === 'string' ? config.url.trim().replace(/\/+$/, '') : '';
+  return url ? `${url}${getBasePath(config)}` : '';
 }
 
 /**

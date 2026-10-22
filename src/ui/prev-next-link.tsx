@@ -1,4 +1,5 @@
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
+import { withBase } from '../utils/base-path';
 import classNames from "classnames";
 import { ALL_NAVIGATION } from "../components/store";
 import { usePathname } from "../components/hooks";
@@ -19,7 +20,7 @@ function PageLink({
         {dir === 'next' ? 'Next' : 'Previous'}
       </p>
       <div className="mt-1">
-        <a href={href} className={classNames('flex items-center gap-x-1 text-sm font-semibold hover:opacity-80', {
+        <a href={withBase(href)} className={classNames('flex items-center gap-x-1 text-sm font-semibold hover:opacity-80', {
             'flex-row-reverse': dir === 'previous',
           },
         )}>

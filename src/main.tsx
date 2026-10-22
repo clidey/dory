@@ -1,4 +1,5 @@
 import { render, hydrate } from 'preact'
+import { Router } from 'wouter-preact'
 import '@clidey/ux/styles.css';
 import '@clidey/ux/brand.css';
 import { App } from './app.tsx'
@@ -12,6 +13,7 @@ import { ThemeProvider } from '@clidey/ux'
 import { preloadFrontmatter } from './components/store'
 import docsConfig from '../docs/dory.json' with { type: 'json' };
 import type { DoryConfig } from './types/config';
+import { BASE_PATH } from './utils/base-path';
 
 const config = docsConfig as DoryConfig;
 
@@ -34,7 +36,9 @@ const tree = (
     <ThemeProvider defaultTheme={defaultTheme} storageKey="@clidey/dory/theme">
         <Toaster />
         <ErrorBoundary>
-            <AppWithMDX />
+            <Router base={BASE_PATH}>
+                <AppWithMDX />
+            </Router>
         </ErrorBoundary>
     </ThemeProvider>
 )

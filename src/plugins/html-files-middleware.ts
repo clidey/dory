@@ -1,6 +1,7 @@
 import type { Plugin } from 'vite';
 import { readFileSync, existsSync, statSync } from 'fs';
 import { resolve, extname, sep } from 'path';
+import { getBasePath, readDoryConfig } from './shared';
 
 /**
  * Returns true if `target` is the `root` path itself or is contained within it.
@@ -50,14 +51,20 @@ export function htmlFilesMiddleware(): Plugin {
   return {
     name: 'html-files-middleware',
     configureServer(server) {
+      // Plugin middlewares run before Vite strips `base`, so strip it here.
+      const basePath = getBasePath(readDoryConfig());
+
       server.middlewares.use((req, res, next) => {
         if (!req.url) {
           next();
           return;
         }
 
-        // Remove query params
-        const url = req.url.split('?')[0];
+        // Remove query params and the base path prefix
+        let url = req.url.split('?')[0];
+        if (basePath && (url === basePath || url.startsWith(`${basePath}/`))) {
+          url = url.slice(basePath.length) || '/';
+        }
 
         // Check if the request is for a file in the dist directory
         if (url.startsWith('/dist/')) {

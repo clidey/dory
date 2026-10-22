@@ -7,6 +7,7 @@ import {
   parseFrontmatter,
   findMdxFilesMap,
   pathFromFilename,
+  getSiteUrl,
 } from './shared';
 
 interface LlmTxtGeneratorOptions {
@@ -41,7 +42,7 @@ function resolveFileKey(navKey: string, mdxFilesMap: Record<string, string>): st
 export function generateLlmsIndex(docsDir: string): string {
   const config = readDoryConfig(docsDir) || {};
   const siteName: string = config.name || 'Documentation';
-  const baseUrl: string = config.url || '';
+  const baseUrl: string = getSiteUrl(config);
   const mdxFilesMap = findMdxFilesMap(docsDir, docsDir);
 
   let output = `# ${siteName}\n`;

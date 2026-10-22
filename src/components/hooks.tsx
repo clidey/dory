@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'preact/hooks';
 import { useLocation } from 'wouter-preact';
+import { withBase } from '../utils/base-path';
 
 /**
  * Strips trailing slash from a pathname (except root "/").
@@ -20,7 +21,7 @@ export const usePathname = () => {
 
   useEffect(() => {
     if (pathname !== normalized) {
-      window.history.replaceState(null, '', normalized + window.location.search + window.location.hash);
+      window.history.replaceState(null, '', withBase(normalized) + window.location.search + window.location.hash);
     }
   }, [pathname, normalized]);
 

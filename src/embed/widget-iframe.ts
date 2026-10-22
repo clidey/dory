@@ -81,10 +81,17 @@ export class DoryWidget {
     }
 
     const url = new URL(baseUrl);
-    url.pathname = path;
+    url.pathname = this.resolveDocsPath(path);
     url.search = params.toString();
 
     return url.toString();
+  }
+
+  // The docs may live under a path prefix (baseUrl is derived from the
+  // embed.js script URL), so routes are resolved beneath that prefix.
+  private resolveDocsPath(path: string): string {
+    const basePath = new URL(this.config.baseUrl).pathname.replace(/\/+$/, '');
+    return `${basePath}${path.startsWith('/') ? path : `/${path}`}`;
   }
 
   private setupIframeMessaging() {
@@ -190,7 +197,7 @@ export class DoryWidget {
     // Update iframe URL if path is specified
     if (path && this.iframe) {
       const url = new URL(this.iframe.src);
-      url.pathname = path;
+      url.pathname = this.resolveDocsPath(path);
       this.iframe.src = url.toString();
     }
 
@@ -240,7 +247,7 @@ export class DoryWidget {
   navigate(path: string) {
     if (this.iframe) {
       const url = new URL(this.iframe.src);
-      url.pathname = path;
+      url.pathname = this.resolveDocsPath(path);
       this.iframe.src = url.toString();
       this.emit('navigate', path);
     }

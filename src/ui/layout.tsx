@@ -18,6 +18,7 @@ import { SparkleIcon } from 'lucide-react';
 import { useIsEmbedded } from '../components/hooks';
 import { ErrorBoundary } from '../components/error-boundary';
 import { cn } from '@clidey/ux';
+import { withBase } from '../utils/base-path';
 
 const config = docsConfig as DoryConfig;
 
@@ -25,7 +26,7 @@ interface LayoutProps {
   children: ComponentChildren;
 }
 
-const prompt = (pathname: string) => `Please read and analyze the content from this documentation page: ${window.location.origin}${pathname}.mdx\n\n` +
+const prompt = (pathname: string) => `Please read and analyze the content from this documentation page: ${window.location.origin}${withBase(pathname)}.mdx\n\n` +
   `Then, help me understand and answer any questions I have about it. ` +
   `Please provide clear, detailed explanations and examples where relevant.`;
 
@@ -60,12 +61,12 @@ export default function Layout({ children }: LayoutProps) {
   }, [pathname]);
 
   const handleOpenMDX = useCallback(() => {
-    window.open(`${window.location.origin}${pathname}.mdx`, '_blank');
+    window.open(`${window.location.origin}${withBase(pathname)}.mdx`, '_blank');
   }, [pathname]);
 
   const handleCopyMDX = useCallback(async () => {
     try {
-      const response = await fetch(`${pathname}.mdx`);
+      const response = await fetch(`${withBase(pathname)}.mdx`);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       await navigator.clipboard.writeText(await response.text());
       showNotification('Copied to clipboard');
@@ -292,6 +293,7 @@ export default function Layout({ children }: LayoutProps) {
                       {group}
                     </h1>
                   )}
+                  {page?.lead && <p className="dory-lead">{page.lead}</p>}
                 </header>
                 {
                   openAPIJSON == null && asyncAPIJSON == null &&

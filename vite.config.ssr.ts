@@ -3,11 +3,14 @@ import preact from '@preact/preset-vite';
 import mdx from '@mdx-js/rollup';
 import { unifiedMdxPreprocessor } from './src/plugins/unified-mdx-plugin';
 import { getMdxConfig } from './src/config/mdx';
+import { getBasePath, readDoryConfig } from './src/plugins/shared';
 
 // Minimal Vite config for the SSR build.
 // Only includes plugins needed for MDX compilation — no sitemap, prerender,
 // analytics, or other build-time plugins that target the client output.
 export default defineConfig({
+  // Must match vite.config.ts so SSR markup uses the same base-prefixed URLs.
+  base: `${getBasePath(readDoryConfig())}/`,
   plugins: [
     unifiedMdxPreprocessor(),
     preact(),

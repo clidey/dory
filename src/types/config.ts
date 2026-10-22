@@ -128,7 +128,10 @@ export interface DoryConfig {
   title?: string;
   description?: string;
   image?: string;
+  /** Origin the site is published at, e.g. "https://example.com" (no base path). */
   url?: string;
+  /** Path prefix the site is served under, e.g. "/docs". Default: served at the root. */
+  basePath?: string;
   twitter?: string;
   favicon: string;
   colors?: DoryColors;

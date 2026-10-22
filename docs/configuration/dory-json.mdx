@@ -92,7 +92,8 @@ The `dory.json` file is the single configuration file for your Dory documentatio
 | `name` | **Yes** | Site name shown in the header and browser tab. |
 | `title` | No | Custom title override. Defaults to `name`. |
 | `description` | No | Meta description for SEO and social sharing. |
-| `url` | No | Canonical URL used when sharing links. |
+| `url` | No | Origin the site is published at, e.g. `"https://example.com"`. Used for canonical links, the sitemap and `llms.txt`. |
+| `basePath` | No | Path prefix the site is served under, e.g. `"/docs"` when it lives at `https://example.com/docs`. Asset URLs, navigation, generated JSON and the dev/preview servers all honour it. Defaults to the root. |
 | `image` | No | Preview image shown when links are shared on social media. |
 | `twitter` | No | Your Twitter/X handle (e.g. `"@yourhandle"`). |
 | `favicon` | **Yes** | Path to favicon file. Supports SVG and PNG. |

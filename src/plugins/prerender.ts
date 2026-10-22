@@ -9,6 +9,8 @@ import {
   stripMdxToText,
   escapeHtml,
   applyTitleTemplate,
+  getBasePath,
+  getSiteUrl,
 } from './shared';
 
 /**
@@ -41,7 +43,7 @@ export function prerender(): Plugin {
 
         const siteConfig = readDoryConfig() || {};
         const seo = siteConfig.seo || {};
-        const baseUrl: string = siteConfig.url || '';
+        const baseUrl: string = getSiteUrl(siteConfig);
         const siteName: string = siteConfig.name || 'Documentation';
 
         if (!baseUrl) {
@@ -209,7 +211,7 @@ export function prerender(): Plugin {
           );
         }
 
-        write404(outDir, baseHtml, siteName, frontmatter);
+        write404(outDir, baseHtml, siteName, frontmatter, getBasePath(siteConfig));
 
         console.log(`✅ Prerendered ${count} routes with page-specific meta tags`);
       } catch (error) {
@@ -241,10 +243,11 @@ function write404(
   outDir: string,
   baseHtml: string,
   siteName: string,
-  frontmatter: Array<Record<string, any>>
+  frontmatter: Array<Record<string, any>>,
+  basePath: string
 ): void {
   const firstPage = frontmatter.find(page => page.path && page.path !== '/');
-  const firstHref: string = firstPage?.path || '/';
+  const firstHref: string = `${basePath}${firstPage?.path || '/'}`;
   const firstTitle: string = firstPage?.title || siteName;
 
   let html = baseHtml;

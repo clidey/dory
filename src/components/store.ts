@@ -3,6 +3,7 @@ import { type RouteComponentProps } from 'wouter-preact';
 import docsConfig from '../../docs/dory.json' with { type: 'json' };
 import type { DoryConfig } from '../types/config';
 import { addToSearchIndex } from './search-index';
+import { withBase } from '../utils/base-path';
 
 const config = docsConfig as DoryConfig;
 
@@ -84,7 +85,7 @@ export async function preloadFrontmatter() {
     if (preloadedFrontMatter) return; // Already loaded (inline or previous fetch)
 
     try {
-        const response = await fetch('/frontmatter.json');
+        const response = await fetch(withBase('/frontmatter.json'));
         if (response.ok) {
             preloadedFrontMatter = await response.json();
             if (preloadedFrontMatter) {
@@ -109,7 +110,7 @@ export async function preloadFrontmatter() {
 // Fetches pre-built search-content.json generated at build time — no ?raw glob needed.
 async function addPreloadedContentToSearch() {
     try {
-        const response = await fetch('/search-content.json');
+        const response = await fetch(withBase('/search-content.json'));
         if (!response.ok) return;
         const searchContent: Array<{ path: string; title: string; content: string }> = await response.json();
 
@@ -137,7 +138,7 @@ export async function loadMDXFrontMatterForPath(pathname: string) {
 
     // Fallback: fetch frontmatter.json for this page's metadata
     try {
-        const response = await fetch('/frontmatter.json');
+        const response = await fetch(withBase('/frontmatter.json'));
         if (response.ok) {
             const allFm: Record<string, any>[] = await response.json();
             const fm = allFm.find(f => f.path === pathname);
@@ -156,7 +157,7 @@ export async function loadAllMDXFrontMatter(pathname: string) {
     if (preloadedFrontMatter) return;
 
     try {
-        const response = await fetch('/frontmatter.json');
+        const response = await fetch(withBase('/frontmatter.json'));
         if (!response.ok) return;
         const allFm: Record<string, any>[] = await response.json();
 

@@ -1,5 +1,5 @@
 import type { Plugin } from 'vite';
-import { readDoryConfig, escapeHtml, applyTitleTemplate } from './shared';
+import { readDoryConfig, escapeHtml, applyTitleTemplate, getBasePath, getSiteUrl } from './shared';
 
 /**
  * Vite plugin that injects site metadata from dory.json into index.html.
@@ -20,7 +20,8 @@ export function htmlMetadataInjector(): Plugin {
         const siteName: string = config.name || 'Documentation';
         const defaultTitle = applyTitleTemplate(config.title || siteName, seo.titleTemplate, siteName);
         const defaultDescription: string = config.description || `${siteName} - Technical Documentation`;
-        const siteUrl: string = config.url || '';
+        const siteUrl: string = getSiteUrl(config);
+        const basePath = getBasePath(config);
         const twitterHandle: string = config.twitter || '';
 
         // Resolve image to absolute URL
@@ -33,7 +34,7 @@ export function htmlMetadataInjector(): Plugin {
         // fall back to the logo so sites without a dedicated favicon still
         // get an icon instead of a broken link.
         const rawFavicon: string = config.favicon || config.logo?.light || config.logo?.dark || '';
-        const faviconHref = rawFavicon ? `/${rawFavicon.replace(/^\.?\/*/, '')}` : '';
+        const faviconHref = rawFavicon ? `${basePath}/${rawFavicon.replace(/^\.?\/*/, '')}` : '';
 
         // Function replacements everywhere so `$&` etc. in config values
         // cannot corrupt the output.

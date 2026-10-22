@@ -15,8 +15,11 @@ import { sitemapGenerator } from './src/plugins/sitemap-generator';
 import { robotsGenerator } from './src/plugins/robots-generator';
 import { prerender } from './src/plugins/prerender';
 import { getMdxConfig } from './src/config/mdx';
+import { getBasePath, readDoryConfig } from './src/plugins/shared';
 
 export default defineConfig(({ command }) => ({
+  // Serve and build under `basePath` from dory.json (asset URLs, import.meta.env.BASE_URL).
+  base: `${getBasePath(readDoryConfig())}/`,
   plugins: [
     // SINGLE SOURCE OF TRUTH: All MDX preprocessing happens in src/mdx/processor.ts
     htmlFilesMiddleware(), // Must be first to intercept HTML file requests

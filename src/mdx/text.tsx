@@ -1,4 +1,5 @@
 import { cn } from "@clidey/ux"
+import { withBase } from '../utils/base-path';
 import classNames from "classnames"
 import { useState } from "preact/hooks"
 
@@ -7,8 +8,13 @@ export const h1 = function H1(props: preact.JSX.HTMLAttributes<HTMLHeadingElemen
   return <h1 className="dory-h1 font-heading mb-3 mt-10" {...props} />
 }
 
-export const h2 = function H2(props: preact.JSX.HTMLAttributes<HTMLHeadingElement>) {
-  return <h2 className="dory-h2 font-heading mb-2 mt-10" {...props} />
+export const h2 = function H2({ children, ...props }: preact.JSX.HTMLAttributes<HTMLHeadingElement>) {
+  return (
+    <h2 className="dory-h2 font-heading mb-2 mt-10" {...props}>
+      <span>{children}</span>
+      {props.id && <a href={`#${props.id}`} className="dory-anchor" aria-label="Link to this section">#</a>}
+    </h2>
+  )
 }
 
 export const h3 = function H3(props: preact.JSX.HTMLAttributes<HTMLHeadingElement>) {
@@ -68,16 +74,17 @@ export function Col({
 
 
 export function Anchor({ children, href }: { children: preact.ComponentChildren, href: string }) {
-  return <a href={href} className="text-[var(--primary)] underline decoration-[color-mix(in_oklch,var(--primary)_40%,transparent)] underline-offset-4 hover:decoration-[var(--primary)]">{children}</a>
+  return <a href={withBase(href)} className="text-[var(--primary)] underline decoration-[color-mix(in_oklch,var(--primary)_40%,transparent)] underline-offset-4 hover:decoration-[var(--primary)]">{children}</a>
 }
 
 export function Image({ src, alt }: { src: string, alt: string }) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const resolvedSrc = withBase(src);
 
   return (
     <>
       <img 
-        src={src} 
+        src={resolvedSrc} 
         alt={alt} 
         className="w-full h-auto cursor-zoom-in rounded-lg border border-[var(--border)]"
         onClick={() => setIsExpanded(true)}
@@ -89,7 +96,7 @@ export function Image({ src, alt }: { src: string, alt: string }) {
           onClick={() => setIsExpanded(false)}
         >
           <img 
-            src={src} 
+            src={resolvedSrc} 
             alt={alt} 
             className="max-h-[90vh] max-w-[90vw] object-contain"
           />

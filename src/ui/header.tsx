@@ -9,6 +9,7 @@ import { ALL_NAVIGATION } from '../components/store';
 import { MobileNavigation } from './mobile-navigation';
 import { ModeToggle } from '@clidey/ux';
 import { useIsEmbedded } from '../components/hooks';
+import { assetUrl } from '../utils/base-path';
 
 const config = docsConfig as DoryConfig;
 const isThemeForced = config.theme?.mode === 'dark' || config.theme?.mode === 'light';
@@ -44,7 +45,7 @@ export function Header({ className }: { className?: string }) {
   const isEmbedded = useIsEmbedded();
 
   const { light, dark } = useMemo(() => {
-    return { light: config.logo.light, dark: config.logo.dark };
+    return { light: assetUrl(config.logo.light), dark: assetUrl(config.logo.dark) };
   }, []);
 
   useEffect(() => {
@@ -71,8 +72,8 @@ export function Header({ className }: { className?: string }) {
     >
       <div className="relative flex justify-between gap-6 sm:gap-8 md:grow items-center w-full px-4">
         <div className="flex items-center grow gap-2">
-          <img src={`/${light}`} alt="logo" className="w-8 hidden dark:block" />
-          <img src={`/${dark}`} alt="logo" className="w-8 block dark:hidden" />
+          <img src={light} alt="logo" className="w-8 hidden dark:block" />
+          <img src={dark} alt="logo" className="w-8 block dark:hidden" />
           <h1 className="text-base lg:text-2xl font-bold">{config.name}</h1>
         </div>
         <nav className="hidden md:block">
