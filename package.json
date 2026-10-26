@@ -73,7 +73,7 @@
     "preact": "11.0.1",
     "preact-render-to-string": "6.8.1",
     "prism-react-renderer": "2.4.1",
-    "react-highlight-words": "0.21.0",
+    "react-highlight-words": "1.0.0",
     "rehype-slug": "6.0.0",
     "remark-gfm": "4.0.1",
     "sass-embedded": "1.105.2",

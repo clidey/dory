@@ -243,8 +243,8 @@ importers:
         specifier: 2.4.1
         version: 2.4.1(react@19.3.1)
       react-highlight-words:
-        specifier: 0.21.0
-        version: 0.21.0(react@19.3.1)
+        specifier: 1.0.0
+        version: 1.0.0(react@19.3.1)
       rehype-slug:
         specifier: 6.0.0
         version: 6.0.0
@@ -2640,8 +2640,8 @@ packages:
     resolution: {integrity: sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==}
     hasBin: true
 
-  highlight-words-core@1.2.3:
-    resolution: {integrity: sha512-m1O9HW3/GNHxzSIXWw1wCNXXsgLlxrP0OI6+ycGUhiUHkikqW3OrwVHz+lxeNBe5yqLESdIcj8PowHQ2zLvUvQ==}
+  highlight-words-core@2.0.0:
+    resolution: {integrity: sha512-dKFj8EZQ8yvU9b/88WGZGwsFC0wmKk5wEVOL4D4POzASma8Gct9LvWax6gPpIzBIF+z8N0si3t1mxyYxOHmjhw==}
 
   iconv-lite@0.6.3:
     resolution: {integrity: sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw==}
@@ -3005,9 +3005,6 @@ packages:
   mdast-util-to-string@4.0.0:
     resolution: {integrity: sha512-0H44vDimn51F0YwvxSJSm0eCDOJTRlmN0R1yBh4HLj9wiV1Dn0QoXGbvFAWj2hSItVTlCmBF1hqKlIyUBVFLPg==}
 
-  memoize-one@4.0.3:
-    resolution: {integrity: sha512-QmpUu4KqDmX0plH4u+tf0riMc1KHE1+lw95cMrLlXQAFOx/xnBtwhZ52XJxd9X2O6kwKBqX32kmhbhlobD0cuw==}
-
   mermaid@12.2.0:
     resolution: {integrity: sha512-w7nr/SFrLO7BaVTs3dQTvYSV6nYSBj0Yy9DjBhsIJtAcHqRzXSq4Pg32ujHZ/AdWsAMNEvvhbm5dt9E2tOiHzw==}
     engines: {node: '>=22.12.0'}
@@ -3256,10 +3253,10 @@ packages:
     peerDependencies:
       react: ^19.3.1
 
-  react-highlight-words@0.21.0:
-    resolution: {integrity: sha512-SdWEeU9fIINArEPO1rO5OxPyuhdEKZQhHzZZP1ie6UeXQf+CjycT1kWaB+9bwGcVbR0NowuHK3RqgqNg6bgBDQ==}
+  react-highlight-words@1.0.0:
+    resolution: {integrity: sha512-783Dim5Q6X51x4yGlU2+XDr5L3r9P+3iI1zuRx4khbjqNOZObUoGOtZ5V7UdN8zrpz/IUo+cAdSoYJu4Y0Vo1w==}
     peerDependencies:
-      react: ^0.14.0 || ^15.0.0 || ^16.0.0-0 || ^17.0.0-0 || ^18.0.0-0 || ^19.0.0-0
+      react: ^16.3.0 || ^17.0.0-0 || ^18.0.0-0 || ^19.0.0-0
 
   react-is@19.3.1:
     resolution: {integrity: sha512-RRieF6IyxQBkcK6pP8xOHprLTPW6QjRkbGdImtqNme+/hYVwCZkLQLdlZGOhUqXwkS9IEynaGvPJtv6XB/cz0Q==}
@@ -6192,7 +6189,7 @@ snapshots:
 
   he@1.2.0: {}
 
-  highlight-words-core@1.2.3: {}
+  highlight-words-core@2.0.0: {}
 
   iconv-lite@0.6.3:
     dependencies:
@@ -6597,8 +6594,6 @@ snapshots:
   mdast-util-to-string@4.0.0:
     dependencies:
       '@types/mdast': 4.0.4
-
-  memoize-one@4.0.3: {}
 
   mermaid@12.2.0:
     dependencies:
@@ -7019,10 +7014,9 @@ snapshots:
       react: 19.3.1
       scheduler: 0.28.0
 
-  react-highlight-words@0.21.0(react@19.3.1):
+  react-highlight-words@1.0.0(react@19.3.1):
     dependencies:
-      highlight-words-core: 1.2.3
-      memoize-one: 4.0.3
+      highlight-words-core: 2.0.0
       react: 19.3.1
 
   react-is@19.3.1: {}
