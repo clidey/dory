@@ -2,6 +2,12 @@
   "name": "Dory",
   "url": "https://dory.clidey.com",
   "version": "1.0.8 · Latest",
+  "copyright": "Clidey",
+  "repository": {
+    "url": "https://github.com/clidey/dory",
+    "branch": "main",
+    "path": "docs"
+  },
   "description": "Static documentation site generator for modern teams. Build beautiful docs from MDX files.",
   "seo": {
     "titleTemplate": "%s — Dory"

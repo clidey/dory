@@ -4,13 +4,11 @@ import { useEffect, useMemo, useRef } from 'preact/hooks';
 import { Link } from 'wouter-preact';
 import docsConfig from '../../docs/dory.json' with { type: 'json' };
 import type { DoryConfig } from '../types/config';
-import { DoryMark } from '../ui/dory-mark';
+import { DORY_REPO_URL, DoryMark } from '../ui/dory-mark';
 import { usePathname } from './hooks';
 import { ALL_NAVIGATION, completeFrontMatter } from './store';
 
 const config = docsConfig as DoryConfig;
-
-const DORY_REPO_URL = 'https://github.com/clidey/dory';
 
 type Frontmatter = Record<string, any>;
 
@@ -64,12 +62,31 @@ export function Navigation({ frontmatter = completeFrontMatter }: { frontmatter?
     return (
         <nav ref={navRef} className="dory-sidebar flex min-h-full flex-col gap-6 text-[13px]" aria-label="Documentation">
             {config.version && (
-                <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-3 py-2.5">
+                <div className="relative flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-3 py-2.5">
                     <div>
                         <p className="dory-mono-label">Version</p>
                         <p className="mt-0.5 text-sm font-semibold text-white">{config.version}</p>
                     </div>
-                    <ChevronsUpDown aria-hidden="true" className="h-3.5 w-3.5 text-white/50" />
+                    {config.versions && config.versions.length > 0 && (
+                        <>
+                            <ChevronsUpDown aria-hidden="true" className="h-3.5 w-3.5 text-white/50" />
+                            {/* Transparent native select over the card: keyboard and screen-reader friendly, no JS menu to hydrate. */}
+                            <select
+                                aria-label="Version"
+                                value=""
+                                onChange={(event) => {
+                                    const url = (event.target as HTMLSelectElement).value;
+                                    if (url) window.location.href = url;
+                                }}
+                                className="absolute inset-0 cursor-pointer opacity-0"
+                            >
+                                <option value="" disabled>{config.version}</option>
+                                {config.versions.map((version) => (
+                                    <option key={version.url} value={version.url}>{version.label}</option>
+                                ))}
+                            </select>
+                        </>
+                    )}
                 </div>
             )}
 

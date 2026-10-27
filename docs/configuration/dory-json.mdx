@@ -97,6 +97,27 @@ The `dory.json` file is the single configuration file for your Dory documentatio
 | `image` | No | Preview image shown when links are shared on social media. |
 | `twitter` | No | Your Twitter/X handle (e.g. `"@yourhandle"`). |
 | `favicon` | **Yes** | Path to favicon file. Supports SVG and PNG. |
+| `version` | No | Text in the sidebar version card, e.g. `"1.0.8 · Latest"`. |
+| `versions` | No | Other published versions as `[{ "label": "1.0.7", "url": "https://…" }]`. When set, the version card opens a picker that goes to the chosen URL. |
+| `copyright` | No | Name in the footer copyright line. Defaults to `name`. |
+
+## Repository
+
+```json
+"repository": {
+  "url": "https://github.com/clidey/dory",
+  "branch": "main",
+  "path": "docs"
+}
+```
+
+When set, the "On this page" rail shows **Edit this page** and **Report an issue** links. URLs follow the GitHub format.
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `url` | **Yes** | Repository URL. |
+| `branch` | No | Branch the edit link opens. Defaults to `main`. |
+| `path` | No | Folder holding the docs inside the repository. Defaults to the repository root. |
 
 ## Colors
 

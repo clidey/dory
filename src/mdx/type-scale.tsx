@@ -1,9 +1,9 @@
 // Mirrors the heading scale in theme.scss (.dory-h1 to .dory-h4). Keep both in sync.
 const scale = [
-  { level: 'H1', size: 26, tracking: -0.025, weight: 700 },
-  { level: 'H2', size: 21, tracking: -0.02, weight: 700 },
-  { level: 'H3', size: 17, tracking: -0.01, weight: 700 },
-  { level: 'H4', size: 15, tracking: -0.005, weight: 600 },
+  { level: 'H1', size: 48, tracking: -0.035, weight: 700 },
+  { level: 'H2', size: 34, tracking: -0.03, weight: 700 },
+  { level: 'H3', size: 22, tracking: -0.02, weight: 700 },
+  { level: 'H4', size: 18, tracking: -0.01, weight: 600 },
 ]
 
 /** Shows each heading level with its size and letter-spacing, without emitting real headings. */

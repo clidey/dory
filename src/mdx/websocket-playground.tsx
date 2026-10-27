@@ -150,7 +150,7 @@ const statusDot: Record<ConnectionState, string> = {
   connected: 'bg-green-600',
   connecting: 'bg-[var(--highlight)]',
   error: 'bg-[var(--destructive)]',
-  disconnected: 'bg-muted-foreground',
+  disconnected: 'bg-[var(--muted-foreground)]',
 }
 
 const statusText: Record<ConnectionState, string> = {

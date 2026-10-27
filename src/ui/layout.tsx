@@ -1,5 +1,5 @@
 import type { ComponentChildren } from 'preact';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { Navigation } from '../components/navigation';
 import { ALL_NAVIGATION, ALL_OPENAPI, completeFrontMatter, loadMDXFrontMatterForPath, loadAllMDXFrontMatter, preloadFrontmatter, ALL_ASYNCAPI, isFrontmatterReady } from '../components/store';
 import docsConfig from '../../docs/dory.json' with { type: 'json' };
@@ -10,14 +10,15 @@ import { AsyncAPI } from '../mdx/async-api';
 import { Header } from './header';
 import { PrevNextLinks } from './prev-next-link';
 import { PageMeta } from './page-meta';
+import { Breadcrumb } from './breadcrumb';
+import { PageActions } from './page-actions';
+import { PageFeedback } from './page-feedback';
+import { PageFooter } from './page-footer';
+import { TableOfContents } from './table-of-content';
 import { Loading } from '../components/loading';
-import Dropdown from '../components/dropdown';
-import { useNotification } from '../components/notification';
-import { SparkleIcon } from 'lucide-react';
 import { useIsEmbedded } from '../components/hooks';
 import { ErrorBoundary } from '../components/error-boundary';
 import { cn } from '@clidey/ux';
-import { withBase } from '../utils/base-path';
 
 const config = docsConfig as DoryConfig;
 
@@ -25,13 +26,10 @@ interface LayoutProps {
   children: ComponentChildren;
 }
 
-const prompt = (pathname: string) => `Please read and analyze the content from this documentation page: ${window.location.origin}${withBase(pathname)}.mdx\n\n` +
-  `Then, help me understand and answer any questions I have about it. ` +
-  `Please provide clear, detailed explanations and examples where relevant.`;
-
 /**
- * Main documentation layout: header, sidebar navigation, article content,
- * table of contents, and prev/next links.
+ * Main documentation layout: header, sidebar navigation, breadcrumb and page
+ * actions, article content, feedback, prev/next cards, footer, and the
+ * "On this page" rail.
  *
  * SYNC NOTE: src/entry-server.tsx renders a static SSR copy of this layout's
  * shell (the .dory-shell / aside / main / article wrappers in render()).
@@ -42,7 +40,6 @@ export default function Layout({ children }: LayoutProps) {
   const [loading, setLoading] = useState(!isFrontmatterReady());
   const rawPathname = usePathname();
   const pathname = rawPathname === '/' ? ALL_NAVIGATION[0]?.groups[0]?.pages[0]?.href ?? '/' : rawPathname;
-  const { showNotification } = useNotification();
   const isEmbedded = useIsEmbedded();
 
   // Client-side navigation keeps the previous scroll position, so start each new
@@ -58,49 +55,6 @@ export default function Layout({ children }: LayoutProps) {
       window.scrollTo(0, 0);
     }
   }, [pathname]);
-
-  const handleOpenMDX = useCallback(() => {
-    window.open(`${window.location.origin}${withBase(pathname)}.mdx`, '_blank');
-  }, [pathname]);
-
-  const handleCopyMDX = useCallback(async () => {
-    try {
-      const response = await fetch(`${withBase(pathname)}.mdx`);
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      await navigator.clipboard.writeText(await response.text());
-      showNotification('Copied to clipboard');
-    } catch (error) {
-      console.warn(`Failed to fetch ${pathname}.mdx:`, error);
-      showNotification('Could not copy MDX', 'The raw MDX file is not available.');
-    }
-  }, [pathname, showNotification]);
-  const handleOpenChatGPT = useCallback(() => {
-    const url = `https://chat.openai.com/?q=${encodeURIComponent(prompt(pathname))}`;
-    window.open(url, '_blank');
-  }, [pathname]);
-  const handleOpenAnthropic = useCallback(() => {
-    const url = `https://claude.ai/new?q=${encodeURIComponent(prompt(pathname))}`;
-    window.open(url, '_blank');
-  }, [pathname]);
-
-  const dropdownItems = useMemo(() => [
-    {
-      label: 'Open MDX',
-      onClick: handleOpenMDX,
-    },
-    {
-      label: 'Copy MDX',
-      onClick: handleCopyMDX
-    },
-    {
-      label: 'Open in ChatGPT',
-      onClick: handleOpenChatGPT
-    },
-    {
-      label: 'Open in Anthropic',
-      onClick: handleOpenAnthropic
-    }
-  ], [handleOpenMDX, handleCopyMDX, handleOpenChatGPT, handleOpenAnthropic]);
 
   useEffect(() => {
     // Try to preload frontmatter first (optimized approach).
@@ -123,14 +77,12 @@ export default function Layout({ children }: LayoutProps) {
 
 
   const { title: group, group: title, page } = useMemo(() => {
-    const group = ALL_NAVIGATION.flatMap((tab) =>
-      tab.groups.find((group) =>
-        group.pages.some((page) => page.href === pathname)
-      )
-    );
+    const group = ALL_NAVIGATION
+      .flatMap((tab) => tab.groups)
+      .find((group) => group.pages.some((page) => page.href === pathname));
     const page = completeFrontMatter.find((page) => page.path === pathname);
 
-    return { group: group[0]?.title, title: page?.title, page };
+    return { group: group?.title, title: page?.title, page };
   }, [pathname, loading]);
 
   // Update document title and meta tags when page changes
@@ -256,6 +208,8 @@ export default function Layout({ children }: LayoutProps) {
       : children;
 
   const showSidebar = !isEmbedded && !isLandingPage;
+  // OpenAPI pages lay out their own two columns, so they skip the TOC and take its width.
+  const isOpenAPIPage = openAPIJSON != null;
 
   return (
     <div className="dory-shell flex min-h-screen w-full flex-col bg-[var(--sidebar)]">
@@ -268,39 +222,34 @@ export default function Layout({ children }: LayoutProps) {
             </div>
           </aside>
         )}
-        <main className={cn("min-w-0 flex-1 bg-background text-foreground", {
-          "rounded-tl-2xl px-6 py-10 sm:px-10 lg:px-12": showSidebar,
+        <main className={cn("dory-main min-w-0 flex-1 bg-background text-foreground", {
+          "px-6 py-10 sm:px-10 lg:px-12": showSidebar,
           "px-6 py-10 sm:px-10": isLandingPage && !isEmbedded,
           "p-8": isEmbedded,
         })}>
           {isLandingPage ? (
             <ErrorBoundary fallback={errorFallback}>{children}</ErrorBoundary>
           ) : (
-            <article className="dory-article mx-auto flex w-full max-w-[52rem] flex-col">
-              <div className="flex items-start justify-between">
-                <header className="mb-8">
-                  {title && (
-                    <p className="dory-subtitle text-sm font-medium tracking-widest uppercase mb-2">
-                      {title}
-                    </p>
-                  )}
-                  {group && (
-                    <h1 className="dory-page-title text-4xl tracking-tight">
-                      {group}
-                    </h1>
-                  )}
+            <div className="mx-auto flex w-full max-w-[66rem] justify-center gap-14">
+              <article className={cn("dory-article flex min-w-0 flex-1 flex-col", isOpenAPIPage ? "max-w-[66rem]" : "max-w-[47rem]")}>
+                <div className="mb-6 flex min-h-9 flex-wrap items-center justify-between gap-4">
+                  <Breadcrumb group={title} title={group} />
+                  <PageActions pathname={pathname} />
+                </div>
+                <header className="mb-10">
+                  {group && <h1 className="dory-page-title">{group}</h1>}
                   {page?.lead && <p className="dory-lead">{page.lead}</p>}
                 </header>
-                {openAPIJSON == null && asyncAPIJSON == null && (
-                  <Dropdown className="gap-0" buttonLabel={<SparkleIcon className="w-4 h-4" />} items={dropdownItems} />
-                )}
-              </div>
-              <PageMeta meta={page?.meta} />
-              <div className="flex-1 min-h-[calc(100vh-2rem)]">
-                <ErrorBoundary fallback={errorFallback}>{content}</ErrorBoundary>
-              </div>
-              <PrevNextLinks />
-            </article>
+                <PageMeta meta={page?.meta} />
+                <div className="flex-1 min-h-[calc(100vh-2rem)]">
+                  <ErrorBoundary fallback={errorFallback}>{content}</ErrorBoundary>
+                </div>
+                <PageFeedback pathname={pathname} />
+                <PrevNextLinks />
+                <PageFooter />
+              </article>
+              {!isOpenAPIPage && <TableOfContents />}
+            </div>
           )}
         </main>
       </div>

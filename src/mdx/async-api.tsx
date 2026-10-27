@@ -131,7 +131,7 @@ export function AsyncAPI({
 
   return (
     <div className="dory-asyncapi max-w-none w-full">
-      {(operation.description || operation.summary) && <p className="dory-lead -mt-4 mb-6">{operation.description || operation.summary}</p>}
+      {(operation.description || operation.summary) && <p className="dory-lead -mt-4! mb-6">{operation.description || operation.summary}</p>}
 
       <h2 id="connect" className="dory-h2 font-heading mb-3 mt-10"><span>Connect</span></h2>
       <WebSocketPanel url={channel.address ?? selectedChannel} servers={wsServers} headers={defaultHeaders} />
@@ -150,7 +150,7 @@ export function AsyncAPI({
             <tbody>
               {rows.map((row) => (
                 <tr key={`${row.direction}-${row.name}`}>
-                  <Td><span className="font-mono text-xs">{row.name}</span></Td>
+                  <Td><span className="font-mono text-[13px] text-foreground">{row.name}</span></Td>
                   <Td>
                     <span className={row.direction === 'SEND' ? 'font-mono text-xs font-semibold text-[var(--brand-readable,#b65401)]' : 'font-mono text-xs font-semibold text-[var(--primary)]'}>
                       {row.direction}

@@ -10,7 +10,7 @@ export const h1 = function H1(props: preact.ComponentProps<'h1'>) {
 
 export const h2 = function H2({ children, ...props }: preact.ComponentProps<'h2'>) {
   return (
-    <h2 className="dory-h2 font-heading mb-2 mt-10" {...props}>
+    <h2 className="dory-h2 font-heading mb-4 mt-16" {...props}>
       <span>{children}</span>
       {props.id && <a href={`#${props.id}`} className="dory-anchor" aria-label="Link to this section">#</a>}
     </h2>
@@ -18,7 +18,7 @@ export const h2 = function H2({ children, ...props }: preact.ComponentProps<'h2'
 }
 
 export const h3 = function H3(props: preact.ComponentProps<'h3'>) {
-  return <h3 className="dory-h3 font-heading mb-2 mt-7" {...props} />
+  return <h3 className="dory-h3 font-heading mb-3 mt-10" {...props} />
 }
 
 export const h4 = function H4(props: preact.ComponentProps<'h4'>) {

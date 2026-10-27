@@ -1,12 +1,13 @@
-import { Button, Sheet, SheetContent, SheetHeader, SheetTitle } from "@clidey/ux"
+import { Button } from "@clidey/ux"
 import classNames from "classnames"
 import { Check, ChevronRight, Copy, Play } from "lucide-react"
 import { h } from "preact"
 import { useState } from "preact/hooks"
-import { APIPlayground, type Server } from "./api-playground"
+import type { Server } from "./api-playground"
 import { CodeFrame, CodeGroup } from "./code"
 import { Fence, Pre } from "./fence"
 import { Tag } from "./tag"
+import { TryItPanel, type TryItField } from "./try-it-panel"
 
 // ---------------------------------------------------------------------------
 // Field list used by the API pages and exposed to MDX as Properties/Property.
@@ -178,6 +179,11 @@ function exampleOf(schema: Schema, depth = 0): unknown {
   }
 }
 
+/** Short type for a form field: `enum` rather than `enum<string>`. */
+function fieldType(schema: Schema): string {
+  return schema.enum ? 'enum' : schema.type ?? 'object'
+}
+
 function describeDefault(schema: Schema, description?: string): string | undefined {
   if (description) return description
   if (schema.description) return schema.description
@@ -299,6 +305,32 @@ function ResponseTabs({ responses, components }: { responses: PathMethod['respon
   )
 }
 
+// Longest line of the cURL `-d` body before it continues on the next line.
+const CURL_BODY_WIDTH = 44
+
+/** `-d` lines for cURL, breaking a flat JSON object across lines so it reads without wrapping. */
+function curlBody(body: unknown): string[] {
+  const json = JSON.stringify(body)
+  if (body === null || typeof body !== 'object' || Array.isArray(body) || json.length <= CURL_BODY_WIDTH) {
+    return [`  -d '${json}'`]
+  }
+  const lines: string[] = []
+  let line = ''
+  for (const [key, value] of Object.entries(body)) {
+    const entry = `${JSON.stringify(key)}:${JSON.stringify(value)}`
+    if (line && line.length + entry.length + 1 > CURL_BODY_WIDTH) {
+      lines.push(`${line},`)
+      line = entry
+    } else {
+      line = line ? `${line},${entry}` : entry
+    }
+  }
+  lines.push(line)
+  return lines.map((text, index) =>
+    `${index === 0 ? "  -d '{" : '      '}${text}${index === lines.length - 1 ? "}'" : ''}`
+  )
+}
+
 /** cURL / JavaScript / Python samples generated from the operation. */
 function RequestSamples({ method, url, headers, body }: { method: string; url: string; headers: Record<string, string>; body?: unknown }) {
   const headerLines = Object.entries(headers)
@@ -306,7 +338,7 @@ function RequestSamples({ method, url, headers, body }: { method: string; url: s
   const curl = [
     `curl -X ${method} ${url} \\`,
     ...headerLines.map(([key, value]) => `  -H "${key}: ${value}" \\`),
-    ...(json ? [`  -d '${json}'`] : []),
+    ...(json ? curlBody(body) : []),
   ].join('\n').replace(/ \\$/, '')
   const js = [
     `const response = await fetch("${url}", {`,
@@ -384,20 +416,39 @@ export function OpenAPI({ openAPIJson, method: selectedMethod, path: selectedPat
   }
   if (bodySchema) headers['Content-Type'] = 'application/json'
 
+  const parameterFields: TryItField[] = parameters.flatMap((param) => {
+    if (param.in === 'cookie') return []
+    const schema = resolveSchema(param.schema, components)
+    const value = schema.example ?? schema.default
+    return [{ name: param.name, type: fieldType(schema), value: value === undefined ? '' : String(value), in: param.in ?? 'query' }]
+  })
+  const bodyFields: TryItField[] = Object.entries(bodySchema?.properties ?? {}).map(([name, raw]) => {
+    const schema = resolveSchema(raw, components)
+    const value = exampleOf(schema)
+    return { name, type: fieldType(schema), value: typeof value === 'string' ? value : JSON.stringify(value) }
+  })
+  const authInputs: TryItField[] = schemes.flatMap((scheme) => {
+    const header = authHeader(scheme)
+    if (!header) return []
+    return [{ name: header[0], type: 'header', value: header[1].replace(/\$\w+$/, '') }]
+  })
+
   return (
     <div className="dory-api max-w-none w-full">
-      <Sheet open={showPlayground} onOpenChange={setShowPlayground} modal={true}>
-        <SheetContent side="bottom" className="h-[90vh] w-full overflow-y-auto p-8">
-          <SheetHeader className="p-0">
-            <SheetTitle>API Playground</SheetTitle>
-          </SheetHeader>
-          <APIPlayground method={selectedMethod} url={selectedPath} servers={openAPIJson.servers} />
-        </SheetContent>
-      </Sheet>
+      <TryItPanel
+        open={showPlayground}
+        onOpenChange={setShowPlayground}
+        method={selectedMethod}
+        path={selectedPath}
+        servers={openAPIJson.servers ?? []}
+        parameters={parameterFields}
+        body={bodyFields}
+        auth={authInputs}
+      />
 
-      {operation.description && <p className="dory-lead -mt-4 mb-6">{operation.description}</p>}
+      {operation.description && <p className="dory-lead -mt-4! mb-6">{operation.description}</p>}
 
-      <div className="not-prose flex items-center gap-3 rounded-lg border border-[var(--border)] bg-card py-2 pl-3 pr-2">
+      <div className="not-prose flex max-w-[45rem] items-center gap-3 rounded-lg border border-[var(--border)] bg-card py-2 pl-3 pr-2">
         <Tag>{selectedMethod}</Tag>
         <span className="min-w-0 flex-1 truncate font-mono text-sm">
           <span className="text-muted-foreground">{serverUrl}</span>
@@ -410,58 +461,63 @@ export function OpenAPI({ openAPIJson, method: selectedMethod, path: selectedPat
         </Button>
       </div>
 
-      {schemes.length > 0 && (
-        <>
-          <SectionTitle>Authorization</SectionTitle>
-          <Properties>
-            {schemes.map((scheme, index) => {
-              const header = authHeader(scheme)
-              const name = header?.[0] ?? scheme.name ?? scheme.type
-              const location = scheme.type === 'apiKey' ? scheme.in ?? 'header' : 'header'
-              return (
-                <Property key={index} name={name} type={`${location} · string`} required>
-                  {scheme.description ?? (scheme.type === 'http' ? `${scheme.scheme === 'basic' ? 'Basic' : 'Bearer'} token.` : 'API key.')}
-                </Property>
-              )
-            })}
-          </Properties>
-        </>
-      )}
+      <div className="grid gap-x-12 xl:grid-cols-[minmax(0,1fr)_29rem]">
+        <div className="min-w-0">
+          {schemes.length > 0 && (
+            <>
+              <SectionTitle>Authorization</SectionTitle>
+              <Properties>
+                {schemes.map((scheme, index) => {
+                  const header = authHeader(scheme)
+                  const name = header?.[0] ?? scheme.name ?? scheme.type
+                  const location = scheme.type === 'apiKey' ? scheme.in ?? 'header' : 'header'
+                  return (
+                    <Property key={index} name={name} type={`${location} · string`} required>
+                      {scheme.description ?? (scheme.type === 'http' ? `${scheme.scheme === 'basic' ? 'Basic' : 'Bearer'} token.` : 'API key.')}
+                    </Property>
+                  )
+                })}
+              </Properties>
+            </>
+          )}
 
-      {parameters.length > 0 && (
-        <>
-          <SectionTitle>Parameters</SectionTitle>
-          <Properties>
-            {parameters.map((param) => {
-              const schema = resolveSchema(param.schema, components)
-              return (
-                <Property key={`${param.in}-${param.name}`} name={param.name} type={`${param.in ?? 'query'} · ${typeLabel(schema)}`} required={param.required} defaultValue={schema.default}>
-                  {describeDefault(schema, param.description)}
-                </Property>
-              )
-            })}
-          </Properties>
-        </>
-      )}
+          {parameters.length > 0 && (
+            <>
+              <SectionTitle>Parameters</SectionTitle>
+              <Properties>
+                {parameters.map((param) => {
+                  const schema = resolveSchema(param.schema, components)
+                  return (
+                    <Property key={`${param.in}-${param.name}`} name={param.name} type={`${param.in ?? 'query'} · ${typeLabel(schema)}`} required={param.required} defaultValue={schema.default}>
+                      {describeDefault(schema, param.description)}
+                    </Property>
+                  )
+                })}
+              </Properties>
+            </>
+          )}
 
-      {bodySchema && (
-        <>
-          <SectionTitle note="application/json">Body</SectionTitle>
-          {operation.requestBody?.description && <p className="mt-2 text-sm text-muted-foreground">{operation.requestBody.description}</p>}
-          <SchemaFields schema={bodySchema} components={components} />
-        </>
-      )}
+          {bodySchema && (
+            <>
+              <SectionTitle note="application/json">Body</SectionTitle>
+              {operation.requestBody?.description && <p className="mt-2 text-sm text-muted-foreground">{operation.requestBody.description}</p>}
+              <SchemaFields schema={bodySchema} components={components} />
+            </>
+          )}
 
-      {responseSchema && (
-        <>
-          <SectionTitle>Response</SectionTitle>
-          <SchemaFields schema={responseSchema} components={components} />
-        </>
-      )}
+          {responseSchema && (
+            <>
+              <SectionTitle>Response</SectionTitle>
+              <SchemaFields schema={responseSchema} components={components} />
+            </>
+          )}
+        </div>
 
-      <div className="mt-8">
-        <RequestSamples method={selectedMethod} url={fullUrl} headers={headers} body={bodySchema ? exampleOf(bodySchema) : undefined} />
-        <ResponseTabs responses={operation.responses} components={components} />
+        {/* Samples sit beside the fields on wide screens and follow the reader down the page. */}
+        <aside className="mt-10 min-w-0 xl:sticky xl:top-20 xl:self-start">
+          <RequestSamples method={selectedMethod} url={fullUrl} headers={headers} body={bodySchema ? exampleOf(bodySchema) : undefined} />
+          <ResponseTabs responses={operation.responses} components={components} />
+        </aside>
       </div>
     </div>
   )

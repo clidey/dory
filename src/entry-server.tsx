@@ -9,6 +9,11 @@ import type { DoryConfig } from './types/config';
 import { PageMeta } from './ui/page-meta';
 import { Header } from './ui/header';
 import { Navigation } from './components/navigation';
+import { Breadcrumb } from './ui/breadcrumb';
+import { PageFeedback } from './ui/page-feedback';
+import { PageFooter } from './ui/page-footer';
+import { PrevNextLinks } from './ui/prev-next-link';
+import { TableOfContents } from './ui/table-of-content';
 import { BASE_PATH, withBase } from './utils/base-path';
 
 const config = docsConfig as DoryConfig;
@@ -90,13 +95,7 @@ export async function render(routePath: string, frontmatter?: Record<string, any
       }
     }
 
-    // Prev/next
-    const allLinks = navigation.flatMap(tab =>
-      tab.groups.flatMap(group => group.pages)
-    );
-    const linkIndex = allLinks.findIndex(link => link.href === routePath);
-    const prevPage = linkIndex > 0 ? allLinks[linkIndex - 1] : null;
-    const nextPage = linkIndex < allLinks.length - 1 ? allLinks[linkIndex + 1] : null;
+    const isOpenAPIPage = Boolean(pageFm?.openapi);
 
     return renderToString(
       <ThemeProvider>
@@ -113,45 +112,32 @@ export async function render(routePath: string, frontmatter?: Record<string, any
                         <Navigation frontmatter={frontmatter} />
                       </div>
                     </aside>
-                    <main class="min-w-0 flex-1 bg-background text-foreground rounded-tl-2xl px-6 py-10 sm:px-10 lg:px-12">
-                      <article class="dory-article mx-auto flex w-full max-w-[52rem] flex-col">
-                        <div class="flex items-start justify-between">
-                          <header class="mb-8">
-                            {groupTitle && <p class="dory-subtitle text-sm font-medium tracking-widest uppercase mb-2">{groupTitle}</p>}
-                            {pageFm?.title && <h1 class="dory-page-title text-4xl tracking-tight">{pageFm.title}</h1>}
+                    <main class="dory-main min-w-0 flex-1 bg-background text-foreground px-6 py-10 sm:px-10 lg:px-12">
+                      <div class="mx-auto flex w-full max-w-[66rem] justify-center gap-14">
+                        <article class={`dory-article flex min-w-0 flex-1 flex-col ${isOpenAPIPage ? 'max-w-[66rem]' : 'max-w-[47rem]'}`}>
+                          {/* Page actions (Copy page / AI actions) are client-only and mount on hydration. */}
+                          <div class="mb-6 flex min-h-9 flex-wrap items-center justify-between gap-4">
+                            <Breadcrumb group={groupTitle} title={pageFm?.title} />
+                          </div>
+                          <header class="mb-10">
+                            {pageFm?.title && <h1 class="dory-page-title">{pageFm.title}</h1>}
                             {pageFm?.lead && <p class="dory-lead">{pageFm.lead}</p>}
                           </header>
-                        </div>
-                        <PageMeta meta={pageFm?.meta} />
-                        <div class="flex-1 min-h-[calc(100vh-2rem)]">
-                          {/* Matches App > div.antialiased > div.flex > Routes > Content */}
-                          <div class="h-full antialiased">
-                            <div class="flex min-h-full">
-                              <Content />
+                          <PageMeta meta={pageFm?.meta} />
+                          <div class="flex-1 min-h-[calc(100vh-2rem)]">
+                            {/* Matches App > div.antialiased > div.flex > Routes > Content */}
+                            <div class="h-full antialiased">
+                              <div class="flex min-h-full">
+                                <Content />
+                              </div>
                             </div>
                           </div>
-                        </div>
-                        {(prevPage || nextPage) && (
-                          <div class="mt-12 pt-6 flex border-t border-black/20 dark:border-white/20">
-                            {prevPage && (
-                              <div>
-                                <p class="font-display text-xs font-medium text-muted-foreground">Previous</p>
-                                <div class="mt-1">
-                                  <a href={withBase(prevPage.href)} class="text-sm font-semibold hover:opacity-80">{prevPage.title}</a>
-                                </div>
-                              </div>
-                            )}
-                            {nextPage && (
-                              <div class="ml-auto text-right">
-                                <p class="font-display text-xs font-medium text-muted-foreground">Next</p>
-                                <div class="mt-1">
-                                  <a href={withBase(nextPage.href)} class="text-sm font-semibold hover:opacity-80">{nextPage.title}</a>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </article>
+                          <PageFeedback pathname={routePath} />
+                          <PrevNextLinks navigation={navigation} />
+                          <PageFooter />
+                        </article>
+                        {!isOpenAPIPage && <TableOfContents />}
+                      </div>
                     </main>
                   </div>
                 </div>

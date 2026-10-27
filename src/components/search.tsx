@@ -7,7 +7,6 @@ import {
 import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react'
 import {
   forwardRef,
-  Fragment,
   Suspense,
   useCallback,
   useEffect,
@@ -18,6 +17,7 @@ import {
 import type { TargetedEvent, TargetedKeyboardEvent, TargetedMouseEvent } from 'preact'
 import Highlighter from 'react-highlight-words'
 import { cn, Spinner, SearchInput as UxSearchInput } from '@clidey/ux'
+import { Search as SearchIcon } from 'lucide-react'
 import classNames from 'classnames'
 import { useLocation } from 'wouter-preact'
 import { useMobileNavigation } from '../ui/mobile-navigation'
@@ -35,9 +35,37 @@ type Autocomplete = AutocompleteApi<
   TargetedKeyboardEvent<HTMLElement>
 >
 
+const SUGGESTED_PAGES = 3
+
+/**
+ * Results shown before the reader types: the current page, its sections, and
+ * the next few pages in navigation order.
+ */
+function suggestions(pathname: string): Result[] {
+  const pages = ALL_NAVIGATION.flatMap(tab => tab.groups.flatMap(group => group.pages))
+  const index = Math.max(0, pages.findIndex(page => page.href === pathname))
+  const current = pages[index]
+  if (!current) return []
+  const sections = Array.from(document.querySelectorAll('.dory-article h2[id]'))
+    .filter(heading => !heading.closest('.dory-specimen'))
+    .map(heading => ({
+      url: `${current.href}#${heading.id}`,
+      title: Array.from(heading.childNodes)
+        .filter(node => !(node instanceof Element && node.classList.contains('dory-anchor')))
+        .map(node => node.textContent ?? '')
+        .join('')
+        .trim(),
+    }))
+  const next = pages.slice(index + 1, index + 1 + SUGGESTED_PAGES)
+  return [current, ...sections, ...next].map(item => ({ url: 'href' in item ? item.href : item.url, title: item.title }))
+}
+
 function useAutocomplete({ onNavigate }: { onNavigate: () => void }) {
   const id = useId()
   const [, nav] = useLocation()
+  // getSources is created once, so read the current page through a ref.
+  const pathnameRef = useRef('')
+  pathnameRef.current = usePathname()
   const [autocompleteState, setAutocompleteState] = useState<
     AutocompleteState<Result> | EmptyObject
   >({})
@@ -58,13 +86,14 @@ function useAutocomplete({ onNavigate }: { onNavigate: () => void }) {
       TargetedKeyboardEvent<HTMLElement>
     >({
       id,
-      placeholder: 'Search or ask…',
+      placeholder: 'Search docs or ask a question',
       defaultActiveItemId: 0,
       onStateChange({ state }) {
         setAutocompleteState(state)
       },
-      shouldPanelOpen({ state }) {
-        return state.query !== ''
+      openOnFocus: true,
+      shouldPanelOpen() {
+        return true
       },
       navigator: {
         navigate,
@@ -74,7 +103,7 @@ function useAutocomplete({ onNavigate }: { onNavigate: () => void }) {
             {
               sourceId: 'documentation',
               getItems() {
-                return search(query, { limit: 5 })
+                return query ? search(query, { limit: 8 }) : suggestions(pathnameRef.current)
               },
               getItemUrl({ item }) {
                 return item.url
@@ -114,64 +143,30 @@ function SearchResult({
 }) {
   const id = useId()
 
-  const currentPage = result.url.split('#')[0];
-  
-  // Get the group containing the current page
-  const group = ALL_NAVIGATION.find(group => 
-    group.groups.some(group => 
-      group.pages.some(page => page.href === currentPage)
-    )
-  );
-
-  const page = group?.groups.find(group => group.pages.find(page => page.href === currentPage));
-
-  const sectionTitle = group?.title;
-  const pageTitle = page?.title;
-  
-  const hierarchy: any[] = [sectionTitle, pageTitle].filter(
-    (x): x is string => typeof x === 'string',
-  );
+  const [currentPage, hash] = result.url.split('#')
+  const group = ALL_NAVIGATION.flatMap(tab => tab.groups)
+    .find(group => group.pages.some(page => page.href === currentPage))
+  const pageTitle = group?.pages.find(page => page.href === currentPage)?.title
+  // Sections show "Group · Page" above their title; pages show only their group.
+  const eyebrow = [group?.title, hash ? pageTitle : undefined].filter(Boolean).join(' · ')
 
   return (
     <li
-      className={classNames(
-        'group block cursor-default px-4 py-3 aria-selected:bg-zinc-50 dark:aria-selected:bg-zinc-800/50',
-      )}
+      className="dory-search-result group block cursor-default px-8 py-3"
       aria-labelledby={`${id}-hierarchy ${id}-title`}
       {...autocomplete.getItemProps({
         item: result,
         source: collection.source,
       })}
     >
-      <div
-        id={`${id}-title`}
-        aria-hidden="true"
-        className="text-sm font-medium text-brand-foreground group-aria-selected:text-brand-foreground"
-      >
-        <HighlightQuery text={result.title} query={query} />
-      </div>
-      {hierarchy.length > 0 && (
-        <div
-          id={`${id}-hierarchy`}
-          aria-hidden="true"
-          className="mt-1 truncate text-2xs whitespace-nowrap text-muted-foreground"
-        >
-          {hierarchy.map((item, itemIndex, items) => (
-            <Fragment key={itemIndex}>
-              <HighlightQuery text={item} query={query} />
-              <span
-                className={
-                  itemIndex === items.length - 1
-                    ? 'sr-only'
-                    : 'mx-2 text-zinc-300 dark:text-zinc-700'
-                }
-              >
-                /
-              </span>
-            </Fragment>
-          ))}
+      {eyebrow && (
+        <div id={`${id}-hierarchy`} aria-hidden="true" className="dory-search-eyebrow truncate">
+          <HighlightQuery text={eyebrow} query={query} />
         </div>
       )}
+      <div id={`${id}-title`} aria-hidden="true" className="dory-search-title">
+        <HighlightQuery text={result.title} query={query} />
+      </div>
     </li>
   )
 }
@@ -207,7 +202,7 @@ function SearchResults({
   }
 
   return (
-    <ul {...autocomplete.getListProps()}>
+    <ul className="py-3" {...autocomplete.getListProps()}>
       {collection.items.map((result) => (
         <SearchResult
           key={result.url}
@@ -232,19 +227,16 @@ const SearchInput = forwardRef<
   const inputProps = autocomplete.getInputProps({ inputElement: null })
 
   return (
-    <div className="group relative flex">
-      <UxSearchInput
+    <div className="relative flex h-16 items-center gap-3 px-7">
+      <SearchIcon aria-hidden="true" className="h-5 w-5 shrink-0 text-muted-foreground" />
+      <input
         ref={inputRef}
         data-autofocus
-        className={cn({
-            'pr-11': autocompleteState.status === 'stalled',
-            'pr-4': autocompleteState.status !== 'stalled',
-        })}
+        className="dory-search-input h-full min-w-0 flex-1 bg-transparent outline-none"
         {...inputProps}
         onKeyDown={(event) => {
           if (
             event.key === 'Escape' &&
-            !autocompleteState.isOpen &&
             autocompleteState.query === ''
           ) {
             // In Safari, closing the dialog with the escape key can sometimes cause the scroll position to jump to the
@@ -259,11 +251,9 @@ const SearchInput = forwardRef<
           }
         }}
       />
-      {autocompleteState.status === 'stalled' && (
-        <div className="absolute inset-y-0 right-3 flex items-center">
-          <Spinner className="h-5 w-5 animate-spin text-brand-foreground" />
-        </div>
-      )}
+      {autocompleteState.status === 'stalled'
+        ? <Spinner className="h-5 w-5 animate-spin text-brand-foreground" />
+        : <kbd className="dory-search-esc">Esc</kbd>}
     </div>
   )
 })
@@ -331,7 +321,7 @@ function SearchDialog({
       <div className="fixed inset-0 overflow-y-auto px-4 py-4 sm:px-6 sm:py-20 md:py-32 lg:px-8 lg:py-[15vh] max-w-[calc(100vw-16px)]">
         <DialogPanel
           transition
-          className="max-sm:mt-[25vh] mx-auto transform-gpu overflow-hidden rounded-lg bg-zinc-50 shadow-xl ring-1 ring-zinc-900/7.5 data-closed:scale-95 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:max-w-xl dark:bg-zinc-900 dark:ring-zinc-800"
+          className="dory-search-panel max-sm:mt-[10vh] mx-auto transform-gpu overflow-hidden data-closed:scale-95 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:max-w-3xl"
         >
           <div {...autocomplete.getRootProps({})}>
             <form
@@ -348,10 +338,10 @@ function SearchDialog({
               />
               <div
                 ref={panelRef}
-                className="border-t border-border bg-white empty:hidden dark:border-zinc-100/5 dark:bg-white/2.5"
+                className="max-h-[60vh] overflow-y-auto border-t border-[var(--border)] empty:hidden"
                 {...autocomplete.getPanelProps({})}
               >
-                {autocompleteState.isOpen && (
+                {autocompleteState.isOpen && autocompleteState.collections[0] && (
                   <SearchResults
                     autocomplete={autocomplete}
                     query={autocompleteState.query}

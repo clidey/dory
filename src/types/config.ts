@@ -129,6 +129,22 @@ export interface DoryTheme {
   radius?: string;
 }
 
+/** One entry in the sidebar version picker. */
+export interface DoryVersion {
+  label: string;
+  url: string;
+}
+
+/** Source repository for "Edit this page" and "Report an issue" links. GitHub-style URLs. */
+export interface DoryRepository {
+  /** Repository URL, e.g. "https://github.com/clidey/dory". */
+  url: string;
+  /** Branch the edit link opens. Default: "main". */
+  branch?: string;
+  /** Folder holding the docs inside the repository, e.g. "docs". Default: the repository root. */
+  path?: string;
+}
+
 export interface DoryConfig {
   name: string;
   title?: string;
@@ -140,6 +156,11 @@ export interface DoryConfig {
   basePath?: string;
   /** Shown in the sidebar version card, e.g. "1.0.8 · Latest". */
   version?: string;
+  /** Other published versions; when set, the version card becomes a picker that opens the chosen URL. */
+  versions?: DoryVersion[];
+  /** Name in the footer copyright line. Default: `name`. */
+  copyright?: string;
+  repository?: DoryRepository;
   twitter?: string;
   favicon: string;
   colors?: DoryColors;

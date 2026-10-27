@@ -46,6 +46,7 @@ export function htmlFilesMiddleware(): Plugin {
     '.woff2': 'font/woff2',
     '.ttf': 'font/ttf',
     '.eot': 'application/vnd.ms-fontobject',
+    '.mdx': 'text/markdown; charset=utf-8',
   };
 
   return {
@@ -114,8 +115,8 @@ export function htmlFilesMiddleware(): Plugin {
             if (stats.isFile()) {
               const ext = extname(url).toLowerCase();
 
-              // Only serve HTML files and assets, not MDX files
-              if (url.endsWith('.html') || assetExtensions.has(ext)) {
+              // HTML, assets, and MDX sources (the build copies these too, for Open MDX / Copy page)
+              if (url.endsWith('.html') || ext === '.mdx' || assetExtensions.has(ext)) {
                 const content = readFileSync(docsPath);
                 const contentType = mimeTypes[ext] || 'application/octet-stream';
 

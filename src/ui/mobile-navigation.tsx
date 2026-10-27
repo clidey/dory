@@ -1,11 +1,11 @@
 'use client'
 
 import { Sheet, SheetContent, Button, ModeToggle } from '@clidey/ux'
-import { createContext, Suspense, useCallback, useContext, useRef, useState } from 'react'
+import { createContext, Suspense, useCallback, useContext, useEffect, useRef, useState } from 'react'
 
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import { Navigation } from '../components/navigation'
-import { useIsEmbedded } from '../components/hooks'
+import { useIsEmbedded, usePathname } from '../components/hooks'
 
 const IsInsideMobileNavigationContext = createContext(false)
 
@@ -36,6 +36,10 @@ export function MobileNavigation() {
   const { isOpen, open, close } = useMobileNavigation();
   const ToggleIcon = isOpen ? XMarkIcon : Bars3Icon;
   const isEmbedded = useIsEmbedded();
+  const pathname = usePathname();
+
+  // Picking a page navigates client-side, so close the menu once the route changes.
+  useEffect(() => close(), [pathname, close]);
 
   return (
     <IsInsideMobileNavigationContext.Provider value={true}>
