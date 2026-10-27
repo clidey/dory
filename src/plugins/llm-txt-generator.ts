@@ -8,7 +8,7 @@ import {
   findMdxFilesMap,
   pathFromFilename,
   getSiteUrl,
-} from './shared';
+} from './shared.ts';
 
 interface LlmTxtGeneratorOptions {
   docsDir?: string;

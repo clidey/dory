@@ -11,7 +11,7 @@ import {
   applyTitleTemplate,
   getBasePath,
   getSiteUrl,
-} from './shared';
+} from './shared.ts';
 
 /**
  * Generates per-route HTML files with page-specific meta tags and JSON-LD

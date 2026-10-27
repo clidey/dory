@@ -8,7 +8,7 @@ import {
   parseFrontmatter,
   escapeHtml,
   getSiteUrl,
-} from './shared';
+} from './shared.ts';
 
 /**
  * Generates sitemap.xml at build time from all MDX files (not just those in

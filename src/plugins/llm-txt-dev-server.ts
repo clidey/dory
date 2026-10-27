@@ -1,7 +1,7 @@
 import type { Plugin } from 'vite';
 import path from 'path';
-import { generateLlmsIndex, generateLlmContent } from './llm-txt-generator';
-import { getBasePath, readDoryConfig } from './shared';
+import { generateLlmsIndex, generateLlmContent } from './llm-txt-generator.ts';
+import { getBasePath, readDoryConfig } from './shared.ts';
 
 /**
  * Dev server plugin that serves llms.txt and llms-full.txt on demand,

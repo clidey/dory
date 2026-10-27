@@ -1,5 +1,5 @@
 import type { Plugin } from 'vite';
-import { preprocessMdxContent } from '../mdx/processor';
+import { preprocessMdxContent } from '../mdx/processor.ts';
 
 /**
  * Unified MDX preprocessing plugin for Vite.

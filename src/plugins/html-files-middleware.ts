@@ -1,7 +1,7 @@
 import type { Plugin } from 'vite';
 import { readFileSync, existsSync, statSync } from 'fs';
 import { resolve, extname, sep } from 'path';
-import { getBasePath, readDoryConfig } from './shared';
+import { getBasePath, readDoryConfig } from './shared.ts';
 
 /**
  * Returns true if `target` is the `root` path itself or is contained within it.

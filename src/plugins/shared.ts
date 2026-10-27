@@ -1,7 +1,7 @@
 import matter from 'gray-matter';
 import fs from 'fs';
 import path from 'path';
-import { normalizeBasePath } from '../utils/base-path';
+import { normalizeBasePath } from '../utils/base-path.ts';
 
 /**
  * Shared helpers for build plugins that read docs/*.mdx and docs/dory.json.

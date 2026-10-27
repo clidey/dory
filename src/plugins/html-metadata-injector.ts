@@ -1,5 +1,5 @@
 import type { Plugin } from 'vite';
-import { readDoryConfig, escapeHtml, applyTitleTemplate, getBasePath, getSiteUrl } from './shared';
+import { readDoryConfig, escapeHtml, applyTitleTemplate, getBasePath, getSiteUrl } from './shared.ts';
 
 /**
  * Vite plugin that injects site metadata from dory.json into index.html.

@@ -1,6 +1,6 @@
 import { compile } from '@mdx-js/mdx';
-import { preprocessMdxTags } from '../plugins/sanitize';
-import { getMdxConfig } from '../config/mdx';
+import { preprocessMdxTags } from '../plugins/sanitize.ts';
+import { getMdxConfig } from '../config/mdx.ts';
 
 export interface ProcessMdxOptions {
   isDevelopment?: boolean;

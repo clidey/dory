@@ -1,7 +1,7 @@
 import type { Plugin } from 'vite';
 import path from 'path';
-import { generateFrontmatterJson, generateSearchContentJson } from './frontmatter-generator';
-import { getBasePath, readDoryConfig } from './shared';
+import { generateFrontmatterJson, generateSearchContentJson } from './frontmatter-generator.ts';
+import { getBasePath, readDoryConfig } from './shared.ts';
 
 /**
  * Dev server plugin that serves frontmatter.json and search-content.json

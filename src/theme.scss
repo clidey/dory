@@ -588,3 +588,15 @@ article .dory-h2 .dory-anchor {
     text-transform: uppercase;
     color: var(--highlight-foreground);
 }
+
+.dory-sidebar-footer {
+    transition: opacity 120ms ease;
+
+    .dory-mono-label {
+        transition: color 120ms ease;
+    }
+
+    &:hover .dory-mono-label {
+        color: #fff;
+    }
+}

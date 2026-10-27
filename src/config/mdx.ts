@@ -1,8 +1,8 @@
 import remarkGfm from 'remark-gfm';
 import rehypeSlug from 'rehype-slug';
-import { remarkSafeVars } from '../plugins/sanitize';
-import { rehypeCodeMeta } from '../plugins/code-meta';
-import { remarkRelativeAssets } from '../plugins/relative-assets';
+import { remarkSafeVars } from '../plugins/sanitize.ts';
+import { rehypeCodeMeta } from '../plugins/code-meta.ts';
+import { remarkRelativeAssets } from '../plugins/relative-assets.ts';
 
 /**
  * Shared MDX configuration used by the main build (vite.config.ts),

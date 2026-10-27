@@ -7,7 +7,7 @@ import {
   pathFromFilename,
   findMdxFilesMap,
   stripMdxToText,
-} from './shared';
+} from './shared.ts';
 
 interface FrontmatterGeneratorOptions {
   docsDir?: string;

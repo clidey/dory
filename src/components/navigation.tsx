@@ -10,6 +10,8 @@ import { ALL_NAVIGATION, completeFrontMatter } from './store';
 
 const config = docsConfig as DoryConfig;
 
+const DORY_REPO_URL = 'https://github.com/clidey/dory';
+
 type Frontmatter = Record<string, any>;
 
 const methodTone: Record<string, string> = {
@@ -99,10 +101,15 @@ export function Navigation({ frontmatter = completeFrontMatter }: { frontmatter?
                 </section>
             ))}
 
-            <div className="mt-auto flex items-center gap-2.5 border-t border-white/10 px-2.5 pt-4">
+            <a
+                href={DORY_REPO_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="dory-sidebar-footer mt-auto flex items-center gap-2.5 border-t border-white/10 px-2.5 pt-4"
+            >
                 <DoryMark className="h-4 w-4" />
                 <span className="dory-mono-label">Built with Dory</span>
-            </div>
+            </a>
         </nav>
     );
 }

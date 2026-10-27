@@ -1,5 +1,5 @@
 import type { Plugin } from 'vite';
-import { readDoryConfig, getBasePath, getSiteUrl } from './shared';
+import { readDoryConfig, getBasePath, getSiteUrl } from './shared.ts';
 
 /**
  * Generates robots.txt at build time. Emits `Disallow: /` when seo.noindex

@@ -2,20 +2,20 @@ import { defineConfig } from 'vite';
 import preact from '@preact/preset-vite';
 import mdx from '@mdx-js/rollup';
 import tailwindcss from '@tailwindcss/vite'
-import { unifiedMdxPreprocessor } from './src/plugins/unified-mdx-plugin';
-import { llmTxtGenerator } from './src/plugins/llm-txt-generator';
-import { llmTxtDevServer } from './src/plugins/llm-txt-dev-server';
-import { frontmatterGenerator } from './src/plugins/frontmatter-generator';
-import { frontmatterDevServer } from './src/plugins/frontmatter-dev-server';
-import { docsAssetsPlugin } from './src/plugins/docs-assets';
-import { htmlMetadataInjector } from './src/plugins/html-metadata-injector';
-import { htmlFilesMiddleware } from './src/plugins/html-files-middleware';
-import { analyticsInjector } from './src/plugins/analytics-injector';
-import { sitemapGenerator } from './src/plugins/sitemap-generator';
-import { robotsGenerator } from './src/plugins/robots-generator';
-import { prerender } from './src/plugins/prerender';
-import { getMdxConfig } from './src/config/mdx';
-import { getBasePath, readDoryConfig } from './src/plugins/shared';
+import { unifiedMdxPreprocessor } from './src/plugins/unified-mdx-plugin.ts';
+import { llmTxtGenerator } from './src/plugins/llm-txt-generator.ts';
+import { llmTxtDevServer } from './src/plugins/llm-txt-dev-server.ts';
+import { frontmatterGenerator } from './src/plugins/frontmatter-generator.ts';
+import { frontmatterDevServer } from './src/plugins/frontmatter-dev-server.ts';
+import { docsAssetsPlugin } from './src/plugins/docs-assets.ts';
+import { htmlMetadataInjector } from './src/plugins/html-metadata-injector.ts';
+import { htmlFilesMiddleware } from './src/plugins/html-files-middleware.ts';
+import { analyticsInjector } from './src/plugins/analytics-injector.ts';
+import { sitemapGenerator } from './src/plugins/sitemap-generator.ts';
+import { robotsGenerator } from './src/plugins/robots-generator.ts';
+import { prerender } from './src/plugins/prerender.ts';
+import { getMdxConfig } from './src/config/mdx.ts';
+import { getBasePath, readDoryConfig } from './src/plugins/shared.ts';
 
 export default defineConfig(({ command }) => ({
   // Serve and build under `basePath` from dory.json (asset URLs, import.meta.env.BASE_URL).
