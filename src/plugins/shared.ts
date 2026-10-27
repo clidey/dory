@@ -62,6 +62,8 @@ export function getNavigationOrder(docsDir: string): string[] {
     for (const page of pages) {
       if (typeof page === 'string') {
         order.push(page);
+      } else if (typeof page === 'object' && typeof page.page === 'string') {
+        order.push(page.page);
       } else if (typeof page === 'object' && page.pages) {
         walkPages(page.pages);
       }

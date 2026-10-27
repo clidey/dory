@@ -1,5 +1,5 @@
 import classNames from 'classnames';
-import { useEffect, useMemo, useState } from 'preact/hooks';
+import { useMemo } from 'preact/hooks';
 import { Link } from 'wouter-preact';
 import { usePathname } from '../components/hooks';
 import docsConfig from '../../docs/dory.json' with { type: 'json' };
@@ -14,96 +14,54 @@ import { assetUrl } from '../utils/base-path';
 const config = docsConfig as DoryConfig;
 const isThemeForced = config.theme?.mode === 'dark' || config.theme?.mode === 'light';
 
-function TopLevelNavItem({ href, children, isActive }: { href: string; children: string; isActive?: boolean }) {
-  return (
-    <li>
-      <Link
-        to={href}
-        className={classNames(
-          "text-xs transition hover:opacity-80",
-          {
-            "text-brand-foreground": isActive,
-          },
-        )}
-      >
-        {children}
-      </Link>
-    </li>
-  );
-}
-
 /**
- * Site header with logo, top-level navigation, search, and theme toggle.
- *
- * SYNC NOTE: src/entry-server.tsx renders a static SSR copy of this header's
- * structure (the <header> block inside render()). If you change the markup
- * structure here, update entry-server.tsx to match or hydration will mismatch.
+ * Dark top bar: logo and site name with a DOCS pill, one underlined tab per
+ * navigation tab, search with a ⌘K hint, theme toggle and the mobile menu.
+ * With `ssr` the client-only widgets (search, toggle, menu) are left out and
+ * mount during hydration.
  */
-export function Header({ className }: { className?: string }) {
-  const [isScrolled, setIsScrolled] = useState(false);
+export function Header({ ssr = false }: { ssr?: boolean }) {
   const pathname = usePathname();
   const isEmbedded = useIsEmbedded();
-
-  const { light, dark } = useMemo(() => {
-    return { light: assetUrl(config.logo.light), dark: assetUrl(config.logo.dark) };
-  }, []);
-
-  useEffect(() => {
-    function onScroll() {
-      setIsScrolled(window.scrollY > 0);
-    }
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => {
-      window.removeEventListener('scroll', onScroll);
-    }
-  }, []);
+  const logo = useMemo(() => assetUrl(config.logo.light), []);
 
   return (
-    <header
-      className={classNames(
-        'dory-header sticky top-0 z-50 flex flex-none flex-wrap items-center justify-between px-4 py-5 sm:px-6 lg:px-8 border-b',
-        className,
-        {
-          'backdrop-blur-sm': isScrolled,
-        },
-      )}
-      style={{ backgroundColor: 'var(--background)', borderColor: 'var(--border)' }}
-    >
-      <div className="relative flex justify-between gap-6 sm:gap-8 md:grow items-center w-full px-4">
-        <div className="flex items-center grow gap-2">
-          <img src={light} alt="logo" className="w-8 hidden dark:block" />
-          <img src={dark} alt="logo" className="w-8 block dark:hidden" />
-          <h1 className="text-base lg:text-2xl font-bold">{config.name}</h1>
-        </div>
-        <nav className="hidden md:block">
-          <ul role="list" className="flex items-center gap-8">
-            {ALL_NAVIGATION.map((tab) => {
-              const isActive = tab.groups.some(group =>
-                group.pages.some(page => page.href === pathname)
-              );
-              return (
-                <TopLevelNavItem
-                  key={tab.title}
-                  href={tab.groups[0].pages[0].href}
-                  isActive={isActive}
-                >
-                  {tab.title}
-                </TopLevelNavItem>
-              );
-            })}
-          </ul>
-        </nav>
-        <div className="hidden md:block md:h-5 md:w-px md:bg-zinc-900/10 md:dark:bg-white/15" />
-        <div className="flex items-center gap-3" data-testid="header-actions">
-          <MobileSearch />
-          <Search />
-          {
-            !isEmbedded && !isThemeForced &&
-            <ModeToggle data-testid="mode-toggle" />
-          }
-          <MobileNavigation />
-        </div>
+    <header className="dory-topbar sticky top-0 z-50 flex h-14 shrink-0 items-stretch bg-[var(--sidebar)] text-white">
+      <Link href={ALL_NAVIGATION[0]?.groups[0]?.pages[0]?.href ?? '/'} className="flex w-60 shrink-0 items-center gap-2.5 px-4">
+        <img src={logo} alt="" className="h-7 w-7" />
+        <span className="font-heading text-lg font-bold tracking-tight text-white">{config.name}</span>
+        <span className="dory-docs-pill">Docs</span>
+      </Link>
+      <nav className="hidden md:flex items-stretch" aria-label="Sections">
+        {ALL_NAVIGATION.map((tab) => {
+          const isActive = tab.groups.some(group => group.pages.some(page => page.href === pathname));
+          return (
+            <Link
+              key={tab.title}
+              href={tab.groups[0].pages[0].href}
+              className={classNames('dory-topbar-tab', { active: isActive })}
+            >
+              {tab.title}
+            </Link>
+          );
+        })}
+      </nav>
+      <div className="ml-auto flex items-center gap-3 pr-4" data-testid="header-actions">
+        {!ssr && (
+          <>
+            <div className="dory-topbar-search relative hidden lg:block">
+              <Search />
+              <kbd className="dory-kbd" aria-hidden="true">⌘K</kbd>
+            </div>
+            <div className="lg:hidden [&_[data-slot=search-input-wrapper]]:w-9 [&_[data-slot=search-input-wrapper]]:border-transparent [&_[data-slot=search-input-wrapper]]:bg-white/8 [&_[data-slot=search-input-wrapper]]:px-2.5 [&_svg]:mr-0 [&_svg]:text-white/70 [&_input]:hidden">
+              <MobileSearch />
+            </div>
+            {!isEmbedded && !isThemeForced && (
+              <span className="dory-mode"><ModeToggle data-testid="mode-toggle" /></span>
+            )}
+            <MobileNavigation />
+          </>
+        )}
       </div>
     </header>
   );

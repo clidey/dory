@@ -7,7 +7,9 @@ import * as mdxComponents from './mdx/mdx';
 import docsConfig from '../docs/dory.json' with { type: 'json' };
 import type { DoryConfig } from './types/config';
 import { PageMeta } from './ui/page-meta';
-import { BASE_PATH, assetUrl, withBase } from './utils/base-path';
+import { Header } from './ui/header';
+import { Navigation } from './components/navigation';
+import { BASE_PATH, withBase } from './utils/base-path';
 
 const config = docsConfig as DoryConfig;
 
@@ -49,7 +51,8 @@ function buildNavigation(frontmatter?: Record<string, any>[]): NavTab[] {
     title: tab.tab,
     groups: tab.groups.map(group => ({
       title: group.group,
-      pages: group.pages.map(page => {
+      pages: group.pages.map(entry => {
+        const page = typeof entry === 'string' ? entry : entry.page;
         const href = `/${page}`;
         const fm = frontmatter?.find(f => f.path === href);
         return {
@@ -99,126 +102,56 @@ export async function render(routePath: string, frontmatter?: Record<string, any
       <ThemeProvider>
         <Router base={BASE_PATH} ssrPath={withBase(routePath)}>
           <MDXProvider components={mdxComponents}>
-                <div class="flex w-full flex-col">
-                  {/* SYNC NOTE: the static shell below (header chrome, sidebar nav skeleton,
-                       main/article wrappers) hand-mirrors the client components:
-                       - <header> block  -> src/ui/header.tsx (Header component JSX)
-                       - #container/nav  -> src/ui/layout.tsx (non-landing return) + src/components/navigation.tsx
-                       When editing structure or classes in either place, update the counterpart,
-                       or hydration will mismatch. Client-only widgets (Search, ModeToggle,
-                       MobileNav) are intentionally NOT rendered here — see placeholder below. */}
-                  {/* Header — matches src/ui/header.tsx structure */}
-                  <header class="sticky top-0 z-50 flex flex-none flex-wrap items-center justify-between bg-white px-4 py-5 shadow-md shadow-gray-900/5 sm:px-6 lg:px-8 dark:shadow-none dark:bg-transparent">
-                    <div class="relative flex justify-between gap-6 sm:gap-8 md:grow items-center w-full px-4">
-                      <div class="flex items-center grow gap-2">
-                        {config.logo && (
-                          <>
-                            <img src={assetUrl(config.logo.light)} alt="logo" class="w-8 hidden dark:block" />
-                            <img src={assetUrl(config.logo.dark)} alt="logo" class="w-8 block dark:hidden" />
-                          </>
-                        )}
-                        <h1 class="text-base lg:text-2xl font-bold">{config.name}</h1>
+                {/* SYNC NOTE: this shell mirrors src/ui/layout.tsx (non-landing return).
+                     Header and Navigation are the real components; Header gets `ssr` so the
+                     client-only widgets (search, theme toggle, mobile menu) mount on hydration. */}
+                <div class="dory-shell flex min-h-screen w-full flex-col bg-[var(--sidebar)]">
+                  <Header ssr />
+                  <div class="flex flex-1">
+                    <aside class="hidden w-60 shrink-0 lg:block">
+                      <div class="sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto px-3 pb-6 pt-4">
+                        <Navigation frontmatter={frontmatter} />
                       </div>
-                      <nav class="hidden md:block">
-                        <ul role="list" class="flex items-center gap-8">
-                          {navigation.map(tab => {
-                            const isActive = tab === currentTab;
-                            return (
-                              <li key={tab.title}>
-                                <a
-                                  href={withBase(tab.groups[0].pages[0].href)}
-                                  class={`text-xs transition hover:opacity-80${isActive ? ' text-brand-foreground' : ''}`}
-                                >
-                                  {tab.title}
-                                </a>
-                              </li>
-                            );
-                          })}
-                        </ul>
-                      </nav>
-                      <div class="hidden md:block md:h-5 md:w-px md:bg-zinc-900/10 md:dark:bg-white/15" />
-                      {/* Search, ModeToggle, MobileNav — rendered client-side during hydration.
-                           Static placeholders cause ref mismatches with Algolia autocomplete. */}
-                      <div class="flex items-center gap-3" data-testid="header-actions" />
-                    </div>
-                  </header>
-
-                  {/* Container — matches src/ui/layout.tsx structure */}
-                  <div id="container" class="relative flex w-full max-w-8xl sm:px-2 lg:px-8">
-                    <div class="hidden lg:relative lg:block lg:flex-none">
-                      <div class="sticky top-[4.75rem] -ml-0.5 h-[calc(100vh-4.75rem)] w-64 overflow-x-hidden overflow-y-auto py-16 pr-8 pl-0.5 xl:w-72 xl:pr-16">
-                        <nav class="dory-navigation text-base lg:text-sm">
-                          <ul role="list" class="space-y-9">
-                            {currentTab && (
-                              <li>
-                                <h2 class="font-display font-medium text-xs">{currentTab.title}</h2>
-                                {currentTab.groups.map(group => (
-                                  <div key={group.title}>
-                                    <h3 class="mt-4 text-sm font-semibold">{group.title}</h3>
-                                    <ul role="list" class="mt-2 space-y-2 border-l-2 border-border lg:mt-4 lg:space-y-4 lg:border-border">
-                                      {group.pages.map(page => (
-                                        <li key={page.href} class="relative">
-                                          <a
-                                            href={withBase(page.href)}
-                                            class={routePath === page.href
-                                              ? 'block w-full pl-3.5 font-semibold text-brand-foreground before:pointer-events-none before:absolute before:top-1/2 before:-left-1 before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full'
-                                              : 'block w-full pl-3.5 text-muted-foreground before:hidden before:bg-slate-300 hover:text-muted-foreground hover:before:block dark:text-muted-foreground dark:before:bg-slate-700 dark:hover:text-slate-300 before:pointer-events-none before:absolute before:top-1/2 before:-left-1 before:h-1.5 before:w-1.5 before:-translate-y-1/2 before:rounded-full'}
-                                          >
-                                            {page.title}
-                                          </a>
-                                        </li>
-                                      ))}
-                                    </ul>
-                                  </div>
-                                ))}
-                              </li>
-                            )}
-                          </ul>
-                        </nav>
-                      </div>
-                    </div>
-
-                    <main class="flex grow max-w-full px-4 py-16 sm:px-6 lg:px-8">
-                      <div class="min-w-0 w-full">
-                        <article class="h-full flex flex-1 flex-col">
-                          <div class="flex justify-between items-start">
-                            <header class="mb-8">
-                              {groupTitle && <h1 class="font-display text-lg tracking-tight">{groupTitle}</h1>}
-                              {pageFm?.title && <p class="text-4xl tracking-tight">{pageFm.title}</p>}
-                              {pageFm?.lead && <p class="dory-lead">{pageFm.lead}</p>}
-                            </header>
+                    </aside>
+                    <main class="min-w-0 flex-1 bg-background text-foreground rounded-tl-2xl px-6 py-10 sm:px-10 lg:px-12">
+                      <article class="dory-article mx-auto flex w-full max-w-[52rem] flex-col">
+                        <div class="flex items-start justify-between">
+                          <header class="mb-8">
+                            {groupTitle && <p class="dory-subtitle text-sm font-medium tracking-widest uppercase mb-2">{groupTitle}</p>}
+                            {pageFm?.title && <h1 class="dory-page-title text-4xl tracking-tight">{pageFm.title}</h1>}
+                            {pageFm?.lead && <p class="dory-lead">{pageFm.lead}</p>}
+                          </header>
+                        </div>
+                        <PageMeta meta={pageFm?.meta} />
+                        <div class="flex-1 min-h-[calc(100vh-2rem)]">
+                          {/* Matches App > div.antialiased > div.flex > Routes > Content */}
+                          <div class="h-full antialiased">
+                            <div class="flex min-h-full">
+                              <Content />
+                            </div>
                           </div>
-                          <PageMeta meta={pageFm?.meta} />
-                          <div class="flex-1 min-h-[calc(100vh-2rem)]">
-                            {/* Matches App > div.antialiased > div.flex > Routes > Content */}
-                            <div class="h-full antialiased">
-                              <div class="flex min-h-full">
-                                <Content />
+                        </div>
+                        {(prevPage || nextPage) && (
+                          <div class="mt-12 pt-6 flex border-t border-black/20 dark:border-white/20">
+                            {prevPage && (
+                              <div>
+                                <p class="font-display text-xs font-medium text-muted-foreground">Previous</p>
+                                <div class="mt-1">
+                                  <a href={withBase(prevPage.href)} class="text-sm font-semibold hover:opacity-80">{prevPage.title}</a>
+                                </div>
                               </div>
-                            </div>
+                            )}
+                            {nextPage && (
+                              <div class="ml-auto text-right">
+                                <p class="font-display text-xs font-medium text-muted-foreground">Next</p>
+                                <div class="mt-1">
+                                  <a href={withBase(nextPage.href)} class="text-sm font-semibold hover:opacity-80">{nextPage.title}</a>
+                                </div>
+                              </div>
+                            )}
                           </div>
-                          {(prevPage || nextPage) && (
-                            <div class="mt-12 pt-6 flex border-t border-black/20 dark:border-white/20">
-                              {prevPage && (
-                                <div>
-                                  <p class="font-display text-sm font-medium">Previous</p>
-                                  <div class="mt-1">
-                                    <a href={withBase(prevPage.href)} class="text-base font-semibold hover:opacity-80">{prevPage.title}</a>
-                                  </div>
-                                </div>
-                              )}
-                              {nextPage && (
-                                <div class="ml-auto text-right">
-                                  <p class="font-display text-sm font-medium">Next</p>
-                                  <div class="mt-1">
-                                    <a href={withBase(nextPage.href)} class="text-base font-semibold hover:opacity-80">{nextPage.title}</a>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          )}
-                        </article>
-                      </div>
+                        )}
+                      </article>
                     </main>
                   </div>
                 </div>

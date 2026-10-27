@@ -47,15 +47,15 @@ export function MobileNavigation() {
         <Button
           variant="outline"
           size="icon"
-          className="relative flex size-6 lg:hidden p-4"
+          className="relative flex size-6 border-white/15 bg-white/5 text-white hover:bg-white/10 lg:hidden p-4"
           aria-label="Toggle navigation"
           onClick={open}
         >
-          <ToggleIcon className="w-8 stroke-zinc-900 dark:stroke-white" />
+          <ToggleIcon className="w-8 stroke-white" />
         </Button>
         {!isInsideMobileNavigation && (
           <Suspense fallback={null}>
-            <SheetContent side="left" className="w-full sm:max-w-sm p-8 overflow-y-auto flex flex-col justify-between">
+            <SheetContent side="left" className="w-full sm:max-w-sm overflow-y-auto border-white/10 bg-[var(--sidebar)] p-4 pt-12 text-white">
               <Navigation />
               {
                 isEmbedded &&

@@ -40,9 +40,15 @@ export interface DoryNavigationPage {
   [key: string]: string;
 }
 
+/** Page entry with extras, e.g. { "page": "components/overview", "badge": "New" }. */
+export interface DoryNavigationPageEntry {
+  page: string;
+  badge?: string;
+}
+
 export interface DoryNavigationGroup {
   group: string;
-  pages: string[];
+  pages: Array<string | DoryNavigationPageEntry>;
 }
 
 export interface DoryNavigationTab {
@@ -132,6 +138,8 @@ export interface DoryConfig {
   url?: string;
   /** Path prefix the site is served under, e.g. "/docs". Default: served at the root. */
   basePath?: string;
+  /** Shown in the sidebar version card, e.g. "1.0.8 · Latest". */
+  version?: string;
   twitter?: string;
   favicon: string;
   colors?: DoryColors;

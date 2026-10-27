@@ -54,7 +54,8 @@ export function generateLlmsIndex(docsDir: string): string {
   for (const tab of tabs) {
     const links: string[] = [];
     const walkPages = (pages: any[]) => {
-      for (const page of pages) {
+      for (const entry of pages) {
+        const page = typeof entry === 'object' && entry && typeof entry.page === 'string' ? entry.page : entry;
         if (typeof page === 'string') {
           const fileKey = resolveFileKey(page, mdxFilesMap);
           if (!fileKey) continue;
@@ -64,8 +65,8 @@ export function generateLlmsIndex(docsDir: string): string {
           const url = `${baseUrl}${routePath}.mdx`;
           const title = data.title || page;
           links.push(data.description ? `- [${title}](${url}): ${data.description}` : `- [${title}](${url})`);
-        } else if (typeof page === 'object' && page.pages) {
-          walkPages(page.pages);
+        } else if (typeof entry === 'object' && entry.pages) {
+          walkPages(entry.pages);
         }
       }
     };

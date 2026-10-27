@@ -223,17 +223,17 @@ function ChildAttributes({ schema, components }: { schema: Schema; components: C
   const count = Object.keys(schema.properties ?? {}).length
   if (count === 0) return null
   return (
-    <div className="mt-3">
+    <div className="mt-3 overflow-hidden rounded-lg border border-[var(--border)]">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="flex w-full items-center gap-2 rounded-lg border border-[var(--border)] bg-muted px-4 py-2.5 text-left text-sm font-medium text-foreground"
+        className="flex w-full items-center gap-2 bg-muted px-4 py-2.5 text-left text-sm font-medium text-foreground"
       >
         <ChevronRight aria-hidden="true" className={classNames('h-3.5 w-3.5 transition-transform', { 'rotate-90': open })} />
         {open ? 'Hide' : 'Show'} {count} child attribute{count === 1 ? '' : 's'}
       </button>
-      {open && <div className="pl-4"><SchemaFields schema={schema} components={components} /></div>}
+      {open && <div className="px-4"><SchemaFields schema={schema} components={components} /></div>}
     </div>
   )
 }

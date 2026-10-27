@@ -9,7 +9,6 @@ import { OpenAPI } from '../mdx/open-api';
 import { AsyncAPI } from '../mdx/async-api';
 import { Header } from './header';
 import { PrevNextLinks } from './prev-next-link';
-import { TableOfContents } from './table-of-content';
 import { PageMeta } from './page-meta';
 import { Loading } from '../components/loading';
 import Dropdown from '../components/dropdown';
@@ -35,7 +34,7 @@ const prompt = (pathname: string) => `Please read and analyze the content from t
  * table of contents, and prev/next links.
  *
  * SYNC NOTE: src/entry-server.tsx renders a static SSR copy of this layout's
- * shell (the #container / sidebar nav / main / article wrappers in render()).
+ * shell (the .dory-shell / aside / main / article wrappers in render()).
  * If you change that markup structure here, update entry-server.tsx to match
  * or hydration will mismatch.
  */
@@ -239,49 +238,46 @@ export default function Layout({ children }: LayoutProps) {
 
   if (loading) return <div className="h-[25vh] flex grow"><Loading /></div>;
 
-  if (isLandingPage) {
-    return (
-      <div className="flex w-full flex-col">
-        <Header />
-        <main className="w-full">
-          <ErrorBoundary fallback={(error) => (
-            <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-              <p className="text-lg font-semibold text-red-700 dark:text-red-300 mb-2">
-                This page failed to render
-              </p>
-              <pre className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-md p-3 max-w-md overflow-auto">
-                {error.message}
-              </pre>
-            </div>
-          )}>
-            {children}
-          </ErrorBoundary>
-        </main>
-      </div>
-    );
-  }
+  const errorFallback = (error: Error) => (
+    <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
+      <p className="text-lg font-semibold text-red-700 dark:text-red-300 mb-2">
+        This page failed to render
+      </p>
+      <pre className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-md p-3 max-w-md overflow-auto">
+        {error.message}
+      </pre>
+    </div>
+  );
+
+  const content = openAPIJSON && tab && "openapi" in tab && method && path
+    ? <OpenAPI openAPIJson={JSON.parse(openAPIJSON)} method={method} path={path} />
+    : asyncAPIJSON && tab && "asyncapi" in tab && operation && channel
+      ? <AsyncAPI asyncAPIJson={JSON.parse(asyncAPIJSON)} operation={operation} channel={channel} />
+      : children;
+
+  const showSidebar = !isEmbedded && !isLandingPage;
 
   return (
-    <div className="flex w-full flex-col">
+    <div className="dory-shell flex min-h-screen w-full flex-col bg-[var(--sidebar)]">
       <Header />
-      <div id="container" className={cn("relative flex w-full", {
-        "max-w-8xl sm:px-2 lg:px-8": !isEmbedded,
-        "px-0": isEmbedded,
-      })}>
-        <div className={cn("hidden lg:relative lg:block lg:flex-none", {
-          "lg:hidden": isEmbedded,
-        })}>
-          <div className="sticky top-[4.75rem] -ml-0.5 h-[calc(100vh-4.75rem)] w-64 overflow-x-hidden overflow-y-auto py-16 pr-8 pl-0.5 xl:w-72 xl:pr-16">
-            <Navigation />
-          </div>
-        </div>
-        <main className={cn("flex grow max-w-full", {
-          "px-4 py-16 sm:px-6 lg:px-8": !isEmbedded,
+      <div className="flex flex-1">
+        {showSidebar && (
+          <aside className="hidden w-60 shrink-0 lg:block">
+            <div className="sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto px-3 pb-6 pt-4">
+              <Navigation />
+            </div>
+          </aside>
+        )}
+        <main className={cn("min-w-0 flex-1 bg-background text-foreground", {
+          "rounded-tl-2xl px-6 py-10 sm:px-10 lg:px-12": showSidebar,
+          "px-6 py-10 sm:px-10": isLandingPage && !isEmbedded,
           "p-8": isEmbedded,
         })}>
-          <div className="min-w-0 w-full">
-            <article className="h-full flex flex-1 flex-col">
-              <div className="flex justify-between items-start">
+          {isLandingPage ? (
+            <ErrorBoundary fallback={errorFallback}>{children}</ErrorBoundary>
+          ) : (
+            <article className="dory-article mx-auto flex w-full max-w-[52rem] flex-col">
+              <div className="flex items-start justify-between">
                 <header className="mb-8">
                   {title && (
                     <p className="dory-subtitle text-sm font-medium tracking-widest uppercase mb-2">
@@ -295,37 +291,17 @@ export default function Layout({ children }: LayoutProps) {
                   )}
                   {page?.lead && <p className="dory-lead">{page.lead}</p>}
                 </header>
-                {
-                  openAPIJSON == null && asyncAPIJSON == null &&
+                {openAPIJSON == null && asyncAPIJSON == null && (
                   <Dropdown className="gap-0" buttonLabel={<SparkleIcon className="w-4 h-4" />} items={dropdownItems} />
-                }
+                )}
               </div>
               <PageMeta meta={page?.meta} />
               <div className="flex-1 min-h-[calc(100vh-2rem)]">
-                <ErrorBoundary fallback={(error) => (
-                  <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-                    <p className="text-lg font-semibold text-red-700 dark:text-red-300 mb-2">
-                      This page failed to render
-                    </p>
-                    <pre className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-md p-3 max-w-md overflow-auto">
-                      {error.message}
-                    </pre>
-                  </div>
-                )}>
-                  {openAPIJSON && tab && "openapi" in tab && method && path ?
-                    <OpenAPI openAPIJson={JSON.parse(openAPIJSON)} method={method} path={path} />
-                   : asyncAPIJSON && tab && "asyncapi" in tab && operation && channel ?
-                    <AsyncAPI asyncAPIJson={JSON.parse(asyncAPIJSON)} operation={operation} channel={channel} />
-                   : children}
-                </ErrorBoundary>
+                <ErrorBoundary fallback={errorFallback}>{content}</ErrorBoundary>
               </div>
               <PrevNextLinks />
             </article>
-          </div>
-          {
-            openAPIJSON == null && asyncAPIJSON == null && !isEmbedded &&
-            <TableOfContents />
-          }
+          )}
         </main>
       </div>
     </div>

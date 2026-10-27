@@ -26,7 +26,7 @@ const KNOWN_COMPONENTS = [
   'Steps', 'Step', 'table', 'th', 'td', 'ul', 'ol', 'li',
   'UnorderedList', 'OrderedList', 'ListItem',
   'APIPlayground', 'WebSocketPlayground', 'AsyncAPI', 'Source', 'Tag',
-  'Specimen', 'SpecimenProps', 'Chip', 'ChipGroup', 'Tabs', 'Tab', 'IconGrid', 'TypeScale',
+  'Specimen', 'SpecimenProps', 'Prop', 'Chip', 'ChipGroup', 'Tabs', 'Tab', 'IconGrid', 'TypeScale',
   // Common HTML elements that should be preserved
   'div', 'span', 'br', 'hr', 'strong', 'em', 'b', 'i', 'u', 's',
   'blockquote', 'nav', 'section', 'article', 'header', 'footer', 'main',

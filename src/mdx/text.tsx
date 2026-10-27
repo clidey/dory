@@ -4,11 +4,11 @@ import classNames from "classnames"
 import { useState } from "preact/hooks"
 
 
-export const h1 = function H1(props: preact.JSX.HTMLAttributes<HTMLHeadingElement>) {
+export const h1 = function H1(props: preact.ComponentProps<'h1'>) {
   return <h1 className="dory-h1 font-heading mb-3 mt-10" {...props} />
 }
 
-export const h2 = function H2({ children, ...props }: preact.JSX.HTMLAttributes<HTMLHeadingElement>) {
+export const h2 = function H2({ children, ...props }: preact.ComponentProps<'h2'>) {
   return (
     <h2 className="dory-h2 font-heading mb-2 mt-10" {...props}>
       <span>{children}</span>
@@ -17,23 +17,23 @@ export const h2 = function H2({ children, ...props }: preact.JSX.HTMLAttributes<
   )
 }
 
-export const h3 = function H3(props: preact.JSX.HTMLAttributes<HTMLHeadingElement>) {
+export const h3 = function H3(props: preact.ComponentProps<'h3'>) {
   return <h3 className="dory-h3 font-heading mb-2 mt-7" {...props} />
 }
 
-export const h4 = function H4(props: preact.JSX.HTMLAttributes<HTMLHeadingElement>) {
+export const h4 = function H4(props: preact.ComponentProps<'h4'>) {
   return <h4 className="dory-h4 font-heading mb-1.5 mt-5" {...props} />
 }
 
-export const h5 = function H5(props: preact.JSX.HTMLAttributes<HTMLHeadingElement>) {
+export const h5 = function H5(props: preact.ComponentProps<'h5'>) {
   return <h5 className="text-lg font-bold mb-2" {...props} />
 }
 
-export const h6 = function H6(props: preact.JSX.HTMLAttributes<HTMLHeadingElement>) {
+export const h6 = function H6(props: preact.ComponentProps<'h6'>) {
   return <h6 className="text-base font-bold mb-2" {...props} />
 }
 
-export const p = function P(props: preact.JSX.HTMLAttributes<HTMLParagraphElement>) {
+export const p = function P(props: preact.ComponentProps<'p'>) {
   return <p className="mb-2 inline-block" {...props} />
 }
 

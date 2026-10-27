@@ -125,10 +125,12 @@ function Select({ value, onChange, children, label }: { value: string; onChange:
 }
 
 function AuthTab({ auth, setAuth }: { auth: AuthState; setAuth: (auth: AuthState) => void }) {
-  const field = (key: keyof AuthState, placeholder: string, type = 'text') => (
-    <input className={inputClass} type={type} value={auth[key] as string} placeholder={placeholder} aria-label={placeholder}
-      onInput={(e) => setAuth({ ...auth, [key]: (e.target as HTMLInputElement).value })} />
-  )
+  const field = (key: keyof AuthState, placeholder: string, password = false) => {
+    const onInput = (e: Event) => setAuth({ ...auth, [key]: (e.target as HTMLInputElement).value })
+    return password
+      ? <input className={inputClass} type="password" value={auth[key] as string} placeholder={placeholder} aria-label={placeholder} onInput={onInput} />
+      : <input className={inputClass} value={auth[key] as string} placeholder={placeholder} aria-label={placeholder} onInput={onInput} />
+  }
   return (
     <div className="flex flex-col gap-3">
       <Select label="Authentication type" value={auth.type} onChange={(type) => setAuth({ ...auth, type: type as AuthState['type'] })}>
@@ -137,9 +139,9 @@ function AuthTab({ auth, setAuth }: { auth: AuthState; setAuth: (auth: AuthState
         <option value="apiKey">API key</option>
         <option value="basic">Basic auth</option>
       </Select>
-      {auth.type === 'bearer' && <div className="flex">{field('token', 'Bearer token', 'password')}</div>}
-      {auth.type === 'apiKey' && <div className="flex">{field('apiKey', 'API key', 'password')}</div>}
-      {auth.type === 'basic' && <div className="flex gap-2">{field('username', 'Username')}{field('password', 'Password', 'password')}</div>}
+      {auth.type === 'bearer' && <div className="flex">{field('token', 'Bearer token', true)}</div>}
+      {auth.type === 'apiKey' && <div className="flex">{field('apiKey', 'API key', true)}</div>}
+      {auth.type === 'basic' && <div className="flex gap-2">{field('username', 'Username')}{field('password', 'Password', true)}</div>}
     </div>
   )
 }
@@ -254,7 +256,8 @@ export function WebSocketPanel({
         </button>
       </div>
 
-      <div className="flex flex-col gap-4 px-4 pt-4 pb-5">
+      <div className="grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
+      <div className="flex flex-col gap-4 border-b border-[var(--border)] px-4 pt-4 pb-5 lg:border-b-0 lg:border-r">
         {servers.length > 0 && (
           <div className="flex flex-col gap-2">
             <MonoLabel>Server</MonoLabel>
@@ -286,11 +289,12 @@ export function WebSocketPanel({
         </div>
       </div>
 
-      <div className="flex items-center justify-between border-t border-[var(--border)] px-4 py-2.5">
+      <div className="flex flex-col">
+      <div className="flex items-center justify-between px-4 py-2.5">
         <MonoLabel>Messages</MonoLabel>
         <button type="button" onClick={() => setMessages([])} className="text-sm text-muted-foreground hover:text-foreground">Clear</button>
       </div>
-      <div className="max-h-72 min-h-56 overflow-y-auto border-t border-[var(--border)] bg-background px-4 py-3">
+      <div className="max-h-96 min-h-64 flex-1 overflow-y-auto border-t border-[var(--border)] bg-background px-4 py-3">
         {messages.length === 0 ? (
           <p className="flex h-48 items-center justify-center text-sm text-muted-foreground">Connect to start receiving messages</p>
         ) : (
@@ -326,6 +330,8 @@ export function WebSocketPanel({
           className="rounded-md border border-[var(--border)] bg-card px-4 py-2 text-sm font-semibold text-foreground transition disabled:text-muted-foreground disabled:opacity-70">
           Send
         </button>
+      </div>
+      </div>
       </div>
     </div>
   )

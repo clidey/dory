@@ -37,6 +37,7 @@ export interface Navigation {
         pages: Array<{
             title: string;
             href: string;
+            badge?: string;
         }>;
     }>;
 }
@@ -45,11 +46,13 @@ export const ALL_NAVIGATION: Navigation[] = config.navigation.tabs.map(tab => ({
     title: tab.tab,
     groups: tab.groups.map(group => ({
       title: group.group,
-      pages: group.pages.map(page => {
+      pages: group.pages.map(entry => {
+        const page = typeof entry === 'string' ? entry : entry.page;
         const path = `/${page}`;
         return {
           title: page.charAt(0).toUpperCase() + page.slice(1).replace(/-/g, ' '),
-          href: path
+          href: path,
+          badge: typeof entry === 'string' ? undefined : entry.badge,
         };
       })
     }))

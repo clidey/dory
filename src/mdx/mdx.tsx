@@ -22,7 +22,7 @@ export { UnorderedList as ul, OrderedList as ol, ListItem as li } from './list';
 export { UnorderedList, OrderedList, ListItem } from './list';
 export { AsyncAPI } from './async-api';
 export { Source } from './source';
-export { Specimen, SpecimenProps } from './specimen';
+export { Specimen, SpecimenProps, Prop } from './specimen';
 export { Chip, ChipGroup } from './chip';
 export { Tabs, Tab } from './tabs';
 export { IconGrid } from './icon-grid';

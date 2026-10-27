@@ -1,12 +1,33 @@
 import classNames from 'classnames'
 import { Children, isValidElement } from 'preact/compat'
 import { useState } from 'preact/hooks'
-import { fencePropsOf } from './code'
-import { Pre } from './fence'
+import { CopyButton, fencePropsOf } from './code'
+import { Fence, Pre } from './fence'
 
-/** Marks the props table inside a Specimen; its children render in the Props tab. */
+/** Props tab body: a PROP / DESCRIPTION header followed by <Prop> rows. */
 export function SpecimenProps({ children }: { children: preact.ComponentChildren }) {
-  return <>{children}</>
+  return (
+    <div className="dory-props">
+      <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.7fr)] gap-6 bg-muted px-5 py-2.5 font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+        <span>Prop</span>
+        <span>Description</span>
+      </div>
+      {children}
+    </div>
+  )
+}
+
+/** One row of a Specimen's Props tab: mono name with its type underneath, and a description. */
+export function Prop({ name, type, children }: { name: string; type?: string; children: preact.ComponentChildren }) {
+  return (
+    <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.7fr)] gap-6 border-t border-[var(--border)] px-5 py-3.5">
+      <div className="min-w-0">
+        <p className="font-mono text-[13px] font-semibold text-foreground">{name}</p>
+        {type && <p className="mt-0.5 font-mono text-xs text-[var(--primary)]">{type}</p>}
+      </div>
+      <div className="text-sm leading-relaxed text-muted-foreground [&_p]:mb-0">{children}</div>
+    </div>
+  )
 }
 
 type SpecimenTab = 'Preview' | 'Code' | 'Props'
@@ -61,8 +82,19 @@ export function Specimen({ label, children }: { label?: string; children: preact
           </div>
         )}
       </div>
-      <div role="tabpanel" className="p-5 [&>:first-child]:mt-0 [&>:last-child]:mb-0">
-        {panels[active]}
+      <div role="tabpanel" className={classNames('[&>:first-child]:mt-0 [&>:last-child]:mb-0', { 'p-5': active === 'Preview' })}>
+        {active === 'Code'
+          ? code.map((child, index) => {
+              // Bare source with a copy button, without the filename frame a standalone fence gets.
+              const fence = fencePropsOf(child as preact.JSX.Element)
+              return (
+                <div key={index} className="relative px-5 py-4 font-mono text-[12.5px] leading-[1.7]">
+                  <Fence language={fence.language} meta={{ ...fence.meta, title: undefined }}>{fence.code}</Fence>
+                  <CopyButton code={fence.code} />
+                </div>
+              )
+            })
+          : panels[active]}
       </div>
     </div>
   )

@@ -14,8 +14,8 @@ import {
   useId,
   useRef,
   useState,
-  type JSX,
 } from 'react'
+import type { TargetedEvent, TargetedKeyboardEvent, TargetedMouseEvent } from 'preact'
 import Highlighter from 'react-highlight-words'
 import { cn, Spinner, SearchInput as UxSearchInput } from '@clidey/ux'
 import classNames from 'classnames'
@@ -30,9 +30,9 @@ type Result = any;
 
 type Autocomplete = AutocompleteApi<
   Result,
-  JSX.TargetedEvent,
-  JSX.TargetedMouseEvent<HTMLElement>,
-  JSX.TargetedKeyboardEvent<HTMLElement>
+  TargetedEvent,
+  TargetedMouseEvent<HTMLElement>,
+  TargetedKeyboardEvent<HTMLElement>
 >
 
 function useAutocomplete({ onNavigate }: { onNavigate: () => void }) {
@@ -53,12 +53,12 @@ function useAutocomplete({ onNavigate }: { onNavigate: () => void }) {
   const [autocomplete] = useState<Autocomplete>(() =>
     createAutocomplete<
       Result,
-      JSX.TargetedEvent,
-      JSX.TargetedMouseEvent<HTMLElement>,
-      JSX.TargetedKeyboardEvent<HTMLElement>
+      TargetedEvent,
+      TargetedMouseEvent<HTMLElement>,
+      TargetedKeyboardEvent<HTMLElement>
     >({
       id,
-      placeholder: 'Find something...',
+      placeholder: 'Search or ask…',
       defaultActiveItemId: 0,
       onStateChange({ state }) {
         setAutocompleteState(state)
@@ -407,8 +407,8 @@ export function Search() {
       onClick={isEmbedded ? buttonProps.onClick : undefined}
     >
       <UxSearchInput
-        aria-label="Find something..."
-        placeholder="Find something..."
+        aria-label="Search or ask…"
+        placeholder="Search or ask…"
         {...buttonProps}
       />
       <Suspense fallback={null}>
@@ -433,9 +433,9 @@ export function MobileSearch() {
     >
       <UxSearchInput
         className="text-sm"
-        aria-label="Find something..."
+        aria-label="Search or ask…"
         {...buttonProps}
-        placeholder="Find something..."
+        placeholder="Search or ask…"
       />
       <Suspense fallback={null}>
         <SearchDialog

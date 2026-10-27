@@ -160,6 +160,27 @@ Separate documentation types with multiple tabs:
 }
 ```
 
+## Sidebar Extras
+
+Set `version` in `dory.json` to show the version card at the top of the sidebar. A page entry can be an object with a `badge`, which renders as a small label after the page name.
+
+```json dory.json
+{
+  "version": "1.0.8 · Latest",
+  "navigation": {
+    "tabs": [{
+      "tab": "Documentation",
+      "groups": [{
+        "group": "Writing Docs",
+        "pages": ["introduction", { "page": "components/overview", "badge": "New" }]
+      }]
+    }]
+  }
+}
+```
+
+API reference pages show their method in the sidebar automatically, taken from the page's `openapi` or `asyncapi` frontmatter.
+
 ## Page Frontmatter
 
 Each MDX page should include frontmatter with `title` and `description`. These are used for the page title, meta tags, and breadcrumbs:

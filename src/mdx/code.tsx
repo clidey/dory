@@ -87,7 +87,7 @@ function languageName(language: string) {
   return supportedLanguages[language as keyof typeof supportedLanguages] || toTitleCase(language)
 }
 
-function CopyButton({ code }: { code: string }) {
+export function CopyButton({ code }: { code: string }) {
   const [copyCount, setCopyCount] = useState(0)
   const copied = copyCount > 0
 

@@ -1,4 +1,7 @@
-import { Button, TextArea, useTheme, Input } from '@clidey/ux'
+import { Button, TextArea, useTheme, Input as UxInput } from '@clidey/ux'
+
+// The ux Input is typed against React's input props, which Preact 11's compat types no longer expose.
+const Input = UxInput as unknown as (props: preact.JSX.IntrinsicElements['input']) => preact.JSX.Element
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react'
 import { CheckIcon } from '@heroicons/react/24/outline'
 import classNames from 'classnames'

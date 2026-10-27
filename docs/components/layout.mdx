@@ -124,7 +124,7 @@ Use `sticky` on the code column so it stays visible while the prose scrolls.
 
 ## Specimen
 
-`<Specimen>` frames a component example with **Preview**, **Code** and **Props** tabs. Put the MDX source in an ` ```mdx ` fence, the rendered example after it, and an optional props table inside `<SpecimenProps>`. Tabs only appear for the parts you include.
+`<Specimen>` frames a component example with **Preview**, **Code** and **Props** tabs. Put the MDX source in an ` ```mdx ` fence, the rendered example after it, and optional `<Prop>` rows inside `<SpecimenProps>`. Tabs only appear for the parts you include.
 
 <Specimen label="&lt;Specimen&gt; &lt;SpecimenProps&gt;">
 
@@ -138,11 +138,7 @@ Use `sticky` on the code column so it stays visible while the prose scrolls.
 <Tag color="sky">Beta</Tag>
 
 <SpecimenProps>
-
-| Prop | Type | Description |
-| --- | --- | --- |
-| `color` | `string` | Badge color. |
-
+<Prop name="color" type="string">Badge color.</Prop>
 </SpecimenProps>
 
 </Specimen>
@@ -152,10 +148,8 @@ Use `sticky` on the code column so it stays visible while the prose scrolls.
 
 <SpecimenProps>
 
-| Prop | Type | Default | Description |
-| --- | --- | --- | --- |
-| `label` | `string` | — | Mono caption in the header, usually the component tag. Write angle brackets as `&lt;` and `&gt;`. |
-| `children` | `ReactNode` | — | An ` ```mdx ` fence (Code tab), a `<SpecimenProps>` block (Props tab), and the preview. |
+<Prop name="label" type="string">Mono caption in the header, usually the component tag. Write angle brackets as `&lt;` and `&gt;`.</Prop>
+<Prop name="children" type="ReactNode">An ` ```mdx ` fence (Code tab), a `<SpecimenProps>` block (Props tab), and the preview.</Prop>
 
 </SpecimenProps>
 

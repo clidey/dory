@@ -35,29 +35,6 @@ html, body, #app {
 
 // === THEMED MODE: override Tailwind utility classes ===
 [data-dory-themed="true"] {
-    // Navigation sidebar text
-    .dory-navigation {
-        a {
-            color: var(--muted-foreground) !important;
-        }
-
-        a:hover {
-            color: var(--foreground) !important;
-        }
-
-        a.font-semibold {
-            color: var(--brand-foreground) !important;
-        }
-
-        h2, h3 {
-            color: var(--foreground) !important;
-        }
-
-        ul[role="list"] {
-            border-color: var(--border) !important;
-        }
-    }
-
     // Override hardcoded Tailwind text colors
     .text-slate-500,
     .text-slate-400,
@@ -81,11 +58,6 @@ html, body, #app {
     .border-slate-800,
     .border-zinc-200,
     .border-zinc-800 {
-        border-color: var(--border) !important;
-    }
-
-    // Header
-    .dory-header {
         border-color: var(--border) !important;
     }
 
@@ -471,4 +443,148 @@ article .dory-h2 .dory-anchor {
 
 .dory-latex-inline .katex {
     font-size: 1.05em;
+}
+
+// === CHROME: dark top bar and sidebar (fixed ink in both themes) ===
+.dory-mono-label {
+    font-family: var(--font-mono, monospace);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.dory-docs-pill {
+    padding: 1px 6px;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 5px;
+    font-family: var(--font-mono, monospace);
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.dory-topbar-tab {
+    display: flex;
+    align-items: center;
+    padding: 0 0.875rem;
+    border-bottom: 2px solid transparent;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.7);
+    transition: color 120ms ease;
+
+    &:hover {
+        color: #fff;
+    }
+
+    &.active {
+        color: #fff;
+        border-bottom-color: var(--sidebar-primary);
+    }
+}
+
+.dory-topbar-search {
+    [data-slot="search-input-wrapper"] {
+        width: 20rem;
+        height: 2.25rem;
+        padding-right: 2.75rem;
+        border-color: transparent;
+        border-radius: 0.5rem;
+        background: rgba(255, 255, 255, 0.08);
+        color: #fff;
+        box-shadow: none;
+
+        svg {
+            color: rgba(255, 255, 255, 0.6);
+        }
+    }
+
+    [data-slot="search-input"] {
+        color: #fff;
+
+        &::placeholder {
+            color: rgba(255, 255, 255, 0.55);
+        }
+    }
+}
+
+.dory-kbd {
+    position: absolute;
+    top: 50%;
+    right: 0.625rem;
+    transform: translateY(-50%);
+    padding: 1px 5px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    font-family: var(--font-mono, monospace);
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.7);
+    pointer-events: none;
+}
+
+.dory-mode button {
+    border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.12);
+    }
+}
+
+.dory-sidebar-link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.625rem;
+    border-radius: 0.5rem;
+    color: rgba(255, 255, 255, 0.72);
+    transition: color 120ms ease, background-color 120ms ease;
+
+    &:hover {
+        color: #fff;
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    &.active {
+        color: #fff;
+        background: var(--sidebar-accent);
+
+        &::before {
+            content: "";
+            position: absolute;
+            left: -0.75rem;
+            top: 0.45rem;
+            bottom: 0.45rem;
+            width: 2px;
+            border-radius: 2px;
+            background: var(--sidebar-primary);
+        }
+    }
+}
+
+.dory-method {
+    flex-shrink: 0;
+    width: 2.25rem;
+    font-family: var(--font-mono, monospace);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+}
+
+.dory-badge {
+    margin-left: auto;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: var(--highlight);
+    font-family: var(--font-mono, monospace);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--highlight-foreground);
 }
