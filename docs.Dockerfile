@@ -2,10 +2,10 @@
 # Builds and serves the Dory documentation site.
 #
 # Build: docker build -f Dockerfile.docs -t dory-docs .
-# Run:   docker run -p 80:80 dory-docs
+# Run:   docker run -p 8080:8080 dory-docs
 
 # ─── Stage 1: Build ───────────────────────────────────────────────────────────
-FROM node:24.11.1-alpine3.22 AS builder
+FROM node:24.22.1-alpine3.24 AS builder
 
 RUN npm install -g pnpm@12.13.0
 
@@ -20,7 +20,7 @@ COPY . .
 RUN pnpm run build:docs
 
 # ─── Stage 2: Serve ───────────────────────────────────────────────────────────
-FROM nginx:1.27-alpine AS runtime
+FROM nginx/nginx-unprivileged:stable-alpine AS runtime
 
 # Copy built site
 COPY --from=builder /app/dist /usr/share/nginx/html
@@ -28,6 +28,6 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 # Copy nginx config (handles SPA routing with try_files)
 COPY k8s/config/nginx-default.conf /etc/nginx/conf.d/default.conf
 
-EXPOSE 80
+EXPOSE 8080
 
 CMD ["nginx", "-g", "daemon off;"]
