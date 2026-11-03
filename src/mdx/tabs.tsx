@@ -1,39 +1,47 @@
-import classNames from 'classnames'
+import { Tabs as UxTabs, TabsContent, TabsList, TabsTrigger } from '@clidey/ux'
 import { Children, isValidElement } from 'preact/compat'
-import { useState } from 'preact/hooks'
 
 /** One tab panel inside <Tabs>. Renders its children when active. */
 export function Tab({ children }: { title: string; children: preact.ComponentChildren }) {
   return <>{children}</>
 }
 
-/** Underlined tab strip for any MDX content, e.g. several diagrams of one thing. */
+/** UX tab strip for any MDX content, e.g. several diagrams of one thing. */
 export function Tabs({ children }: { children: preact.ComponentChildren }) {
   const panels = Children.toArray(children).filter(isValidElement) as preact.VNode<{ title: string }>[]
-  const [active, setActive] = useState(0)
 
   return (
-    <div className="dory-tabs not-prose my-5">
-      <div role="tablist" className="flex gap-5 border-b border-[var(--border)]">
+    <UxTabs defaultValue="0" className="dory-tabs not-prose my-5">
+      <TabsList
+        className="max-w-full justify-start overflow-x-auto"
+        onKeyDown={(event) => {
+          // Radix roving focus does not handle arrow keys through Preact compat.
+          if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return
+          const tabs = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="tab"]:not([disabled])'))
+          const current = tabs.indexOf(event.target as HTMLButtonElement)
+          if (current < 0 || tabs.length === 0) return
+          event.preventDefault()
+          const next = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1
+            : (current + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length
+          tabs[next].focus()
+          tabs[next].click()
+        }}
+      >
         {panels.map((panel, index) => (
-          <button
+          <TabsTrigger
             key={index}
-            type="button"
-            role="tab"
-            aria-selected={active === index}
-            onClick={() => setActive(index)}
-            className={classNames('-mb-px border-b-2 pb-2.5 pt-1 text-sm font-medium transition', {
-              'border-[var(--primary)] text-foreground': active === index,
-              'border-transparent text-muted-foreground hover:text-foreground': active !== index,
-            })}
+            value={String(index)}
+            className="whitespace-nowrap"
           >
             {panel.props.title}
-          </button>
+          </TabsTrigger>
         ))}
-      </div>
-      <div role="tabpanel" className="pt-4 [&>:first-child]:mt-0 [&>:last-child]:mb-0">
-        {panels[active]}
-      </div>
-    </div>
+      </TabsList>
+      {panels.map((panel, index) => (
+        <TabsContent key={index} value={String(index)} className="pt-4 [&>:first-child]:mt-0 [&>:last-child]:mb-0">
+          {panel}
+        </TabsContent>
+      ))}
+    </UxTabs>
   )
 }

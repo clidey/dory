@@ -1,4 +1,4 @@
-import {
+import { CatalogIcon,
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
@@ -6,7 +6,7 @@ import {
   DropdownMenuSeparator,
   Button
 } from '@clidey/ux'
-import { ChevronDownIcon } from '@heroicons/react/20/solid'
+
 import type { ComponentChildren } from 'preact'
 import type { ReactNode } from 'preact/compat'
 
@@ -30,7 +30,7 @@ export default function Dropdown({ buttonLabel, items, className = '' }: Dropdow
       <DropdownMenuTrigger>
         <Button className={className}>
           {buttonLabel}
-          <ChevronDownIcon className="ml-2 h-4 w-4" />
+          <CatalogIcon name="chevron-down" className="ml-2 h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>

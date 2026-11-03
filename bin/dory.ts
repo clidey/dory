@@ -1,12 +1,16 @@
 #!/usr/bin/env node
 
-import { execSync } from 'child_process';
-import { existsSync, rmSync, mkdirSync, cpSync, readFileSync, readdirSync, writeFileSync } from 'fs';
+import { execFileSync, spawn } from 'child_process';
+import { existsSync, rmSync, mkdirSync, mkdtempSync, cpSync, readFileSync, readdirSync, lstatSync, writeFileSync, symlinkSync, watch } from 'fs';
 import { resolve, dirname, basename } from 'path';
 import { tmpdir } from 'os';
 import { fileURLToPath, pathToFileURL } from 'url';
-import { createServer } from 'http';
-import sirv from 'sirv';
+import { discoverSite, listPages, projectInfo, readPage, screenshot } from './automation.js';
+import { serveMcp } from './mcp.js';
+import { checkProject, formatCheckResult } from './check.js';
+import { initLocale } from './i18n-init.js';
+import { startPreview } from './preview-server.js';
+import { validateDoryConfig, type DoryConfig } from './project-config.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -23,485 +27,251 @@ const getDoryRoot = (): string => {
 // Get the user's current working directory
 const getUserRoot = (): string => process.cwd();
 
-// Count files recursively in a directory (for backup verification)
-const countFiles = (dir: string): number => {
-  let count = 0;
-  for (const item of readdirSync(dir, { withFileTypes: true })) {
-    if (item.isDirectory()) {
-      count += countFiles(resolve(dir, item.name));
-    } else {
-      count++;
-    }
-  }
-  return count;
+const workspaceFiles = [
+  'src', 'bin', 'scripts', 'index.html', 'package.json', 'vite.config.ts',
+  'vite.config.ssr.ts', 'vite.config.embed-loader.ts', 'vite.config.embed-widget.ts',
+];
+
+const projectDocsDir = (userRoot: string): string => {
+  const docsDir = resolve(userRoot, 'docs');
+  return existsSync(docsDir) ? docsDir : userRoot;
 };
 
-// Detect which package manager is available (prefer pnpm for speed, fallback to npm)
-const getPackageManager = (): { run: string; exec: string } => {
+const findDependencyDir = (doryRoot: string): string => {
+  let current = doryRoot;
+  while (true) {
+    const candidate = resolve(current, 'node_modules');
+    if (existsSync(resolve(candidate, 'vite', 'bin', 'vite.js')) && existsSync(resolve(candidate, 'preact', 'package.json'))) return candidate;
+    const parent = dirname(current);
+    if (parent === current) break;
+    current = parent;
+  }
+  throw new Error('Dory dependencies were not found. Install @clidey/dory in this project first.');
+};
+
+const loadProjectEnv = (userRoot: string): void => {
+  for (const name of ['.env', '.env.local']) {
+    const file = resolve(userRoot, name);
+    if (existsSync(file)) process.loadEnvFile(file);
+  }
+};
+
+const stageDocs = (userRoot: string, workspace: string): void => {
+  const source = projectDocsDir(userRoot);
+  const destination = resolve(workspace, 'docs');
+  rmSync(destination, { recursive: true, force: true });
+  mkdirSync(destination, { recursive: true });
+  const excluded = new Set(['node_modules', 'dist', 'dist-ssr', '.git', '.github', '.DS_Store', '.env', '.env.local', 'pnpm-lock.yaml', 'package-lock.json', 'yarn.lock']);
+  for (const item of readdirSync(source)) {
+    if (excluded.has(item) || item.startsWith('.env.') || (source === userRoot && item === 'docs')) continue;
+    cpSync(resolve(source, item), resolve(destination, item), {
+      recursive: true,
+      force: true,
+      filter: (path) => {
+        const name = basename(path);
+        if (excluded.has(name) || name.startsWith('.env.')) return false;
+        if (!lstatSync(path).isSymbolicLink()) return true;
+        console.warn(`Skipping symbolic link in docs: ${path}`);
+        return false;
+      },
+    });
+  }
+  cpSync(resolve(userRoot, 'dory.json'), resolve(destination, 'dory.json'), { force: true });
+};
+
+const createWorkspace = (userRoot: string): string => {
+  const doryRoot = getDoryRoot();
+  const workspace = mkdtempSync(resolve(tmpdir(), 'dory-workspace-'));
   try {
-    execSync('pnpm --version', { stdio: 'ignore' });
-    return { run: 'pnpm run', exec: 'pnpm exec' };
-  } catch {
-    try {
-      execSync('npm --version', { stdio: 'ignore' });
-      return { run: 'npm run', exec: 'npx' };
-    } catch {
-      console.error('❌ No package manager found');
-      console.error('   Install npm or pnpm to use Dory');
-      console.error('   npm: https://nodejs.org/');
-      console.error('   pnpm: npm install -g pnpm');
-      process.exit(1);
+    for (const item of workspaceFiles) {
+      const source = resolve(doryRoot, item);
+      if (!existsSync(source)) throw new Error(`Installed Dory package is missing ${item}`);
+      cpSync(source, resolve(workspace, item), { recursive: true, force: true });
     }
+    symlinkSync(findDependencyDir(doryRoot), resolve(workspace, 'node_modules'), 'dir');
+    stageDocs(userRoot, workspace);
+    return workspace;
+  } catch (error) {
+    rmSync(workspace, { recursive: true, force: true });
+    throw error;
   }
 };
 
-interface DoryConfig {
-  name?: string;
-  description?: string;
-  navigation?: unknown;
-  [key: string]: unknown;
-}
+const viteCli = (workspace: string): string => resolve(workspace, 'node_modules', 'vite', 'bin', 'vite.js');
 
-const validateDoryConfig = (config: DoryConfig): void => {
-  if (!config || typeof config !== 'object') {
-    throw new Error('Configuration must be a valid object');
-  }
-  if (config.basePath !== undefined && typeof config.basePath !== 'string') {
-    throw new Error('"basePath" must be a string such as "/docs"');
-  }
-};
-
-// Reads dory.json when present; preview must not fail without one.
-const readOptionalDoryConfig = (configPath: string): DoryConfig | null => {
-  if (!existsSync(configPath)) return null;
-  try {
-    return JSON.parse(readFileSync(configPath, 'utf8')) as DoryConfig;
-  } catch {
-    return null;
-  }
-};
-
-// Same normalization as src/utils/base-path.ts (the CLI is compiled separately).
-const normalizeBasePath = (value: unknown): string => {
-  if (typeof value !== 'string') return '';
-  const trimmed = value.trim().replace(/^\/+|\/+$/g, '');
-  return trimmed ? `/${trimmed}` : '';
-};
 
 const commands = {
-  build: () => {
-    console.log('🐟 Dory is ready to build your docs!');
+  reference: () => {
+    const root = resolve(getDoryRoot(), 'docs');
+    const page = process.argv[3];
+    console.log(page ? readPage(root, page) : listPages(root).join('\n'));
+  },
 
+  init: () => {
     const userRoot = getUserRoot();
-    const doryRoot = getDoryRoot();
-    const doryConfigPath = resolve(userRoot, 'dory.json');
-    const tempDocsDir = resolve(doryRoot, 'docs');
-    const doryDistDir = resolve(doryRoot, 'dist');
-    const userDistDir = resolve(userRoot, 'dist');
-
-    // Step 1: Validate prerequisites before making any changes
-    console.log('🔍 Validating project structure...');
-
-    if (!existsSync(doryConfigPath)) {
-      console.error('❌ dory.json not found in current directory');
-      console.error(`   Looking for: ${doryConfigPath}`);
-      console.error('   Create a dory.json file to configure your documentation site');
-      process.exit(1);
-    }
-
-    // Read and validate dory.json
-    let config: DoryConfig;
-    try {
-      const configContent = readFileSync(doryConfigPath, 'utf8');
-      config = JSON.parse(configContent) as DoryConfig;
-      validateDoryConfig(config);
-      console.log(`📋 Building: ${config.name || 'Documentation'}`);
-    } catch (error) {
-      console.error('❌ Failed to parse dory.json:');
-      if (error instanceof Error) {
-        console.error(`   ${error.message}`);
-      }
-      process.exit(1);
-    }
-
-    // The build stages user files into the package's own docs/ directory, so a
-    // docs/ folder in the user's project cannot be included. Fail loudly
-    // instead of silently dropping it.
-    const userDocsDir = resolve(userRoot, 'docs');
-    if (existsSync(userDocsDir) && userDocsDir !== tempDocsDir) {
-      console.error('❌ Your project contains a docs/ directory');
-      console.error('   Dory currently cannot include a top-level docs/ folder in the build');
-      console.error('   Rename it (e.g. to guides/) and update dory.json navigation paths');
-      process.exit(1);
-    }
-
-    // Detect package manager
-    const pm = getPackageManager();
-
-    // Guard against concurrent builds mutating the package's docs/ directory
-    const lockPath = resolve(doryRoot, '.dory-build-lock');
-    if (existsSync(lockPath)) {
-      console.error('❌ Another dory build appears to be in progress');
-      console.error(`   Lock file: ${lockPath}`);
-      console.error('   If no other build is running, delete the lock file and retry');
-      process.exit(1);
-    }
-    writeFileSync(lockPath, String(process.pid), 'utf8');
-
-    // Step 2: Backup existing docs directory to a safe temp location
-    console.log('🧹 Preparing workspace...');
-    const docsExistedBefore = existsSync(tempDocsDir);
-    const safeBackupDir = docsExistedBefore
-      ? resolve(tmpdir(), `dory-backup-${Date.now()}`)
-      : null;
-
-    if (docsExistedBefore && safeBackupDir) {
-      console.log('💾 Backing up existing docs directory...');
-      cpSync(tempDocsDir, safeBackupDir, { recursive: true, force: true });
-
-      // Verify backup integrity by comparing file counts
-      const origCount = countFiles(tempDocsDir);
-      const backupCount = countFiles(safeBackupDir);
-      if (origCount !== backupCount) {
-        console.error(`❌ Backup verification failed (expected ${origCount} files, got ${backupCount})`);
-        console.error(`   Backup location: ${safeBackupDir}`);
-        rmSync(lockPath, { force: true });
-        process.exit(1);
-      }
-
-      rmSync(tempDocsDir, { recursive: true, force: true });
-    }
-
-    // If the process is interrupted while the package's docs/ is mutated,
-    // restore the backup before exiting so no data is lost.
-    const restoreOnSignal = (): void => {
-      console.error('\n⚠️  Build interrupted — restoring docs directory...');
-      try {
-        if (docsExistedBefore && safeBackupDir && existsSync(safeBackupDir)) {
-          rmSync(tempDocsDir, { recursive: true, force: true });
-          cpSync(safeBackupDir, tempDocsDir, { recursive: true, force: true });
-          rmSync(safeBackupDir, { recursive: true, force: true });
-        } else if (!docsExistedBefore && existsSync(tempDocsDir)) {
-          rmSync(tempDocsDir, { recursive: true, force: true });
-        }
-      } catch {
-        if (safeBackupDir) {
-          console.error(`   Restore failed — backup preserved at: ${safeBackupDir}`);
-        }
-      }
-      rmSync(lockPath, { force: true });
-      process.exit(1);
+    const configPath = resolve(userRoot, 'dory.json');
+    if (existsSync(configPath)) throw new Error('dory.json already exists in this directory');
+    const docsDir = resolve(userRoot, 'docs');
+    const introduction = resolve(docsDir, 'introduction.mdx');
+    if (existsSync(introduction)) throw new Error('docs/introduction.mdx already exists; initialization would overwrite it');
+    mkdirSync(docsDir, { recursive: true });
+    const name = basename(userRoot).replace(/[-_]/g, ' ').replace(/\b\w/g, letter => letter.toUpperCase());
+    const config = {
+      name,
+      description: `Documentation for ${name}`,
+      favicon: './logo.svg',
+      logo: { light: './logo.svg', dark: './logo.svg' },
+      navigation: { tabs: [{ tab: 'Guides', groups: [{ group: 'Getting started', pages: ['introduction'] }] }] },
     };
-    process.on('SIGINT', restoreOnSignal);
-    process.on('SIGTERM', restoreOnSignal);
+    writeFileSync(configPath, `${JSON.stringify(config, null, 2)}\n`);
+    writeFileSync(introduction, `---\ntitle: Introduction\ndescription: Get started with ${name}.\n---\n\n# Welcome to ${name}\n\nStart writing your documentation here.\n`);
+    const logoPath = resolve(docsDir, 'logo.svg');
+    if (!existsSync(logoPath)) writeFileSync(logoPath, '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#2C6BD4"/><text x="32" y="43" text-anchor="middle" fill="white" font-family="sans-serif" font-size="36" font-weight="700">D</text></svg>\n');
+    console.log('Created dory.json and docs/introduction.mdx. Run `dory dev` to start writing.');
+  },
 
+  dev: () => {
+    const userRoot = getUserRoot();
+    const configPath = resolve(userRoot, 'dory.json');
+    if (!existsSync(configPath)) throw new Error('dory.json not found; run `dory init` first');
+    loadProjectEnv(userRoot);
+    const workspace = createWorkspace(userRoot);
+    const server = spawn(process.execPath, [viteCli(workspace)], {
+      cwd: workspace,
+      stdio: 'inherit',
+      env: { ...process.env, DORY_PROJECT_ROOT: userRoot },
+    });
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const sync = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        try { stageDocs(userRoot, workspace); }
+        catch (error) { console.error('Could not sync documentation:', error); }
+      }, 100);
+    };
+    const watchers = [watch(userRoot, (_event, file) => { if (file === 'dory.json') sync(); })];
+    const docsDir = resolve(userRoot, 'docs');
+    if (existsSync(docsDir)) watchers.push(watch(docsDir, { recursive: true }, sync));
+    else watchers.push(watch(userRoot, { recursive: true }, (_event, file) => {
+      if (file && !file.startsWith('dist/') && !file.startsWith('node_modules/')) sync();
+    }));
+    const cleanup = () => {
+      clearTimeout(timer);
+      watchers.forEach(watcher => watcher.close());
+      if (!server.killed) server.kill('SIGTERM');
+      rmSync(workspace, { recursive: true, force: true });
+    };
+    server.once('exit', code => { cleanup(); process.exitCode = code || 0; });
+    process.once('SIGINT', () => { cleanup(); process.exit(130); });
+    process.once('SIGTERM', () => { cleanup(); process.exit(143); });
+  },
+
+  check: () => {
+    const result = checkProject(getUserRoot());
+    console.log(formatCheckResult(result));
+    if (result.errors > 0) process.exitCode = 1;
+  },
+
+  'i18n:init': () => {
+    const locale = process.argv[3];
+    if (!locale) throw new Error('Usage: dory i18n:init <locale>');
+    const result = initLocale(getUserRoot(), locale);
+    console.log(`Created ${result.templatesCreated} translation template(s) in ${result.directory}.`);
+    console.log('Translate each .mdx.template file, then rename it to .mdx to publish.');
+  },
+
+  inspect: () => {
+    console.log(JSON.stringify(projectInfo(getUserRoot()), null, 2));
+  },
+
+  discover: async () => {
+    const url = process.argv[3];
+    if (!url) throw new Error('Usage: dory discover <site-url>');
+    console.log(JSON.stringify(await discoverSite(url), null, 2));
+  },
+
+  screenshot: async () => {
+    const args = process.argv.slice(3);
+    const value = (flag: string) => {
+      const index = args.indexOf(flag);
+      return index < 0 ? undefined : args[index + 1];
+    };
+    const width = value('--width');
+    const height = value('--height');
+    const theme = value('--theme');
+    if (theme && theme !== 'light' && theme !== 'dark') throw new Error('--theme must be light or dark');
+    const result = await screenshot(getUserRoot(), {
+      route: value('--route'), output: value('--output'),
+      width: width ? Number(width) : undefined,
+      height: height ? Number(height) : undefined,
+      theme: theme as 'light' | 'dark' | undefined,
+    });
+    console.log(`Screenshot saved: ${result.output}`);
+  },
+
+  mcp: () => {
+    const action = process.argv[3];
+    if (action === 'serve') {
+      const projectIndex = process.argv.indexOf('--project', 4);
+      if (projectIndex >= 0) process.env.DORY_PROJECT_ROOT = resolve(process.argv[projectIndex + 1]);
+      const version = JSON.parse(readFileSync(resolve(getDoryRoot(), 'package.json'), 'utf8')).version as string;
+      return serveMcp(__filename, version);
+    }
+    if (action === 'config') {
+      console.log(JSON.stringify({ mcpServers: { dory: { command: process.execPath, args: [__filename, 'mcp', 'serve'], env: { DORY_PROJECT_ROOT: getUserRoot() } } } }, null, 2));
+      return;
+    }
+    throw new Error('Usage: dory mcp serve | dory mcp config');
+  },
+
+  build: () => {
+    const userRoot = getUserRoot();
+    const configPath = resolve(userRoot, 'dory.json');
+    if (!existsSync(configPath)) throw new Error(`dory.json not found: ${configPath}`);
+    const config = JSON.parse(readFileSync(configPath, 'utf8')) as DoryConfig;
+    validateDoryConfig(config);
+
+    const workspace = createWorkspace(userRoot);
     try {
-      // Step 3: Copy user files to temp docs directory
-      mkdirSync(tempDocsDir, { recursive: true });
+      console.log(`Building ${config.name || 'Documentation'} from an isolated workspace...`);
+      const runVite = (...args: string[]) => execFileSync(process.execPath, [viteCli(workspace), ...args], { cwd: workspace, stdio: 'inherit', env: process.env });
+      runVite('build');
+      runVite('build', '--config', 'vite.config.ssr.ts');
+      execFileSync(process.execPath, [resolve(workspace, 'scripts', 'render-routes.mjs')], { cwd: workspace, stdio: 'inherit' });
 
-      console.log('📁 Gathering project files...');
-
-      // Define files/dirs to exclude
-      const excludeItems = new Set([
-        'node_modules',
-        'dist',
-        '.git',
-        '.github',
-        'docs',
-        '.DS_Store',
-        '.env',
-        '.env.local',
-        'pnpm-lock.yaml',
-        'package-lock.json',
-        'yarn.lock'
-      ]);
-
-      const items = readdirSync(userRoot);
-      let copiedCount = 0;
-
-      for (const item of items) {
-        if (excludeItems.has(item)) {
-          continue;
-        }
-
-        const srcPath = resolve(userRoot, item);
-        const destPath = resolve(tempDocsDir, item);
-
-        try {
-          cpSync(srcPath, destPath, { recursive: true, force: true });
-          copiedCount++;
-        } catch (error) {
-          console.warn(`⚠️  Could not copy ${item}: ${error instanceof Error ? error.message : 'unknown error'}`);
-        }
+      const distDir = resolve(workspace, 'dist');
+      if (!existsSync(resolve(distDir, 'index.html'))) {
+        throw new Error('Build did not produce dist/index.html');
       }
-
-      console.log(`✅ Copied ${copiedCount} items`);
-
-      // Verify critical files exist
-      const doryJsonPath = resolve(tempDocsDir, 'dory.json');
-      if (!existsSync(doryJsonPath)) {
-        throw new Error(`dory.json was not copied to docs directory (expected: ${doryJsonPath})`);
-      }
-
-      // Step 4: Run the build
-      console.log('⚡ Building documentation...');
-
-      try {
-        execSync(`${pm.run} build:docs`, {
-          stdio: 'inherit',
-          cwd: doryRoot,
-          // Don't let corepack's strict packageManager pin fail the build for
-          // users running a different pnpm version.
-          env: { ...process.env, COREPACK_ENABLE_STRICT: '0' }
-        });
-      } catch (error) {
-        console.error('❌ Build failed');
-        console.error('   Check the error messages above for details');
-        throw error;
-      }
-
-      // Step 5: Verify build output
-      console.log('🔍 Verifying build output...');
-
-      if (!existsSync(doryDistDir)) {
-        throw new Error(`Build completed but dist folder was not created (expected: ${doryDistDir})`);
-      }
-
-      const indexHtml = resolve(doryDistDir, 'index.html');
-      if (!existsSync(indexHtml)) {
-        throw new Error('Build incomplete: index.html not found — the build may have failed silently');
-      }
-
-      // Check if dist has content
-      const distFiles = readdirSync(doryDistDir);
-      if (distFiles.length === 0) {
-        throw new Error('Build completed but dist folder is empty');
-      }
-
-      // Verify SSR actually rendered content into at least one route
       const hasSsrContent = (dir: string): boolean => {
         for (const item of readdirSync(dir, { withFileTypes: true })) {
           const itemPath = resolve(dir, item.name);
-          if (item.isDirectory()) {
-            if (hasSsrContent(itemPath)) return true;
-          } else if (item.name.endsWith('.html')) {
-            if (/<div id="app">\s*<\w/.test(readFileSync(itemPath, 'utf8'))) return true;
-          }
+          if (item.isDirectory() && hasSsrContent(itemPath)) return true;
+          if (item.name.endsWith('.html') && /<div id="app">\s*<\w/.test(readFileSync(itemPath, 'utf8'))) return true;
         }
         return false;
       };
-      if (!hasSsrContent(doryDistDir)) {
-        throw new Error('Build verification failed: no route HTML contains server-rendered content in <div id="app">');
+      if (!hasSsrContent(distDir)) {
+        throw new Error('Build verification failed: no server-rendered route content was found');
       }
-
-      console.log('🎉 Build completed successfully!');
-
-      // Step 6: Copy dist to user's directory
-      console.log('📦 Copying build output...');
-
-      // Only copy if they're different directories
-      if (doryDistDir !== userDistDir) {
-        if (existsSync(userDistDir)) {
-          rmSync(userDistDir, { recursive: true, force: true });
-        }
-        cpSync(doryDistDir, userDistDir, { recursive: true, force: true });
-      }
-
-      console.log('✨ Documentation ready in dist/');
-
-      // Step 6.5: Build embed files
-      console.log('📦 Building embed files...');
 
       try {
-        // Build embed loader
-        console.log('   Building embed loader...');
-        execSync(`${pm.exec} vite build -c vite.config.embed-loader.ts`, {
-          stdio: 'inherit',
-          cwd: doryRoot,
-          env: { ...process.env, COREPACK_ENABLE_STRICT: '0' }
-        });
-
-        // Build embed widget
-        console.log('   Building embed widget...');
-        execSync(`${pm.exec} vite build -c vite.config.embed-widget.ts`, {
-          stdio: 'inherit',
-          cwd: doryRoot,
-          env: { ...process.env, COREPACK_ENABLE_STRICT: '0' }
-        });
-
-        // Copy embed files to user's dist if different
-        if (doryDistDir !== userDistDir) {
-          const embedFiles = ['embed.js', 'embed-widget.js', 'embed.css'];
-          embedFiles.forEach(file => {
-            const srcPath = resolve(doryDistDir, file);
-            const destPath = resolve(userDistDir, file);
-            if (existsSync(srcPath)) {
-              cpSync(srcPath, destPath, { force: true });
-            }
-          });
-
-          // Copy any chunk files (embed-*.js)
-          const files = readdirSync(doryDistDir);
-          files.forEach(file => {
-            if (file.startsWith('embed-') && file.endsWith('.js')) {
-              const srcPath = resolve(doryDistDir, file);
-              const destPath = resolve(userDistDir, file);
-              cpSync(srcPath, destPath, { force: true });
-            }
-          });
-        }
-
-        console.log('✨ Embed files built successfully!');
-        console.log('');
-        console.log('   📝 Add to your site:');
-        console.log('   <script src="https://your-docs.com/embed.js"></script>');
-        console.log('   <button onclick="DoryDocs.open()">Help</button>');
-        console.log('');
-
+        runVite('build', '-c', 'vite.config.embed-loader.ts');
+        runVite('build', '-c', 'vite.config.embed-widget.ts');
       } catch (error) {
-        console.warn('⚠️  Embed build failed, but main build succeeded');
-        console.warn('   Your documentation site is still available at dist/');
-        if (error instanceof Error) {
-          console.warn(`   Error: ${error.message}`);
-        }
+        console.warn(`Embed build failed: ${error instanceof Error ? error.message : String(error)}`);
       }
 
+      const userDistDir = resolve(userRoot, 'dist');
+      rmSync(userDistDir, { recursive: true, force: true });
+      cpSync(distDir, userDistDir, { recursive: true });
+      console.log(`Documentation ready in ${userDistDir}`);
     } finally {
-      // Step 7: Always clean up and restore backup
-      console.log('🧹 Cleaning up...');
-
-      process.removeListener('SIGINT', restoreOnSignal);
-      process.removeListener('SIGTERM', restoreOnSignal);
-
-      if (docsExistedBefore && safeBackupDir && existsSync(safeBackupDir)) {
-        console.log('📦 Restoring original docs directory...');
-
-        try {
-          if (existsSync(tempDocsDir)) {
-            rmSync(tempDocsDir, { recursive: true, force: true });
-          }
-
-          cpSync(safeBackupDir, tempDocsDir, { recursive: true, force: true });
-
-          // Verify restoration succeeded before deleting backup
-          const restoredCount = countFiles(tempDocsDir);
-          const backupCount = countFiles(safeBackupDir);
-          if (restoredCount === backupCount) {
-            rmSync(safeBackupDir, { recursive: true, force: true });
-          } else {
-            console.warn(`⚠️  Restore verification mismatch — backup preserved at: ${safeBackupDir}`);
-          }
-        } catch (error) {
-          console.error('❌ Failed to restore docs directory!');
-          console.error(`   Backup is preserved at: ${safeBackupDir}`);
-          console.error('   You can manually restore by running:');
-          console.error(`   cp -r "${safeBackupDir}" "${tempDocsDir}"`);
-          if (error instanceof Error) {
-            console.error(`   Error: ${error.message}`);
-          }
-        }
-      } else if (!docsExistedBefore) {
-        try {
-          if (existsSync(tempDocsDir)) {
-            rmSync(tempDocsDir, { recursive: true, force: true });
-          }
-        } catch (error) {
-          console.warn('⚠️  Could not remove temporary docs directory');
-        }
-      }
-
-      // Clean up doryDistDir if it's different from userDistDir
-      try {
-        if (doryDistDir !== userDistDir && existsSync(doryDistDir)) {
-          rmSync(doryDistDir, { recursive: true, force: true });
-        }
-      } catch (error) {
-        console.warn('⚠️  Could not clean up dory dist directory');
-      }
-
-      rmSync(lockPath, { force: true });
-
-      console.log('✅ Done!');
+      rmSync(workspace, { recursive: true, force: true });
     }
   },
 
-  preview: () => {
-    console.log('👀 Starting docs preview...');
-
-    const userRoot = getUserRoot();
-    const distDir = resolve(userRoot, 'dist');
-    const port = parseInt(process.env.PORT || '3000', 10);
-
-    // Validate dist folder exists
-    if (!existsSync(distDir)) {
-      console.error('❌ dist folder not found');
-      console.error(`   Looking for: ${distDir}`);
-      console.error('   Run "dory build" first to generate the documentation');
-      process.exit(1);
-    }
-
-    // Check if dist has content
-    const distFiles = readdirSync(distDir);
-    if (distFiles.length === 0) {
-      console.error('❌ dist folder is empty');
-      console.error('   Run "dory build" to generate documentation');
-      process.exit(1);
-    }
-
-    const serve = sirv(distDir, {
-      dev: false,
-      single: true,
-      etag: true,
-      gzip: true,
-      brotli: true,
-    });
-
-    // Mirror the production layout: a `basePath` build is served under that
-    // prefix, so strip it before handing the request to sirv.
-    const basePath = normalizeBasePath(readOptionalDoryConfig(resolve(userRoot, 'dory.json'))?.basePath);
-
-    const maxAttempts = 20;
-
-    const tryPort = (currentPort: number, attempt: number): void => {
-      // Fresh server per attempt — reusing one server object stacks listeners
-      // and produces duplicate servers on retry.
-      const server = createServer((req, res) => {
-        if (basePath && req.url) {
-          if (req.url === basePath || req.url.startsWith(`${basePath}/`) || req.url.startsWith(`${basePath}?`)) {
-            req.url = req.url.slice(basePath.length) || '/';
-          } else {
-            res.statusCode = 302;
-            res.setHeader('Location', `${basePath}/`);
-            res.end();
-            return;
-          }
-        }
-        serve(req, res);
-      });
-
-      server.once('error', (err: NodeJS.ErrnoException) => {
-        if (err.code === 'EADDRINUSE' && attempt + 1 < maxAttempts) {
-          console.log(`⚠️  Port ${currentPort} in use, trying ${currentPort + 1}...`);
-          tryPort(currentPort + 1, attempt + 1);
-        } else if (err.code === 'EADDRINUSE') {
-          console.error(`❌ No free port found in range ${port}-${currentPort}`);
-          process.exit(1);
-        } else {
-          console.error('❌ Failed to start server:', err.message);
-          process.exit(1);
-        }
-      });
-
-      server.once('listening', () => {
-        console.log(`🚀 Documentation live at http://localhost:${currentPort}${basePath}`);
-        console.log('   Press Ctrl+C to stop the server');
-      });
-
-      server.listen(currentPort);
-    };
-
-    tryPort(port, 0);
-  },
+  preview: () => startPreview({ version: JSON.parse(readFileSync(resolve(getDoryRoot(), 'package.json'), 'utf8')).version as string }),
 
   'verify:content': async () => {
     const args = process.argv.slice(3);
@@ -599,6 +369,20 @@ Usage:
   dory <command> [options]
 
 Commands:
+  init             Create dory.json and starter docs in the current directory
+  dev              Start a live development server for this project
+  check            Check navigation, links, and content before publishing
+  i18n:init <code>  Create translation templates for a locale
+  reference [page]  List or read packaged Dory MDX reference pages
+  inspect          Show dory.json and local MDX pages as JSON
+  discover <url>   Find llms.txt and MDX source links from one hosted docs URL
+  screenshot       Capture a built route as a full-page PNG
+                   Options: --route <path> --output <file> --theme light|dark
+                            --width <pixels> --height <pixels>
+  mcp serve        Run the local MCP server over stdio
+                   Option: --project <directory>
+  mcp config       Print an MCP client config for this project
+
   build            Build your documentation site
                    Requirements: dory.json in current directory
                    Output: dist/ folder with static site
@@ -616,6 +400,15 @@ Commands:
   help             Show this help message
 
 Examples:
+  dory init
+  dory dev
+  dory check
+  dory i18n:init es
+  dory reference components/cards.mdx
+  dory inspect
+  dory discover https://docs.example.com
+  dory build && dory screenshot --route /getting-started --theme dark
+  dory mcp config
   dory build
   dory preview
   dory verify:content --content "# Hello World"

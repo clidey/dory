@@ -44,11 +44,15 @@ export function generateLlmsIndex(docsDir: string): string {
   const siteName: string = config.name || 'Documentation';
   const baseUrl: string = getSiteUrl(config);
   const mdxFilesMap = findMdxFilesMap(docsDir, docsDir);
+  const listed = new Set<string>();
 
   let output = `# ${siteName}\n`;
   if (config.description) {
     output += `\n> ${config.description}\n`;
   }
+
+  output += `\nThis site publishes its MDX source. Fetch the .mdx links below for individual pages, or ${baseUrl || ''}/llms-full.txt for one combined text file. Start from this URL to discover documentation without guessing repository paths.\n`;
+  output += `\nIf this site is served by Dory's Node preview server, a read-only MCP endpoint is available at ${baseUrl || ''}/mcp. MCP clients require a one-time connection to that endpoint; the page URL alone is sufficient for clients that can browse these links.\n`;
 
   const tabs: any[] = config.navigation?.tabs || [];
   for (const tab of tabs) {
@@ -59,6 +63,7 @@ export function generateLlmsIndex(docsDir: string): string {
         if (typeof page === 'string') {
           const fileKey = resolveFileKey(page, mdxFilesMap);
           if (!fileKey) continue;
+          listed.add(fileKey);
           const raw = fs.readFileSync(mdxFilesMap[fileKey], 'utf-8');
           const { data } = parseFrontmatter(raw);
           const routePath = pathFromFilename(mdxFilesMap[fileKey], docsDir);
@@ -75,6 +80,17 @@ export function generateLlmsIndex(docsDir: string): string {
     }
     if (links.length > 0) {
       output += `\n## ${tab.tab || 'Documentation'}\n\n${links.join('\n')}\n`;
+    }
+  }
+
+  const additional = Object.keys(mdxFilesMap).filter(key => !listed.has(key)).sort();
+  if (additional.length > 0) {
+    output += '\n## Other pages and translations\n\n';
+    for (const fileKey of additional) {
+      const raw = fs.readFileSync(mdxFilesMap[fileKey], 'utf-8');
+      const { data } = parseFrontmatter(raw);
+      const routePath = pathFromFilename(mdxFilesMap[fileKey], docsDir);
+      output += `- [${data.title || fileKey}](${baseUrl}${routePath}.mdx)${data.description ? `: ${data.description}` : ''}\n`;
     }
   }
 

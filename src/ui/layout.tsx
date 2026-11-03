@@ -1,7 +1,7 @@
 import type { ComponentChildren } from 'preact';
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { Navigation } from '../components/navigation';
-import { ALL_NAVIGATION, ALL_OPENAPI, completeFrontMatter, loadMDXFrontMatterForPath, loadAllMDXFrontMatter, preloadFrontmatter, ALL_ASYNCAPI, isFrontmatterReady } from '../components/store';
+import { ALL_NAVIGATION, ALL_PAGES, ALL_OPENAPI, completeFrontMatter, loadMDXFrontMatterForPath, loadAllMDXFrontMatter, preloadFrontmatter, ALL_ASYNCAPI, isFrontmatterReady, getNavigationForPath } from '../components/store';
 import docsConfig from '../../docs/dory.json' with { type: 'json' };
 import type { DoryConfig } from '../types/config';
 import { usePathname } from '../components/hooks';
@@ -15,12 +15,24 @@ import { PageActions } from './page-actions';
 import { PageFeedback } from './page-feedback';
 import { PageFooter } from './page-footer';
 import { TableOfContents } from './table-of-content';
+import { DocsPageFrame } from './docs-page-frame';
 import { Loading } from '../components/loading';
 import { useIsEmbedded } from '../components/hooks';
 import { ErrorBoundary } from '../components/error-boundary';
-import { cn } from '@clidey/ux';
+import { contentScope } from '../utils/content-scope';
 
 const config = docsConfig as DoryConfig;
+
+function embedParentOrigin(): string | null {
+  try {
+    const value = new URLSearchParams(window.location.search).get('parentOrigin');
+    if (!value) return null;
+    const origin = new URL(value);
+    if (origin.origin !== value || !['http:', 'https:'].includes(origin.protocol)) return null;
+    return origin.origin === window.location.origin || config.embed?.security?.allowedOrigins?.includes(origin.origin)
+      ? origin.origin : null;
+  } catch { return null; }
+}
 
 interface LayoutProps {
   children: ComponentChildren;
@@ -41,6 +53,21 @@ export default function Layout({ children }: LayoutProps) {
   const rawPathname = usePathname();
   const pathname = rawPathname === '/' ? ALL_NAVIGATION[0]?.groups[0]?.pages[0]?.href ?? '/' : rawPathname;
   const isEmbedded = useIsEmbedded();
+  const parentOrigin = useRef<string | null>(typeof window === 'undefined' ? null : embedParentOrigin());
+  const embeddedReady = useRef(false);
+  const lastEmbeddedPath = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!isEmbedded || loading || !parentOrigin.current || window.parent === window) return;
+    if (!embeddedReady.current) {
+      window.parent.postMessage({ source: 'dory', type: 'dory:ready' }, parentOrigin.current);
+      embeddedReady.current = true;
+    }
+    if (lastEmbeddedPath.current !== pathname) {
+      window.parent.postMessage({ source: 'dory', type: 'dory:navigate', path: pathname }, parentOrigin.current);
+      lastEmbeddedPath.current = pathname;
+    }
+  }, [isEmbedded, loading, pathname]);
 
   // Client-side navigation keeps the previous scroll position, so start each new
   // page at the top. The initial load keeps the browser's own position, and a
@@ -77,7 +104,7 @@ export default function Layout({ children }: LayoutProps) {
 
 
   const { title: group, group: title, page } = useMemo(() => {
-    const group = ALL_NAVIGATION
+    const group = getNavigationForPath(pathname)
       .flatMap((tab) => tab.groups)
       .find((group) => group.pages.some((page) => page.href === pathname));
     const page = completeFrontMatter.find((page) => page.path === pathname);
@@ -145,7 +172,7 @@ export default function Layout({ children }: LayoutProps) {
   }, [page]);
 
   const isLandingPage = useMemo(() => {
-    const firstTab = ALL_NAVIGATION[0];
+    const firstTab = getNavigationForPath(pathname)[0];
     if (!firstTab) return false;
     return (
       firstTab.groups.length === 1 &&
@@ -162,8 +189,9 @@ export default function Layout({ children }: LayoutProps) {
     if (tab == null || tab.openapi == null) {
       return null;
     }
-    const firstDirectory = `/${tab.path.split('/')[1]}`;
-    return ALL_OPENAPI[`${firstDirectory}/openapi.json`].default;
+    const scope = contentScope(config, tab.path);
+    const firstDirectory = `/${scope.page.split('/')[1]}`;
+    return (ALL_OPENAPI[`${scope.prefix}${firstDirectory}/openapi.json`] ?? ALL_OPENAPI[`${firstDirectory}/openapi.json`])?.default ?? null;
   }, [tab, loading]);
 
   const { method, path } = useMemo(() => {
@@ -177,8 +205,9 @@ export default function Layout({ children }: LayoutProps) {
     if (tab == null || tab.asyncapi == null) {
       return null;
     }
-    const firstDirectory = `/${tab.path.split('/')[1]}`;
-    return ALL_ASYNCAPI[`${firstDirectory}/asyncapi.json`].default;
+    const scope = contentScope(config, tab.path);
+    const firstDirectory = `/${scope.page.split('/')[1]}`;
+    return (ALL_ASYNCAPI[`${scope.prefix}${firstDirectory}/asyncapi.json`] ?? ALL_ASYNCAPI[`${firstDirectory}/asyncapi.json`])?.default ?? null;
   }, [tab, loading]);
   
   const { operation, channel } = useMemo(() => {
@@ -207,52 +236,44 @@ export default function Layout({ children }: LayoutProps) {
       ? <AsyncAPI asyncAPIJson={JSON.parse(asyncAPIJSON)} operation={operation} channel={channel} />
       : children;
 
+  const scope = contentScope(config, pathname);
+  const isScopeRoot = Boolean(scope.prefix) && pathname === scope.prefix;
+  const isNotFound = !ALL_PAGES[pathname] && !isScopeRoot;
   const showSidebar = !isEmbedded && !isLandingPage;
   // OpenAPI pages lay out their own two columns, so they skip the TOC and take its width.
   const isOpenAPIPage = openAPIJSON != null;
 
+  if (isNotFound) {
+    return (
+      <main className="dory-main flex min-h-dvh w-full items-center justify-center bg-background px-6 py-12 text-foreground">
+        <div className="w-full">
+          <ErrorBoundary fallback={errorFallback}>{children}</ErrorBoundary>
+        </div>
+      </main>
+    );
+  }
+
   return (
-    <div className="dory-shell flex min-h-screen w-full flex-col bg-[var(--sidebar)]">
+    isLandingPage ? <div className="dory-shell flex min-h-screen w-full flex-col bg-[var(--sidebar)]">
       <Header />
       <div className="flex flex-1">
-        {showSidebar && (
-          <aside className="hidden w-60 shrink-0 lg:block">
-            <div className="sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto px-3 pb-6 pt-4">
-              <Navigation />
-            </div>
-          </aside>
-        )}
-        <main className={cn("dory-main min-w-0 flex-1 bg-background text-foreground", {
-          "px-6 py-10 sm:px-10 lg:px-12": showSidebar,
-          "px-6 py-10 sm:px-10": isLandingPage && !isEmbedded,
-          "p-8": isEmbedded,
-        })}>
-          {isLandingPage ? (
-            <ErrorBoundary fallback={errorFallback}>{children}</ErrorBoundary>
-          ) : (
-            <div className="mx-auto flex w-full max-w-[66rem] justify-center gap-14">
-              <article className={cn("dory-article flex min-w-0 flex-1 flex-col", isOpenAPIPage ? "max-w-[66rem]" : "max-w-[47rem]")}>
-                <div className="mb-6 flex min-h-9 flex-wrap items-center justify-between gap-4">
-                  <Breadcrumb group={title} title={group} />
-                  <PageActions pathname={pathname} />
-                </div>
-                <header className="mb-10">
-                  {group && <h1 className="dory-page-title">{group}</h1>}
-                  {page?.lead && <p className="dory-lead">{page.lead}</p>}
-                </header>
-                <PageMeta meta={page?.meta} />
-                <div className="flex-1 min-h-[calc(100vh-2rem)]">
-                  <ErrorBoundary fallback={errorFallback}>{content}</ErrorBoundary>
-                </div>
-                <PageFeedback pathname={pathname} />
-                <PrevNextLinks />
-                <PageFooter />
-              </article>
-              {!isOpenAPIPage && <TableOfContents />}
-            </div>
-          )}
+        <main className="dory-main min-w-0 flex-1 bg-background px-6 py-10 text-foreground sm:px-10">
+          <ErrorBoundary fallback={errorFallback}>{children}</ErrorBoundary>
         </main>
       </div>
-    </div>
+    </div> : <DocsPageFrame
+      header={<Header />}
+      sidebar={showSidebar ? <Navigation /> : undefined}
+      breadcrumb={<Breadcrumb group={title} title={group} />}
+      actions={<PageActions pathname={pathname} />}
+      title={group}
+      lead={page?.lead}
+      meta={<PageMeta meta={page?.meta} />}
+      content={<ErrorBoundary fallback={errorFallback}>{content}</ErrorBoundary>}
+      afterContent={<><PageFeedback pathname={pathname} /><PrevNextLinks /><PageFooter /></>}
+      toc={!isOpenAPIPage && <TableOfContents />}
+      embedded={isEmbedded}
+      wide={isOpenAPIPage}
+    />
   );
 }

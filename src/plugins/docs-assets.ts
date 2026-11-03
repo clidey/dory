@@ -1,5 +1,5 @@
 import type { Plugin } from 'vite';
-import { cpSync, existsSync, readdirSync, statSync } from 'fs';
+import { cpSync, existsSync, lstatSync, readdirSync } from 'fs';
 import { resolve, extname } from 'path';
 
 /**
@@ -54,7 +54,11 @@ export function docsAssetsPlugin(): Plugin {
           const itemRelativePath = relativePath ? `${relativePath}/${item}` : item;
 
           try {
-            const stats = statSync(srcPath);
+            const stats = lstatSync(srcPath);
+
+            // Do not copy symlinks: they can point outside docs and leak files
+            // from the build machine through the generated static site.
+            if (stats.isSymbolicLink()) continue;
 
             if (stats.isDirectory()) {
               // Recursively copy directories

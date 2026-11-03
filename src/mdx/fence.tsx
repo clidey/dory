@@ -8,13 +8,14 @@ import classNames from 'classnames'
 
 // Colors resolve through CSS variables so one theme serves both light and dark mode.
 const codeTheme: PrismTheme = {
-  plain: { color: 'var(--foreground)', backgroundColor: 'transparent' },
+  plain: { color: 'var(--syntax-plain)', backgroundColor: 'transparent' },
   styles: [
-    { types: ['comment', 'prolog', 'doctype', 'cdata'], style: { color: 'var(--muted-foreground)', fontStyle: 'italic' } },
-    { types: ['keyword', 'builtin', 'function', 'tag', 'selector', 'number', 'boolean', 'constant', 'property', 'class-name'], style: { color: 'var(--primary)' } },
-    { types: ['string', 'char', 'attr-value', 'url', 'regex', 'inserted'], style: { color: 'var(--dory-code-string)' } },
+    { types: ['comment', 'prolog', 'doctype', 'cdata'], style: { color: 'var(--syntax-comment)', fontStyle: 'italic' } },
+    { types: ['keyword', 'builtin', 'function', 'tag', 'selector', 'property', 'class-name'], style: { color: 'var(--syntax-keyword)' } },
+    { types: ['number', 'boolean', 'constant'], style: { color: 'var(--syntax-number)' } },
+    { types: ['string', 'char', 'attr-value', 'url', 'regex', 'inserted'], style: { color: 'var(--syntax-string)' } },
     { types: ['deleted'], style: { color: 'var(--destructive)' } },
-    { types: ['punctuation', 'operator'], style: { color: 'var(--foreground)' } },
+    { types: ['punctuation', 'operator'], style: { color: 'var(--syntax-plain)' } },
   ],
 }
 

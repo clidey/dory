@@ -4,7 +4,7 @@ import { defineConfig } from 'vitest/config';
 // (which boots the full docs-site plugin pipeline).
 export default defineConfig({
   test: {
-    include: ['src/**/*.test.ts'],
+    include: ['src/**/*.test.ts', 'bin/**/*.test.ts'],
     environment: 'node',
   },
 });

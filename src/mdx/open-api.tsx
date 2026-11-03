@@ -1,6 +1,6 @@
-import { Button } from "@clidey/ux"
+import { CatalogIcon, Button } from "@clidey/ux"
 import classNames from "classnames"
-import { Check, ChevronRight, Copy, Play } from "lucide-react"
+
 import { h } from "preact"
 import { useState } from "preact/hooks"
 import type { Server } from "./api-playground"
@@ -236,7 +236,7 @@ function ChildAttributes({ schema, components }: { schema: Schema; components: C
         aria-expanded={open}
         className="flex w-full items-center gap-2 bg-muted px-4 py-2.5 text-left text-sm font-medium text-foreground"
       >
-        <ChevronRight aria-hidden="true" className={classNames('h-3.5 w-3.5 transition-transform', { 'rotate-90': open })} />
+        <CatalogIcon name="chevron-right" aria-hidden="true" className={classNames('h-3.5 w-3.5 transition-transform', { 'rotate-90': open })} />
         {open ? 'Hide' : 'Show'} {count} child attribute{count === 1 ? '' : 's'}
       </button>
       {open && <div className="px-4"><SchemaFields schema={schema} components={components} /></div>}
@@ -253,7 +253,7 @@ function CopyUrl({ value }: { value: string }) {
       onClick={() => navigator.clipboard.writeText(value).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1000) })}
       className="rounded-md p-1.5 text-muted-foreground transition hover:bg-muted hover:text-foreground"
     >
-      {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+      {copied ? <CatalogIcon name="check" className="h-3.5 w-3.5" /> : <CatalogIcon name="copy" className="h-3.5 w-3.5" />}
     </button>
   )
 }
@@ -456,7 +456,7 @@ export function OpenAPI({ openAPIJson, method: selectedMethod, path: selectedPat
         </span>
         <CopyUrl value={fullUrl} />
         <Button onClick={() => setShowPlayground(true)} className="flex items-center gap-1.5 bg-[var(--primary)] text-white hover:bg-[var(--primary)]/90">
-          <Play className="h-3 w-3 fill-current" />
+          <CatalogIcon name="play" className="h-3 w-3 fill-current" />
           Try it
         </Button>
       </div>

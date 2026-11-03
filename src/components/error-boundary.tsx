@@ -1,5 +1,5 @@
+import { CatalogIcon } from '@clidey/ux'
 import { Component, type ComponentChildren } from 'preact';
-import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 
 interface ErrorBoundaryProps {
   children: ComponentChildren;
@@ -33,7 +33,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       return (
         <div className="flex flex-col items-center justify-center min-h-[50vh] p-8">
           <div className="w-16 h-16 mb-4 flex items-center justify-center bg-red-100 dark:bg-red-900/30 rounded-full">
-            <ExclamationTriangleIcon className="w-8 h-8 text-red-500" />
+            <CatalogIcon name="warning" className="w-8 h-8 text-red-500" />
           </div>
           <h2 className="text-2xl font-semibold text-red-700 dark:text-red-300 mb-2">
             Something went wrong

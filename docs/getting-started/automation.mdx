@@ -1,0 +1,76 @@
+---
+title: 'CLI and MCP automation'
+description: 'Build, inspect, capture, and iterate on Dory documentation from a CLI or MCP client.'
+---
+
+# CLI and MCP automation
+
+Dory can expose a local documentation project to an MCP client. The client can inspect `dory.json`, read and write MDX pages, validate compilation, build the site, and capture screenshots of the result.
+
+## Connect an MCP client
+
+From the directory containing `dory.json`, run:
+
+```bash
+dory mcp config
+```
+
+Add the printed `mcpServers.dory` entry to your MCP client's configuration. It pins the current project with `DORY_PROJECT_ROOT`, so the client does not need to launch from that directory. To start it directly:
+
+```bash
+dory mcp serve --project /path/to/docs-project
+```
+
+The server uses stdio. Its stdout carries MCP messages; build logs are returned inside tool results.
+
+## Connect to hosted documentation
+
+A Dory site served with `dory preview` also exposes a public, read-only Streamable HTTP MCP endpoint at `/mcp` (or `/docs/mcp` when `basePath` is `/docs`). It provides `site_guide`, `list_pages`, `search_docs`, and `read_page`. These tools read only files in the built `dist/` directory. The local stdio MCP server above remains the way to write pages, build, and take screenshots.
+
+Add the endpoint once in your MCP client:
+
+```bash
+codex mcp add whodb-docs --url https://docs.whodb.com/mcp
+claude mcp add --transport http whodb-docs https://docs.whodb.com/mcp
+```
+
+Replace the example URL with your Dory site. If the docs run behind a reverse proxy, forward `/mcp` to the Dory preview server. Its `dory.json` `url` must match the public hostname; for an additional preview hostname, set `DORY_MCP_ALLOWED_HOSTS` to a comma-separated list. The endpoint rejects other hostnames and cross-origin browser requests.
+
+You can also give a browsing agent just the documentation URL. Dory advertises `llms.txt` in its HTML, with links to the published `.mdx` pages and `llms-full.txt`. MCP clients still need the one-time connector command above before they can call MCP tools.
+
+## Build and review loop
+
+Ask the MCP client to call `dory_guide` first. A typical loop is:
+
+1. `dory_project` reads the site configuration and page list.
+2. `dory_reference` provides Dory's packaged component and configuration guides.
+3. `dory_read_page` and `dory_write_page` update the relevant MDX.
+4. `dory_verify_page` checks MDX compilation.
+5. `dory_check` catches broken navigation and links, then `dory_build` generates the site.
+6. `dory_screenshot` captures a route in light and dark themes; review the images and repeat as needed.
+
+The same operations are available from the CLI:
+
+```bash
+dory inspect
+dory reference components/cards.mdx
+dory check
+dory verify:content --file getting-started/quick-start.mdx
+dory build
+dory screenshot --route /getting-started/quick-start --theme light
+dory screenshot --route /getting-started/quick-start --theme dark --width 390 --height 844
+```
+
+Screenshot capture uses Chrome or Chromium. Set `DORY_CHROME_PATH` if the browser is outside the standard installation paths. Screenshots are written as PNG files under `.dory/screenshots/`; `--output` must stay in that directory.
+
+## Discover published MDX from one URL
+
+Dory sites advertise their `llms.txt` index in the page HTML. The index links to every navigation page's published `.mdx` source and to `llms-full.txt` for combined text. Give a hosted site URL to the CLI or MCP client:
+
+```bash
+dory discover https://docs.example.com
+```
+
+The `dory_discover_site` MCP tool returns the index and MDX URLs. `dory_read_remote_page` retrieves an individual published MDX page. For sites hosted under a path such as `/docs`, the HTML discovery link points to the correct index automatically. Remote discovery accepts public HTTP or HTTPS sites; local and private network addresses are blocked.
+
+The server only edits local project pages. Hosted URL discovery reads published source; it does not change the remote site.

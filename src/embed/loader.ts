@@ -171,9 +171,6 @@ if (typeof window !== 'undefined' && window.DoryDocs) {
     on(event: string, handler: Function) {
       const eventKey = `on${event.charAt(0).toUpperCase()}${event.slice(1)}` as keyof DoryEmbedConfig;
       (config as any)[eventKey] = handler;
-      if (widgetInstance) {
-        widgetInstance.on(event, handler);
-      }
       return this;
     },
   };

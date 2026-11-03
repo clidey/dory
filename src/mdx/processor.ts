@@ -1,5 +1,5 @@
 import { compile } from '@mdx-js/mdx';
-import { preprocessMdxTags } from '../plugins/sanitize.ts';
+import { preprocessMdxSource } from './preprocess.ts';
 import { getMdxConfig } from '../config/mdx.ts';
 
 export interface ProcessMdxOptions {
@@ -25,101 +25,9 @@ export async function preprocessMdxContent(
   error?: Error;
 }> {
   try {
-    // Step 0: Strip YAML frontmatter before any processing.
-    // Frontmatter is parsed separately by the frontmatter-generator plugin.
-    let processedContent = content;
-    const frontMatterMatch = processedContent.match(/^---\n([\s\S]*?)\n---\n?/);
-    if (frontMatterMatch) {
-      processedContent = processedContent.slice(frontMatterMatch[0].length);
-    }
-
-    // Step 0b: Strip stray ```yaml metadata blocks that follow frontmatter.
-    // Some content generators produce a second YAML block (```yaml...---) after
-    // the frontmatter. This is a broken code fence (closed with --- instead of ```)
-    // that leaks metadata into the rendered page.
-    const yamlBlockMatch = processedContent.match(/^```yaml\n([\s\S]*?)\n---\n?/);
-    if (yamlBlockMatch) {
-      processedContent = processedContent.slice(yamlBlockMatch[0].length);
-    }
-
-    // Step 1: Apply preprocessor (handles MDX tags, code blocks, etc.)
-    const preprocessor = preprocessMdxTags();
-    
-    if (preprocessor.transform) {
-      const result = preprocessor.transform(processedContent, fileName);
-      if (result && typeof result === 'object' && result.code) {
-        processedContent = result.code;
-      } else if (typeof result === 'string') {
-        processedContent = result;
-      }
-    }
-    
-    // Step 2: Convert URLs in angle brackets to markdown links
-    // Handles cases like <https://example.com> which MDX would interpret as JSX
-    // But preserves them inside code blocks
-    
-    // Process line by line to handle code blocks correctly
-    const lines = processedContent.split('\n');
-    let inCodeBlock = false;
-    
-    processedContent = lines.map(line => {
-      // Check if we're entering or leaving a code block (with optional indentation)
-      if (line.trim().startsWith('```')) {
-        inCodeBlock = !inCodeBlock;
-        return line;
-      }
-      
-      // Don't process lines inside code blocks
-      if (inCodeBlock) {
-        return line;
-      }
-      
-      // For lines outside code blocks, preserve inline code
-      // More robust regex that handles inline code with potential spaces
-      // Matches: `...` including multi-line content
-      let result = '';
-      let lastIndex = 0;
-      
-      // Find all inline code spans in the line
-      const inlineCodeRegex = /`([^`]+)`/g;
-      let match;
-      
-      while ((match = inlineCodeRegex.exec(line)) !== null) {
-        // Process text before the inline code
-        const beforeCode = line.substring(lastIndex, match.index);
-        result += beforeCode.replace(/<(https?:\/\/[^\s>]+)>/g, '[$1]($1)');
-        
-        // Keep inline code as-is
-        result += match[0];
-        
-        lastIndex = match.index + match[0].length;
-      }
-      
-      // Process remaining text after last inline code (or entire line if no inline code)
-      const remainingText = line.substring(lastIndex);
-      result += remainingText.replace(/<(https?:\/\/[^\s>]+)>/g, '[$1]($1)');
-      
-      return result;
-    }).join('\n');
-    
-    // Step 3: Add any future preprocessing steps here
-    // Example: processedContent = await yourNewPreprocessor(processedContent);
-    // Example: processedContent = removeHTMLComments(processedContent);
-    // Example: processedContent = expandCustomShortcodes(processedContent);
-    // ALL preprocessing added here will automatically apply to:
-    // - CLI commands (verify:content)
-    // - Vite build (pnpm run build)
-    // - Vite dev server (pnpm run dev)
-    
-    return {
-      success: true,
-      processedContent
-    };
+    return { success: true, processedContent: preprocessMdxSource(content, fileName) };
   } catch (error) {
-    return {
-      success: false,
-      error: error as Error
-    };
+    return { success: false, error: error as Error };
   }
 }
 

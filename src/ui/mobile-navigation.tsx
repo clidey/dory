@@ -1,9 +1,8 @@
 'use client'
 
-import { Sheet, SheetContent, Button, ModeToggle } from '@clidey/ux'
+import { CatalogIcon, Sheet, SheetContent, Button, ModeToggle } from '@clidey/ux'
 import { createContext, Suspense, useCallback, useContext, useEffect, useRef, useState } from 'react'
 
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import { Navigation } from '../components/navigation'
 import { useIsEmbedded, usePathname } from '../components/hooks'
 
@@ -34,7 +33,6 @@ export function useMobileNavigation() {
 export function MobileNavigation() {
   const isInsideMobileNavigation = useIsInsideMobileNavigation();
   const { isOpen, open, close } = useMobileNavigation();
-  const ToggleIcon = isOpen ? XMarkIcon : Bars3Icon;
   const isEmbedded = useIsEmbedded();
   const pathname = usePathname();
 
@@ -55,7 +53,7 @@ export function MobileNavigation() {
           aria-label="Toggle navigation"
           onClick={open}
         >
-          <ToggleIcon className="w-8 stroke-white" />
+          <CatalogIcon name={isOpen ? 'close' : 'menu'} className="w-8 stroke-white" />
         </Button>
         {!isInsideMobileNavigation && (
           <Suspense fallback={null}>

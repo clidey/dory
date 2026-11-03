@@ -1,5 +1,6 @@
+import { CatalogIcon } from '@clidey/ux'
 import classNames from 'classnames'
-import { ExternalLink, File } from 'lucide-react'
+
 import { useEffect, useState } from 'preact/hooks'
 import { Fence } from './fence'
 
@@ -121,7 +122,7 @@ export const Source = ({ url, branch = "main", paths }: SourceProps) => {
                                 : 'border-[var(--border)] bg-muted text-foreground hover:border-[var(--primary)]',
                         )}
                     >
-                        <File aria-hidden="true" className="h-3.5 w-3.5 text-muted-foreground" />
+                        <CatalogIcon name="file" aria-hidden="true" className="h-3.5 w-3.5 text-muted-foreground" />
                         {path}
                         {range && <span className="text-muted-foreground">{range}</span>}
                     </button>
@@ -129,7 +130,7 @@ export const Source = ({ url, branch = "main", paths }: SourceProps) => {
             </div>
             <div className="dory-code mt-3 overflow-hidden rounded-lg border border-[var(--border)] bg-card">
                 <div className="flex min-h-10 items-center gap-2 border-b border-[var(--border)] bg-muted px-4">
-                    <File aria-hidden="true" className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                    <CatalogIcon name="file" aria-hidden="true" className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                     <p className="mr-auto truncate font-mono text-xs text-foreground">
                         {repo} · {current.path}
                         {current.range && <span className="ml-2 text-muted-foreground">{current.range}</span>}
@@ -141,7 +142,7 @@ export const Source = ({ url, branch = "main", paths }: SourceProps) => {
                         className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-[var(--primary)] hover:underline"
                     >
                         {openLabel}
-                        <ExternalLink aria-hidden="true" className="h-3 w-3" />
+                        <CatalogIcon name="external" aria-hidden="true" className="h-3 w-3" />
                     </a>
                 </div>
                 {ready ? (

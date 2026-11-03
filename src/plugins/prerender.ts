@@ -12,6 +12,9 @@ import {
   getBasePath,
   getSiteUrl,
 } from './shared.ts';
+import { contentScope, scopedPath } from '../utils/content-scope.ts';
+import type { DoryConfig } from '../types/config.ts';
+import { renderSocialPreview } from './social-preview.ts';
 
 /**
  * Generates per-route HTML files with page-specific meta tags and JSON-LD
@@ -42,6 +45,7 @@ export function prerender(): Plugin {
         const baseHtml = readFileSync(indexHtmlPath, 'utf-8');
 
         const siteConfig = readDoryConfig() || {};
+        const typedConfig = siteConfig as DoryConfig;
         const seo = siteConfig.seo || {};
         const baseUrl: string = getSiteUrl(siteConfig);
         const siteName: string = siteConfig.name || 'Documentation';
@@ -57,7 +61,6 @@ export function prerender(): Plugin {
         const ogImage = rawOgImage && baseUrl && !rawOgImage.startsWith('http')
           ? `${baseUrl}${rawOgImage.startsWith('/') ? '' : '/'}${rawOgImage}`
           : rawOgImage;
-        const hasImage = Boolean(ogImage || siteConfig.image);
 
         // Map route paths to MDX source files for description fallbacks
         const docsDir = resolve(process.cwd(), 'docs');
@@ -69,6 +72,9 @@ export function prerender(): Plugin {
 
         const missingDescriptions: string[] = [];
         let count = 0;
+        if (seo.generateSocialImages !== false) {
+          renderSocialPreview({ route: '/', title: siteConfig.title || siteName, description: siteConfig.description || '', config: typedConfig, docsDir, outDir });
+        }
 
         for (const page of frontmatter) {
           const routePath = page.path;
@@ -80,8 +86,21 @@ export function prerender(): Plugin {
             missingDescriptions.push(routePath);
           }
           const fullUrl = baseUrl ? `${baseUrl}${routePath}` : '';
+          const scope = contentScope(typedConfig, routePath);
+          const customImage = typeof page.image === 'string' ? page.image : typeof page.ogImage === 'string' ? page.ogImage : '';
+          let image = customImage;
+          if (!image && seo.generateSocialImages !== false) {
+            image = renderSocialPreview({ route: routePath, title: page.title || siteName, description, config: typedConfig, docsDir, outDir });
+          }
+          image ||= ogImage || siteConfig.image || '';
+          if (image && !/^https?:\/\//i.test(image)) image = `${baseUrl || getBasePath(siteConfig)}/${image.replace(/^\.?\//, '')}`;
 
-          let html = baseHtml;
+          // Route-specific structured data replaces the homepage graph.
+          let html = baseHtml.replace(/<script type="application\/ld\+json" data-dory-site-schema>[\s\S]*?<\/script>/, '');
+          html = html.replace(/<html\b([^>]*)>/, (_match, attrs: string) => {
+            const withoutLang = attrs.replace(/\s+lang="[^"]*"/, '');
+            return `<html${withoutLang} lang="${escapeHtml(scope.locale)}">`;
+          });
           // Function replacements so `$&` etc. in values cannot corrupt output
           const setTag = (re: RegExp, replacement: string) => {
             html = html.replace(re, () => replacement);
@@ -105,27 +124,30 @@ export function prerender(): Plugin {
             /<meta property="og:description" content=".*?" \/>/,
             `<meta property="og:description" content="${escapeHtml(description)}" />`
           );
+          if (typedConfig.i18n) {
+            setTag(
+              /<meta property="og:locale" content=".*?" \/>/,
+              `<meta property="og:locale" content="${escapeHtml(scope.locale.replace(/-/g, '_'))}" />`
+            );
+          }
           setTag(
             /<meta property="og:type" content=".*?" \/>/,
             '<meta property="og:type" content="article" />'
           );
-          if (ogImage) {
+          if (image) {
             setTag(
               /<meta property="og:image" content=".*?" \/>/,
-              `<meta property="og:image" content="${escapeHtml(ogImage)}" />`
+              `<meta property="og:image" content="${escapeHtml(image)}" />`
             );
             setTag(
               /<meta name="twitter:image" content=".*?" \/>/,
-              `<meta name="twitter:image" content="${escapeHtml(ogImage)}" />`
+              `<meta name="twitter:image" content="${escapeHtml(image)}" />`
             );
           }
-          if (!hasImage) {
-            // No shareable image — a large-image card would render broken
-            setTag(
-              /<meta name="twitter:card" content=".*?" \/>/,
-              '<meta name="twitter:card" content="summary" />'
-            );
-          }
+          setTag(
+            /<meta name="twitter:card" content=".*?" \/>/,
+            `<meta name="twitter:card" content="${image ? escapeHtml(seo.twitterCard || 'summary_large_image') : 'summary'}" />`
+          );
 
           // Twitter tags
           setTag(
@@ -148,6 +170,14 @@ export function prerender(): Plugin {
               /<link rel="canonical" href=".*?" \/>/,
               `<link rel="canonical" href="${escapeHtml(fullUrl)}" />`
             );
+          }
+
+          if (baseUrl && typedConfig.i18n) {
+            for (const locale of typedConfig.i18n.locales) {
+              const alternate = scopedPath(typedConfig, routePath, locale.code, scope.version);
+              if (!fileByRoute[alternate]) continue;
+              injectHeadTag(`<link rel="alternate" hreflang="${escapeHtml(locale.code)}" href="${escapeHtml(`${baseUrl}${alternate}`)}" />`);
+            }
           }
 
           // Per-page robots directive from frontmatter
@@ -253,14 +283,11 @@ function write404(
   let html = baseHtml;
   html = html.replace(/<title>.*?<\/title>/, () => `<title>Page not found — ${escapeHtml(siteName)}</title>`);
   html = html.replace('</head>', () => '  <meta name="robots" content="noindex" />\n  </head>');
+  // Leave #app empty so the client renders the same UX NotFoundPage used for unknown routes.
+  // A separate noscript fallback keeps the static 404 useful without JavaScript.
   html = html.replace(
-    '<div id="app"></div>',
-    () =>
-      '<div id="app"><main style="max-width:36rem;margin:6rem auto;padding:0 1.5rem;font-family:sans-serif;text-align:center">' +
-      '<h1>Page not found</h1>' +
-      '<p>The page you are looking for does not exist.</p>' +
-      `<p><a href="${escapeHtml(firstHref)}">Go to ${escapeHtml(firstTitle)}</a></p>` +
-      '</main></div>'
+    '<noscript>You need to enable JavaScript to run this app.</noscript>',
+    () => `<noscript><main><h1>Page not found</h1><p>The page you are looking for does not exist.</p><p><a href="${escapeHtml(firstHref)}">Go to ${escapeHtml(firstTitle)}</a></p></main></noscript>`
   );
   writeFileSync(resolve(outDir, '404.html'), html, 'utf-8');
 }

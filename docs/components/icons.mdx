@@ -1,150 +1,71 @@
 ---
 title: 'Icons'
-description: 'Inline icons from the Lucide and FontAwesome libraries using the Icon component.'
+description: 'The shared Clidey Design icon suite for inline content and components.'
 ---
 
 # Icons
 
-The `<Icon>` component renders icons inline within text or as standalone visual elements. It supports **Lucide** icons by default and falls back to **FontAwesome** when a Lucide icon isn't found.
+The `<Icon>` component renders icons from `@clidey/ux/icons`. Icons inherit the text color unless you set `color`. Names use kebab-case.
 
 ## Basic Usage
 
 <Specimen label="&lt;Icon&gt;">
 
 ```mdx
-<Icon icon="rocket" />
-<Icon icon="code-2" />
+<Icon icon="promote" />
+<Icon icon="code" />
 <Icon icon="check-circle" />
 ```
 
-<Icon icon="rocket" /> <Icon icon="code-2" /> <Icon icon="check-circle" />
+<Icon icon="promote" /> <Icon icon="code" /> <Icon icon="check-circle" />
 
 </Specimen>
 
-## With Color
+## Color and Size
 
 <Specimen label="&lt;Icon&gt;">
 
 ```mdx
-<Icon icon="heart" color="#ef4444" />
-<Icon icon="star" color="#f59e0b" />
-<Icon icon="shield-check" color="#22c55e" />
+<Icon icon="star" color="#f59e0b" size={16} />
+<Icon icon="star" color="#f59e0b" size={24} />
+<Icon icon="star" color="#f59e0b" size={40} />
 ```
 
-<Icon icon="heart" color="#ef4444" /> <Icon icon="star" color="#f59e0b" /> <Icon icon="shield-check" color="#22c55e" />
+<Icon icon="star" color="#f59e0b" size={16} /> <Icon icon="star" color="#f59e0b" size={24} /> <Icon icon="star" color="#f59e0b" size={40} />
 
 </Specimen>
 
-## With Size
-
-<Specimen label="&lt;Icon&gt;">
-
-```mdx
-<Icon icon="zap" size={16} />
-<Icon icon="zap" size={24} />
-<Icon icon="zap" size={40} />
-```
-
-<Icon icon="zap" size={16} /> <Icon icon="zap" size={24} /> <Icon icon="zap" size={40} />
-
-</Specimen>
-
-## Lucide Icons in Context
-
-Icons work well alongside text:
+## Icons in Context
 
 <Specimen label="&lt;Icon&gt;">
 
 ```mdx
 <Icon icon="terminal" size={16} /> Run `dory build` to compile your site.
 
-<Icon icon="package" size={16} /> Install with `npm install -g @clidey/dory`.
+<Icon icon="packages" size={16} /> Install with `npm install -g @clidey/dory`.
 
-<Icon icon="git-branch" size={16} /> Push the `dist/` directory to your hosting provider.
+<Icon icon="branch" size={16} /> Push the `dist/` directory to your hosting provider.
 ```
 
 <Icon icon="terminal" size={16} /> Run `dory build` to compile your site.
 
-<Icon icon="package" size={16} /> Install with `npm install -g @clidey/dory`.
+<Icon icon="packages" size={16} /> Install with `npm install -g @clidey/dory`.
 
-<Icon icon="git-branch" size={16} /> Push the `dist/` directory to your hosting provider.
-
-</Specimen>
-
-## FontAwesome Fallback
-
-When a Lucide icon isn't found, Dory falls back to FontAwesome. Specify the icon type with `iconType`:
-
-<Specimen label="&lt;Icon&gt;">
-
-```mdx
-<Icon icon="github" iconType="brands" size={24} />
-<Icon icon="twitter" iconType="brands" size={24} />
-<Icon icon="npm" iconType="brands" size={24} />
-```
-
-<Icon icon="github" iconType="brands" size={24} /> <Icon icon="twitter" iconType="brands" size={24} /> <Icon icon="npm" iconType="brands" size={24} />
+<Icon icon="branch" size={16} /> Push the `dist/` directory to your hosting provider.
 
 </Specimen>
 
-## Icon Set
+## Icon Catalog
 
-One stroke icon set, used by Card, Accordion and Icon. Click an icon to copy its tag.
+The catalog includes every icon published by Clidey Design, including distinct variants with `-alt` suffixes. Click an icon to copy its MDX tag. Existing source-prefixed names such as `enterprise/chevron-down` continue to work.
 
-<Specimen label="&lt;Icon icon=&quot;…&quot; /&gt; &lt;IconGrid&gt;">
-
-```mdx
-<IconGrid icons={["database", "box", "share-2", "table", "columns-3", "code", "square-terminal", "search"]} />
-```
-
-<IconGrid icons={["database", "box", "share-2", "table", "columns-3", "code", "square-terminal", "search", "file-text", "folder", "circle-check", "lock", "shield", "sparkles", "chart-column", "git-fork", "arrow-left-right", "cloud", "globe", "sliders-horizontal"]} />
-
-<SpecimenProps>
-
-<Prop name="icons" type="string[]">Lucide icon names to show.</Prop>
-<Prop name="cols" type="number">Tiles per row. Default: `4`.</Prop>
-
-</SpecimenProps>
-
-</Specimen>
-
-## Common Lucide Icon Names
-
-Icons use **kebab-case** names from the [Lucide icon library](https://lucide.dev):
-
-<Row>
-  <Col>
-    | Icon | Name |
-    | --- | --- |
-    | <Icon icon="rocket" size={18} /> | `rocket` |
-    | <Icon icon="code-2" size={18} /> | `code-2` |
-    | <Icon icon="layers" size={18} /> | `layers` |
-    | <Icon icon="settings" size={18} /> | `settings` |
-    | <Icon icon="zap" size={18} /> | `zap` |
-    | <Icon icon="lock" size={18} /> | `lock` |
-    | <Icon icon="globe" size={18} /> | `globe` |
-    | <Icon icon="package" size={18} /> | `package` |
-  </Col>
-  <Col>
-    | Icon | Name |
-    | --- | --- |
-    | <Icon icon="check-circle" size={18} /> | `check-circle` |
-    | <Icon icon="alert-triangle" size={18} /> | `alert-triangle` |
-    | <Icon icon="info" size={18} /> | `info` |
-    | <Icon icon="star" size={18} /> | `star` |
-    | <Icon icon="heart" size={18} /> | `heart` |
-    | <Icon icon="git-branch" size={18} /> | `git-branch` |
-    | <Icon icon="terminal" size={18} /> | `terminal` |
-    | <Icon icon="file-text" size={18} /> | `file-text` |
-  </Col>
-</Row>
+<IconGrid />
 
 ## Props Reference
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
-| `icon` | `string` | — | Icon name in kebab-case (e.g. `"check-circle"`). |
-| `iconType` | `'solid' \| 'regular' \| 'brands'` | `'solid'` | FontAwesome icon type (used as fallback). |
-| `color` | `string` | Inherits from theme | CSS color value (hex, rgb, named color). |
+| `icon` | `string` | — | Clidey Design icon name, such as `check-circle`. |
+| `color` | `string` | Inherits from text | CSS color value. |
 | `size` | `number` | `24` | Icon size in pixels. |
 | `className` | `string` | — | Additional CSS classes. |

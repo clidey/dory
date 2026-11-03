@@ -2,6 +2,7 @@ import matter from 'gray-matter';
 import fs from 'fs';
 import path from 'path';
 import { normalizeBasePath } from '../utils/base-path.ts';
+export { stripMdxToText } from '../utils/search-content.ts';
 
 /**
  * Shared helpers for build plugins that read docs/*.mdx and docs/dory.json.
@@ -89,12 +90,13 @@ export function getNavigationOrder(docsDir: string): string[] {
  * e.g. docs/getting-started/installation.mdx -> /getting-started/installation.
  */
 export function pathFromFilename(filename: string, docsDir: string): string {
-  return filename
+  const route = filename
     .replace(docsDir, '')
     .replace(/\/?index\.mdx$/, '/')
     .replace(/\.mdx$/, '')
     .replace(/\\/g, '/')
     .toLowerCase();
+  return route.length > 1 ? route.replace(/\/$/, '') : route;
 }
 
 /**
@@ -117,22 +119,6 @@ export function findMdxFilesMap(dir: string, baseDir: string): Record<string, st
   }
 
   return files;
-}
-
-/**
- * Strips MDX/JSX syntax to extract plain text (for search indexing and
- * meta description fallbacks).
- */
-export function stripMdxToText(content: string): string {
-  return content
-    .replace(/^import\s+.*$/gm, '')           // import statements
-    .replace(/^export\s+.*$/gm, '')           // export statements
-    .replace(/```[\s\S]*?```/g, '')           // fenced code blocks
-    .replace(/<[^>]+>/g, '')                  // JSX/HTML tags
-    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')  // markdown links -> text
-    .replace(/[#*_~`>|]/g, '')                // markdown syntax chars
-    .replace(/\n{3,}/g, '\n\n')               // collapse blank lines
-    .trim();
 }
 
 /**

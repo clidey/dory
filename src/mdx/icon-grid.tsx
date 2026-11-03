@@ -1,8 +1,11 @@
 import { useNotification } from '../components/notification'
 import { Icon } from './icon'
+import { icons as catalog } from '@clidey/ux/icons'
+
+const iconNames = Object.keys(catalog).sort()
 
 /** Grid of icon tiles. Clicking a tile copies its `<Icon icon="…" />` tag. */
-export function IconGrid({ icons, cols = 4 }: { icons: string[]; cols?: number }) {
+export function IconGrid({ icons = iconNames, cols = 4 }: { icons?: string[]; cols?: number }) {
   const { showNotification } = useNotification()
 
   const copy = (name: string) => {

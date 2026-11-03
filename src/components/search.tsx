@@ -6,6 +6,7 @@ import {
 } from '@algolia/autocomplete-core'
 import { Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react'
 import {
+  Fragment,
   forwardRef,
   Suspense,
   useCallback,
@@ -16,17 +17,20 @@ import {
 } from 'react'
 import type { TargetedEvent, TargetedKeyboardEvent, TargetedMouseEvent } from 'preact'
 import Highlighter from 'react-highlight-words'
-import { cn, Spinner, SearchInput as UxSearchInput } from '@clidey/ux'
-import { Search as SearchIcon } from 'lucide-react'
+import { CatalogIcon, cn, Spinner, SearchInput as UxSearchInput } from '@clidey/ux'
+
 import classNames from 'classnames'
 import { useLocation } from 'wouter-preact'
 import { useMobileNavigation } from '../ui/mobile-navigation'
 import { useIsEmbedded, usePathname, useSearchParams } from './hooks'
 import { search } from './search-index'
-import { ALL_NAVIGATION } from './store'
+import { ensureSearchContent, getNavigationForPath } from './store'
+import { captureDocsEvent } from '../utils/analytics'
+import { ChatAssistant, useChatAssistant } from './chat-assistant'
 
 type EmptyObject = Record<string, never>
-type Result = any;
+type Result = { url: string; title: string; pageTitle?: string; kind?: 'ask' }
+const ASK_RESULT_URL = '__dory_ask__'
 
 type Autocomplete = AutocompleteApi<
   Result,
@@ -42,7 +46,7 @@ const SUGGESTED_PAGES = 3
  * the next few pages in navigation order.
  */
 function suggestions(pathname: string): Result[] {
-  const pages = ALL_NAVIGATION.flatMap(tab => tab.groups.flatMap(group => group.pages))
+  const pages = getNavigationForPath(pathname).flatMap(tab => tab.groups.flatMap(group => group.pages))
   const index = Math.max(0, pages.findIndex(page => page.href === pathname))
   const current = pages[index]
   if (!current) return []
@@ -60,18 +64,25 @@ function suggestions(pathname: string): Result[] {
   return [current, ...sections, ...next].map(item => ({ url: 'href' in item ? item.href : item.url, title: item.title }))
 }
 
-function useAutocomplete({ onNavigate }: { onNavigate: () => void }) {
+function useAutocomplete({ onNavigate, onAsk, chatEnabled }: { onNavigate: () => void; onAsk: (query: string) => void; chatEnabled: boolean }) {
   const id = useId()
   const [, nav] = useLocation()
   // getSources is created once, so read the current page through a ref.
   const pathnameRef = useRef('')
   pathnameRef.current = usePathname()
+  const queryRef = useRef('')
+  const onAskRef = useRef(onAsk)
+  onAskRef.current = onAsk
+  const chatEnabledRef = useRef(chatEnabled)
+  chatEnabledRef.current = chatEnabled
   const [autocompleteState, setAutocompleteState] = useState<
     AutocompleteState<Result> | EmptyObject
   >({})
 
   function navigate({ itemUrl }: { itemUrl?: string }) {
     if (itemUrl) {
+      const query = queryRef.current.trim()
+      if (query) captureDocsEvent('docs_search_result_clicked', { query, result: itemUrl, path: pathnameRef.current })
       nav(itemUrl);
     }
 
@@ -86,9 +97,10 @@ function useAutocomplete({ onNavigate }: { onNavigate: () => void }) {
       TargetedKeyboardEvent<HTMLElement>
     >({
       id,
-      placeholder: 'Search docs or ask a question',
+      placeholder: 'Search documentation',
       defaultActiveItemId: 0,
       onStateChange({ state }) {
+        queryRef.current = state.query
         setAutocompleteState(state)
       },
       openOnFocus: true,
@@ -102,13 +114,21 @@ function useAutocomplete({ onNavigate }: { onNavigate: () => void }) {
         return [
             {
               sourceId: 'documentation',
-              getItems() {
-                return query ? search(query, { limit: 8 }) : suggestions(pathnameRef.current)
+              async getItems() {
+                if (!query) return suggestions(pathnameRef.current)
+                await ensureSearchContent()
+                const pages = search(query, { limit: 8 })
+                return chatEnabledRef.current
+                  ? [{ url: ASK_RESULT_URL, title: query, kind: 'ask' as const }, ...pages]
+                  : pages
               },
               getItemUrl({ item }) {
-                return item.url
+                return item.kind === 'ask' ? undefined : item.url
               },
-              onSelect: navigate,
+              onSelect({ item }) {
+                if (item.kind === 'ask') onAskRef.current(item.title)
+                else navigate({ itemUrl: item.url })
+              },
             },
           ]
       },
@@ -118,11 +138,10 @@ function useAutocomplete({ onNavigate }: { onNavigate: () => void }) {
   return { autocomplete, autocompleteState }
 }
 
-
 function HighlightQuery({ text, query }: { text: string; query: string }) {
   return (
     <Highlighter
-      highlightClassName="underline bg-transparent text-brand-foreground"
+      highlightClassName="dory-search-highlight"
       searchWords={[query]}
       autoEscape={true}
       textToHighlight={text}
@@ -143,8 +162,21 @@ function SearchResult({
 }) {
   const id = useId()
 
+  if (result.kind === 'ask') {
+    return (
+      <li className="dory-search-result dory-search-ask-result flex cursor-default items-center gap-4 px-5 py-3" {...autocomplete.getItemProps({ item: result, source: collection.source })}>
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--primary)] text-[var(--primary-foreground)]" aria-hidden="true"><CatalogIcon name="ai" className="h-4 w-4" /></span>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-sm font-semibold text-foreground">{result.title}</span>
+          <span className="block text-xs text-muted-foreground">Ask Dory · answers cite these docs</span>
+        </span>
+        <span className="hidden gap-1 text-xs text-muted-foreground sm:flex" aria-hidden="true"><kbd className="dory-search-key">Tab</kbd><kbd className="dory-search-key">↵</kbd></span>
+      </li>
+    )
+  }
+
   const [currentPage, hash] = result.url.split('#')
-  const group = ALL_NAVIGATION.flatMap(tab => tab.groups)
+  const group = getNavigationForPath(currentPage).flatMap(tab => tab.groups)
     .find(group => group.pages.some(page => page.href === currentPage))
   const pageTitle = group?.pages.find(page => page.href === currentPage)?.title
   // Sections show "Group · Page" above their title; pages show only their group.
@@ -152,20 +184,23 @@ function SearchResult({
 
   return (
     <li
-      className="dory-search-result group block cursor-default px-8 py-3"
+      className="dory-search-result group flex cursor-default items-center gap-4 px-8 py-3"
       aria-labelledby={`${id}-hierarchy ${id}-title`}
       {...autocomplete.getItemProps({
         item: result,
         source: collection.source,
       })}
     >
-      {eyebrow && (
-        <div id={`${id}-hierarchy`} aria-hidden="true" className="dory-search-eyebrow truncate">
-          <HighlightQuery text={eyebrow} query={query} />
+      <span className="dory-search-result-icon flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[var(--border)]" aria-hidden="true"><CatalogIcon name="file" className="h-4 w-4" /></span>
+      <div className="min-w-0 flex-1">
+        <div id={`${id}-title`} aria-hidden="true" className="dory-search-title">
+          <HighlightQuery text={result.title} query={query} />
         </div>
-      )}
-      <div id={`${id}-title`} aria-hidden="true" className="dory-search-title">
-        <HighlightQuery text={result.title} query={query} />
+        {eyebrow && (
+          <div id={`${id}-hierarchy`} aria-hidden="true" className="dory-search-eyebrow truncate">
+            <HighlightQuery text={eyebrow} query={query} />
+          </div>
+        )}
       </div>
     </li>
   )
@@ -203,14 +238,16 @@ function SearchResults({
 
   return (
     <ul className="py-3" {...autocomplete.getListProps()}>
-      {collection.items.map((result) => (
-        <SearchResult
-          key={result.url}
-          result={result}
-          autocomplete={autocomplete}
-          collection={collection}
-          query={query}
-        />
+      {collection.items.map((result, index) => (
+        <Fragment key={result.url}>
+          {index === 1 && collection.items[0]?.kind === 'ask' && <li className="px-8 pb-1 pt-4 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground" role="presentation">Pages</li>}
+          <SearchResult
+            result={result}
+            autocomplete={autocomplete}
+            collection={collection}
+            query={query}
+          />
+        </Fragment>
       ))}
     </ul>
   )
@@ -222,20 +259,25 @@ const SearchInput = forwardRef<
     autocomplete: Autocomplete
     autocompleteState: AutocompleteState<Result> | EmptyObject
     onClose: () => void
+    onAsk: () => void
+    chatEnabled: boolean
   }
->(function SearchInput({ autocomplete, autocompleteState, onClose }, inputRef) {
+>(function SearchInput({ autocomplete, autocompleteState, onClose, onAsk, chatEnabled }, inputRef) {
   const inputProps = autocomplete.getInputProps({ inputElement: null })
 
   return (
-    <div className="relative flex h-16 items-center gap-3 px-7">
-      <SearchIcon aria-hidden="true" className="h-5 w-5 shrink-0 text-muted-foreground" />
+    <div className="relative flex h-16 items-center gap-2 px-4 sm:gap-3 sm:px-7">
+      <CatalogIcon name="search" aria-hidden="true" className="h-5 w-5 shrink-0 text-muted-foreground" />
       <input
         ref={inputRef}
         data-autofocus
         className="dory-search-input h-full min-w-0 flex-1 bg-transparent outline-none"
         {...inputProps}
         onKeyDown={(event) => {
-          if (
+          if (event.key === 'Tab' && !event.shiftKey && chatEnabled) {
+            event.preventDefault()
+            onAsk()
+          } else if (
             event.key === 'Escape' &&
             autocompleteState.query === ''
           ) {
@@ -253,7 +295,9 @@ const SearchInput = forwardRef<
       />
       {autocompleteState.status === 'stalled'
         ? <Spinner className="h-5 w-5 animate-spin text-brand-foreground" />
-        : <kbd className="dory-search-esc">Esc</kbd>}
+        : null}
+      <span className="dory-search-active" aria-current="page">Search</span>
+      {chatEnabled && <button type="button" className="dory-search-ask-button" onClick={onAsk}>Ask Dory</button>}
     </div>
   )
 })
@@ -272,18 +316,62 @@ function SearchDialog({
   const formRef = useRef<React.ElementRef<'form'>>(null)
   const panelRef = useRef<React.ElementRef<'div'>>(null)
   const inputRef = useRef<React.ElementRef<typeof SearchInput>>(null)
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const chat = useChatAssistant()
+  const [mode, setMode] = useState<'search' | 'chat'>('search')
   const { autocomplete, autocompleteState } = useAutocomplete({
     onNavigate() {
       onNavigate()
       setOpen(false)
     },
+    onAsk: askSearchQuery,
+    chatEnabled: chat.enabled,
   })
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
+
+  function askSearchQuery(query: string) {
+    if (!chat.enabled) return
+    captureDocsEvent('docs_chat_opened', { path: window.location.pathname })
+    setMode('chat')
+    if (query.trim().length >= 3) void chat.ask(query)
+    else chat.setDraft(query)
+  }
+
+  function showChat() {
+    if (!chat.enabled) return
+    const query = autocompleteState.query?.trim()
+    if (query) chat.setDraft(query)
+    captureDocsEvent('docs_chat_opened', { path: window.location.pathname })
+    setMode('chat')
+  }
+
+  function showSearch() {
+    if (chat.draft.trim() && !autocompleteState.query?.trim()) autocomplete.setQuery(chat.draft)
+    setMode('search')
+  }
+
+  useEffect(() => {
+    if (chat.enabled && autocompleteState.query) void autocomplete.refresh()
+  }, [chat.enabled])
+
+  useEffect(() => {
+    if (!open || !autocompleteState.isOpen || !autocompleteState.collections) return
+    const query = autocompleteState.query?.trim()
+    if (!query) return
+    const resultCount = autocompleteState.collections.reduce((count, collection) => count + collection.items.filter(item => item.kind !== 'ask').length, 0)
+    const timeout = window.setTimeout(() => {
+      captureDocsEvent('docs_search', { query, result_count: resultCount, path: pathname })
+    }, 600)
+    return () => window.clearTimeout(timeout)
+  }, [open, autocompleteState.query, autocompleteState.collections, autocompleteState.isOpen, pathname])
 
   useEffect(() => {
     setOpen(false)
   }, [pathname, searchParams, setOpen])
+
+  useEffect(() => {
+    if (!open) setMode('search')
+  }, [open])
 
   useEffect(() => {
     if (open) {
@@ -321,9 +409,9 @@ function SearchDialog({
       <div className="fixed inset-0 overflow-y-auto px-4 py-4 sm:px-6 sm:py-20 md:py-32 lg:px-8 lg:py-[15vh] max-w-[calc(100vw-16px)]">
         <DialogPanel
           transition
-          className="dory-search-panel max-sm:mt-[10vh] mx-auto transform-gpu overflow-hidden data-closed:scale-95 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:max-w-3xl"
+          className="dory-search-panel max-sm:mt-[4vh] mx-auto transform-gpu overflow-hidden data-closed:scale-95 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:max-w-5xl"
         >
-          <div {...autocomplete.getRootProps({})}>
+          {mode === 'search' ? <div {...autocomplete.getRootProps({})}>
             <form
               ref={formRef}
               {...autocomplete.getFormProps({
@@ -335,6 +423,8 @@ function SearchDialog({
                 autocomplete={autocomplete}
                 autocompleteState={autocompleteState}
                 onClose={() => setOpen(false)}
+                onAsk={showChat}
+                chatEnabled={chat.enabled}
               />
               <div
                 ref={panelRef}
@@ -350,7 +440,21 @@ function SearchDialog({
                 )}
               </div>
             </form>
-          </div>
+            <div className="dory-search-footer" aria-hidden="true">
+              <span>↑ ↓ Navigate</span><span>↵ Open</span>{chat.enabled && <span>Tab Ask Dory</span>}<span>Esc Close</span>
+            </div>
+          </div> : <>
+            <div className="dory-search-tabs flex items-center gap-2 border-b border-[var(--border)] px-5 py-4 sm:px-7">
+              <div className="min-w-0 flex-1">
+                <h2 className="text-base font-semibold text-foreground">Ask Dory</h2>
+                <p className="text-xs text-muted-foreground">Grounded in these docs</p>
+              </div>
+              {chat.messages.length > 0 && <button type="button" onClick={chat.reset} className="rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-[var(--accent)]">+ New</button>}
+              <button type="button" onClick={showSearch} className="rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-[var(--accent)]">Search</button>
+              <span className="rounded-lg bg-[var(--brand-primary)] px-3 py-2 text-sm font-semibold text-white">Ask Dory</span>
+            </div>
+            <ChatAssistant chat={chat} onNavigate={() => { onNavigate(); setOpen(false) }} onSearch={showSearch} />
+          </>}
         </DialogPanel>
       </div>
     </Dialog>
@@ -373,8 +477,9 @@ function useSearchProps() {
       open,
       setOpen: useCallback(
         (open: boolean) => {
+          const trigger = inputRef.current?.closest('[data-slot="search-input-wrapper"]') ?? inputRef.current
           const { width = 0, height = 0 } =
-            inputRef.current?.getBoundingClientRect?.() ?? {}
+            trigger?.getBoundingClientRect?.() ?? {}
           if (!open || (width !== 0 && height !== 0)) {
             setOpen(open)
           }
@@ -397,8 +502,8 @@ export function Search() {
       onClick={isEmbedded ? buttonProps.onClick : undefined}
     >
       <UxSearchInput
-        aria-label="Search or ask…"
-        placeholder="Search or ask…"
+        aria-label="Search documentation"
+        placeholder="Search documentation"
         {...buttonProps}
       />
       <Suspense fallback={null}>
@@ -416,16 +521,25 @@ export function MobileSearch() {
   return (
     <div
       className={cn({
-        "contents": !isEmbedded,
+        "inline-flex": !isEmbedded,
         "[&_input]:hidden [&_svg]:mr-0 cursor-pointer": isEmbedded,
       }, "lg:hidden")}
-      onClick={isEmbedded ? buttonProps.onClick : undefined}
+      role="button"
+      tabIndex={0}
+      aria-label="Search documentation"
+      onClick={buttonProps.onClick}
+      onKeyDown={event => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault()
+          buttonProps.onClick()
+        }
+      }}
     >
       <UxSearchInput
         className="text-sm"
-        aria-label="Search or ask…"
+        aria-label="Search documentation"
         {...buttonProps}
-        placeholder="Search or ask…"
+        placeholder="Search documentation"
       />
       <Suspense fallback={null}>
         <SearchDialog

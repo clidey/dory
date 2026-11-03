@@ -1,6 +1,9 @@
 # pnpm settings. Since pnpm 12, .npmrc only carries registry and auth settings;
 # everything else lives here. See https://pnpm.io/settings
 
+packages:
+  - '.'
+
 # Fail on missing or invalid peer dependencies
 strictPeerDependencies: true
 

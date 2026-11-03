@@ -44,12 +44,23 @@ https://github.com/user-attachments/assets/5a2840ce-a0b9-41fd-8d15-3ee1d2356f07
 Install Dory globally to use the CLI tool:
 
 ```bash
-npm install -g @clidey/dory
+pnpm add -g @clidey/dory
 ```
 
 ### CLI Usage
 
 Once installed, you can use the `dory` command:
+
+```bash
+mkdir my-docs && cd my-docs
+dory init       # Create dory.json and docs/introduction.mdx
+dory dev        # Live authoring preview
+dory check      # Validate navigation, links, assets, and metadata
+dory build      # Generate dist/
+dory preview    # Serve the build, including optional documentation chat
+```
+
+Keep pages in `docs/` and run commands from the directory containing `dory.json`. Existing flat projects still work. Builds use an isolated workspace and leave the installed package untouched. See [documentation chat](docs/configuration/chat.mdx) for a server-side model and [languages and versions](docs/configuration/internationalization.mdx) for localized content.
 
 #### `dory build`
 Builds your documentation site:

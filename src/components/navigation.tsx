@@ -1,132 +1,89 @@
-import classNames from 'classnames';
-import { ChevronsUpDown } from 'lucide-react';
-import { useEffect, useMemo, useRef } from 'preact/hooks';
+import { CatalogIcon } from '@clidey/ux'
+import type { ComponentChildren } from 'preact';
+
 import { Link } from 'wouter-preact';
 import docsConfig from '../../docs/dory.json' with { type: 'json' };
 import type { DoryConfig } from '../types/config';
-import { DORY_REPO_URL, DoryMark } from '../ui/dory-mark';
+import { DocsNavigationView, type NavigationPage } from '../ui/docs-navigation-view';
 import { usePathname } from './hooks';
-import { ALL_NAVIGATION, completeFrontMatter } from './store';
+import { ALL_PAGES, completeFrontMatter, getNavigationForPath } from './store';
+import { contentScope, scopedPath } from '../utils/content-scope';
+import { withBase } from '../utils/base-path';
 
 const config = docsConfig as DoryConfig;
 
 type Frontmatter = Record<string, any>;
 
-const methodTone: Record<string, string> = {
-    GET: 'text-[var(--sidebar-primary)]',
-    POST: 'text-[var(--highlight)]',
-    PUT: 'text-[#f4781c]',
-    PATCH: 'text-[#f4781c]',
-    DEL: 'text-[#ff6668]',
-    PUB: 'text-[#f4781c]',
-    SUB: 'text-[var(--sidebar-primary)]',
-    WS: 'text-[var(--sidebar-primary)]',
-};
-
 /** Sidebar label for a page. API pages show a method tag and their path or message name. */
 function pageLabel(href: string, title: string, frontmatter: Frontmatter[]): { method?: string; title: string } {
-    const fm = frontmatter.find((entry) => entry.path === href);
-    if (typeof fm?.openapi === 'string') {
-        const [verb, path] = fm.openapi.split(' ');
-        const method = verb.toUpperCase() === 'DELETE' ? 'DEL' : verb.toUpperCase();
-        return { method, title: path ?? title };
-    }
-    if (typeof fm?.asyncapi === 'string') {
-        const [operation] = fm.asyncapi.split(' ');
-        return { method: operation.toLowerCase() === 'publish' ? 'PUB' : 'SUB', title };
-    }
-    return { title };
+  const fm = frontmatter.find((entry) => entry.path === href);
+  if (typeof fm?.openapi === 'string') {
+    const [verb, path] = fm.openapi.split(' ');
+    const method = verb.toUpperCase() === 'DELETE' ? 'DEL' : verb.toUpperCase();
+    return { method, title: path ?? title };
+  }
+  if (typeof fm?.asyncapi === 'string') {
+    const [operation] = fm.asyncapi.split(' ');
+    return { method: operation.toLowerCase() === 'publish' ? 'PUB' : 'SUB', title };
+  }
+  return { title };
 }
 
-/**
- * Dark sidebar: version card, every navigation group numbered in order, and a
- * "Built with Dory" footer. Pass `frontmatter` when rendering on the server;
- * the client reads the loaded frontmatter store.
- */
+/** Static-site adapter for Dory's shared documentation navigation. */
 export function Navigation({ frontmatter = completeFrontMatter }: { frontmatter?: Frontmatter[] }) {
-    const pathname = usePathname();
+  const pathname = usePathname();
+  const scope = contentScope(config, pathname);
+  const navigation = getNavigationForPath(pathname);
+  const switchTo = (locale: string, version: string) => {
+    const candidate = scopedPath(config, pathname, locale, version);
+    if (ALL_PAGES[candidate]) return candidate;
+    return getNavigationForPath(candidate)[0]?.groups[0]?.pages[0]?.href ?? '/';
+  };
+  const effectivePath = pathname === '/'
+    ? navigation[0]?.groups[0]?.pages[0]?.href ?? '/'
+    : pathname;
+  const groups = navigation.flatMap(tab => tab.groups).map(group => ({
+    title: group.title,
+    pages: group.pages.map(page => {
+      const translatedTitle = frontmatter.find(entry => entry.path === page.href)?.title ?? page.title;
+      return { ...page, ...pageLabel(page.href, translatedTitle, frontmatter) };
+    }),
+  }));
+  const currentVersion = config.versions?.find(version => version.id === scope.version);
+  const versionLabel = currentVersion?.label ?? config.version;
+  const versionSelect = config.versions && config.versions.length > 0 ? <>
+    <CatalogIcon name="up-down" aria-hidden="true" className="h-3.5 w-3.5 text-white/50" />
+    {/* Transparent native select over the card: keyboard and screen-reader friendly. */}
+    <select
+      aria-label="Version"
+      value={scope.version}
+      onChange={event => {
+        const id = (event.target as HTMLSelectElement).value;
+        const version = config.versions?.find(entry => entry.id === id || entry.url === id);
+        const target = version?.url ?? withBase(switchTo(scope.locale, id));
+        window.location.href = target;
+      }}
+      className="absolute inset-0 cursor-pointer opacity-0"
+    >
+      <option value="">{config.version}</option>
+      {config.versions.map(version => <option key={version.id ?? version.url} value={version.id ?? version.url}>{version.label}</option>)}
+    </select>
+  </> : undefined;
+  const languageSelect = config.i18n && config.i18n.locales.length > 1 ?
+    <label className="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-white">
+      <span className="dory-mono-label">Language</span>
+      <select
+        aria-label="Language"
+        value={scope.locale}
+        onChange={event => { window.location.href = withBase(switchTo((event.target as HTMLSelectElement).value, scope.version)); }}
+        className="min-w-0 max-w-32 bg-transparent text-right text-sm text-white"
+      >
+        {config.i18n.locales.map(locale => <option key={locale.code} value={locale.code} className="text-black">{locale.label}</option>)}
+      </select>
+    </label> : undefined;
+  const renderPageLink = (page: NavigationPage, className: string, active: boolean, children: ComponentChildren) =>
+    <Link href={page.href} aria-current={active ? 'page' : undefined} className={className}>{children}</Link>;
 
-    const effectivePath = pathname === '/'
-        ? ALL_NAVIGATION[0]?.groups[0]?.pages[0]?.href ?? '/'
-        : pathname;
-
-    // Long sidebars scroll; bring the active page into view on load and on navigation.
-    const navRef = useRef<HTMLElement>(null);
-    useEffect(() => {
-        navRef.current?.querySelector('a[aria-current="page"]')?.scrollIntoView({ block: 'nearest' });
-    }, [effectivePath]);
-
-    // The top bar's tabs are section shortcuts; the sidebar always lists every group.
-    const groups = useMemo(() => ALL_NAVIGATION.flatMap(tab => tab.groups), []);
-
-    return (
-        <nav ref={navRef} className="dory-sidebar flex min-h-full flex-col gap-6 text-[13px]" aria-label="Documentation">
-            {config.version && (
-                <div className="relative flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-3 py-2.5">
-                    <div>
-                        <p className="dory-mono-label">Version</p>
-                        <p className="mt-0.5 text-sm font-semibold text-white">{config.version}</p>
-                    </div>
-                    {config.versions && config.versions.length > 0 && (
-                        <>
-                            <ChevronsUpDown aria-hidden="true" className="h-3.5 w-3.5 text-white/50" />
-                            {/* Transparent native select over the card: keyboard and screen-reader friendly, no JS menu to hydrate. */}
-                            <select
-                                aria-label="Version"
-                                value=""
-                                onChange={(event) => {
-                                    const url = (event.target as HTMLSelectElement).value;
-                                    if (url) window.location.href = url;
-                                }}
-                                className="absolute inset-0 cursor-pointer opacity-0"
-                            >
-                                <option value="" disabled>{config.version}</option>
-                                {config.versions.map((version) => (
-                                    <option key={version.url} value={version.url}>{version.label}</option>
-                                ))}
-                            </select>
-                        </>
-                    )}
-                </div>
-            )}
-
-            {groups.map((group, index) => (
-                <section key={group.title}>
-                    <h3 className="dory-mono-label flex gap-2 px-2.5 !text-[var(--sidebar-primary)]">
-                        <span>{String(index + 1).padStart(2, '0')}</span>
-                        <span className="text-white/55">{group.title}</span>
-                    </h3>
-                    <ul role="list" className="mt-2 space-y-0.5">
-                        {group.pages.map((page) => {
-                            const { method, title } = pageLabel(page.href, page.title, frontmatter);
-                            const isActive = effectivePath === page.href;
-                            return (
-                                <li key={page.href}>
-                                    <Link
-                                        href={page.href}
-                                        aria-current={isActive ? 'page' : undefined}
-                                        className={classNames('dory-sidebar-link', { active: isActive })}
-                                    >
-                                        {method && <span className={classNames('dory-method', methodTone[method] ?? 'text-white/60')}>{method}</span>}
-                                        <span className="truncate">{title}</span>
-                                        {page.badge && <span className="dory-badge">{page.badge}</span>}
-                                    </Link>
-                                </li>
-                            );
-                        })}
-                    </ul>
-                </section>
-            ))}
-
-            <a
-                href={DORY_REPO_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="dory-sidebar-footer mt-auto flex items-center gap-2.5 border-t border-white/10 px-2.5 pt-4"
-            >
-                <DoryMark className="h-4 w-4" />
-                <span className="dory-mono-label">Built with Dory</span>
-            </a>
-        </nav>
-    );
+  return <DocsNavigationView groups={groups} activeHref={effectivePath} renderPageLink={renderPageLink}
+    versionLabel={versionLabel} versionSelect={versionSelect} languageSelect={languageSelect} />;
 }

@@ -1,11 +1,11 @@
-import { Button, TextArea, useTheme, Input as UxInput } from '@clidey/ux'
+import { CatalogIcon, Button, TextArea, useTheme, Input as UxInput } from '@clidey/ux'
 
 // The ux Input is typed against React's input props, which Preact 11's compat types no longer expose.
 const Input = UxInput as unknown as (props: preact.JSX.IntrinsicElements['input']) => preact.JSX.Element
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react'
-import { CheckIcon } from '@heroicons/react/24/outline'
+
 import classNames from 'classnames'
-import { PencilIcon, PlusIcon, TrashIcon, XIcon } from 'lucide-react'
+
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks'
 import { Highlight, themes } from 'prism-react-renderer'
 import Dropdown from '../components/dropdown'
@@ -179,10 +179,10 @@ export const HeadersTab = ({ requestConfig, setRequestConfig }: HeadersTabProps)
                 className="flex-1 text-sm"
               />
               <Button onClick={() => saveHeader(idx)}>
-                <CheckIcon className="w-4 h-4" />
+                <CatalogIcon name="check" className="w-4 h-4" />
               </Button>
               <Button onClick={() => cancelEdit(idx)}>
-                <XIcon className="w-4 h-4" />
+                <CatalogIcon name="close" className="w-4 h-4" />
               </Button>
             </>
           ) : (
@@ -190,17 +190,17 @@ export const HeadersTab = ({ requestConfig, setRequestConfig }: HeadersTabProps)
               <span className="text-sm  w-32 truncate">{hdr.key}</span>
               <span className="text-sm  flex-1 truncate">{hdr.value}</span>
               <Button onClick={() => editHeader(idx)}>
-                <PencilIcon className="w-4 h-4" />
+                <CatalogIcon name="edit" className="w-4 h-4" />
               </Button>
               <Button onClick={() => removeHeader(idx)} className="text-red-400">
-                <TrashIcon className="w-4 h-4" />
+                <CatalogIcon name="trash" className="w-4 h-4" />
               </Button>
             </>
           )}
         </div>
       ))}
       <Button onClick={addEmptyHeaderRow} className="text-sm mt-2 w-fit">
-        <PlusIcon className="w-4 h-4" /> Add Header
+        <CatalogIcon name="plus" className="w-4 h-4" /> Add Header
       </Button>
     </div>
   )
@@ -287,10 +287,10 @@ export const ParamsTab = ({ queryParams, setQueryParams }: ParamsTabProps) => {
               <Input value={p.name} onChange={e => updateParam(i, 'name', (e.target as HTMLInputElement).value)} placeholder="Param name" className="w-32 text-sm" />
               <Input value={p.value} onChange={e => updateParam(i, 'value', (e.target as HTMLInputElement).value)} placeholder="Param value" className="flex-1 text-sm" />
               <Button onClick={() => saveParam(i)}>
-                <CheckIcon className="w-4 h-4" />
+                <CatalogIcon name="check" className="w-4 h-4" />
               </Button>
               <Button onClick={() => cancelEdit(i)}>
-                <XIcon className="w-4 h-4" />
+                <CatalogIcon name="close" className="w-4 h-4" />
               </Button>
             </>
           ) : (
@@ -298,22 +298,21 @@ export const ParamsTab = ({ queryParams, setQueryParams }: ParamsTabProps) => {
               <span className="w-32 truncate text-sm">{p.name}</span>
               <span className="flex-1 truncate text-sm">{p.value}</span>
               <Button onClick={() => editParam(i)}>
-                <PencilIcon className="w-4 h-4" />
+                <CatalogIcon name="edit" className="w-4 h-4" />
               </Button>
               <Button onClick={() => removeParam(i)} className="text-red-400">
-                <TrashIcon className="w-4 h-4" />
+                <CatalogIcon name="trash" className="w-4 h-4" />
               </Button>
             </>
           )}
         </div>
       ))}
       <Button onClick={addParamRow} className="mt-2 text-sm self-end">
-        <PlusIcon className="w-4 h-4" /> Add Parameter
+        <CatalogIcon name="plus" className="w-4 h-4" /> Add Parameter
       </Button>
     </div>
   );
 };
-
 
 export function APIPlayground({
   method,
@@ -599,7 +598,7 @@ export function APIPlayground({
         {/* Response */}
         <div className="flex-1">
           <div className="px-4 py-3">
-            <h3 className="text-sm font-semibold">Response</h3>
+            <h3 className="text-sm font-semibold" data-toc-ignore>Response</h3>
           </div>
           
           <div className="p-4">

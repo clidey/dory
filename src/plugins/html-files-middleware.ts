@@ -1,5 +1,5 @@
 import type { Plugin } from 'vite';
-import { readFileSync, existsSync, statSync } from 'fs';
+import { readFileSync, existsSync, realpathSync, statSync } from 'fs';
 import { resolve, extname, sep } from 'path';
 import { getBasePath, readDoryConfig } from './shared.ts';
 
@@ -9,6 +9,15 @@ import { getBasePath, readDoryConfig } from './shared.ts';
  */
 export function isPathInside(root: string, target: string): boolean {
   return target === root || target.startsWith(root + sep);
+}
+
+/** Resolve symlinks before serving a file so a path inside docs cannot point outside it. */
+export function isRealPathInside(root: string, target: string): boolean {
+  try {
+    return isPathInside(realpathSync(root), realpathSync(target));
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -81,7 +90,12 @@ export function htmlFilesMiddleware(): Plugin {
 
           if (existsSync(distPath)) {
             try {
-              const content = readFileSync(distPath);
+              if (!isRealPathInside(distRoot, distPath)) {
+                res.statusCode = 403;
+                res.end('Forbidden');
+                return;
+              }
+              const content = readFileSync(realpathSync(distPath));
               const ext = extname(url).toLowerCase();
               const contentType = mimeTypes[ext] || 'application/octet-stream';
 
@@ -109,6 +123,11 @@ export function htmlFilesMiddleware(): Plugin {
 
         if (existsSync(docsPath)) {
           try {
+            if (!isRealPathInside(docsRoot, docsPath)) {
+              res.statusCode = 403;
+              res.end('Forbidden');
+              return;
+            }
             const stats = statSync(docsPath);
 
             // If it's a file, serve it
@@ -117,7 +136,7 @@ export function htmlFilesMiddleware(): Plugin {
 
               // HTML, assets, and MDX sources (the build copies these too, for Open MDX / Copy page)
               if (url.endsWith('.html') || ext === '.mdx' || assetExtensions.has(ext)) {
-                const content = readFileSync(docsPath);
+                const content = readFileSync(realpathSync(docsPath));
                 const contentType = mimeTypes[ext] || 'application/octet-stream';
 
                 res.setHeader('Content-Type', contentType);

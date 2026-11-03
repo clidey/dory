@@ -1,22 +1,16 @@
 import { useEffect, useState } from 'preact/hooks'
-
-declare global {
-  interface Window {
-    posthog?: { capture: (event: string, properties?: Record<string, unknown>) => void }
-  }
-}
+import { captureDocsEvent } from '../utils/analytics'
 
 /**
- * "Was this page helpful?" prompt. Answers are sent to PostHog as
- * `docs_page_feedback` when analytics is configured.
+ * "Was this page helpful?" prompt and a small page engagement signal.
  */
-export function PageFeedback({ pathname }: { pathname: string }) {
+export function PageFeedbackView({ pathname, onAnswer }: { pathname: string; onAnswer: (helpful: boolean) => void }) {
   const [answered, setAnswered] = useState(false)
 
   useEffect(() => setAnswered(false), [pathname])
 
   const answer = (helpful: boolean) => {
-    window.posthog?.capture('docs_page_feedback', { path: pathname, helpful })
+    onAnswer(helpful)
     setAnswered(true)
   }
 
@@ -35,4 +29,22 @@ export function PageFeedback({ pathname }: { pathname: string }) {
       )}
     </div>
   )
+}
+
+export function PageFeedback({ pathname }: { pathname: string }) {
+
+  useEffect(() => {
+    let visibleSeconds = 0
+    const timer = window.setInterval(() => {
+      if (document.visibilityState !== 'visible') return
+      visibleSeconds += 1
+      if (visibleSeconds === 15) {
+        captureDocsEvent('docs_page_engaged', { path: pathname, active_seconds: 15 })
+        window.clearInterval(timer)
+      }
+    }, 1000)
+    return () => window.clearInterval(timer)
+  }, [pathname])
+
+  return <PageFeedbackView pathname={pathname} onAnswer={helpful => captureDocsEvent('docs_page_feedback', { path: pathname, helpful })} />
 }

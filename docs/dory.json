@@ -1,6 +1,7 @@
 {
   "name": "Dory",
   "url": "https://dory.clidey.com",
+  "image": "/social-card.png",
   "version": "1.0.8 · Latest",
   "copyright": "Clidey",
   "repository": {
@@ -13,14 +14,8 @@
     "titleTemplate": "%s — Dory"
   },
   "favicon": "./favicon.svg",
-  "colors": {
-    "primary": "#2C6BD4",
-    "light": "#2C6BD4",
-    "dark": "#5091FD"
-  },
   "fonts": {
     "family": "Hanken Grotesk",
-    "stylesheet": "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Hanken+Grotesk:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap",
     "heading": {
       "family": "Bricolage Grotesque"
     },
@@ -43,6 +38,8 @@
               "introduction",
               "getting-started/installation",
               "getting-started/quick-start",
+              "getting-started/automation",
+              "getting-started/whodb-ee-apps",
               "getting-started/configuration"
             ]
           },
@@ -54,6 +51,8 @@
               "configuration/theming",
               "configuration/fonts",
               "configuration/analytics",
+              "configuration/chat",
+              "configuration/internationalization",
               "configuration/embed"
             ]
           }

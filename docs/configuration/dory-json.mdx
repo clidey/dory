@@ -249,3 +249,30 @@ See [Analytics](/configuration/analytics) for setup instructions.
 ```
 
 See [Embed](/configuration/embed) for embedding configuration.
+
+## Social preview images
+
+Dory automatically generates a 1200 × 630 PNG for every documentation page during `dory build`. Each image includes your site name, local logo, brand colors, page title, and description. Open Graph and Twitter metadata point to the page's image. Set `url` so these links are absolute.
+
+Override an individual page's image in its frontmatter:
+
+```yaml
+---
+title: Installation
+description: Install and configure the application.
+image: /images/installation-preview.png
+---
+```
+
+To use a shared site image instead of generating page images:
+
+```json
+{
+  "image": "/social-card.png",
+  "seo": {
+    "generateSocialImages": false
+  }
+}
+```
+
+Generated files live in the build output under `_dory/social/`; they do not need to be committed. Generation uses a bundled Hanken Grotesk font and requires no browser or network connection. Local TTF or OTF heading fonts can be configured through `fonts.heading.source`. Remote logos and font URLs are not fetched during image generation.

@@ -1,15 +1,16 @@
-import classNames from 'classnames';
+import type { ComponentChildren } from 'preact';
 import { useMemo } from 'preact/hooks';
 import { Link } from 'wouter-preact';
 import { usePathname } from '../components/hooks';
 import docsConfig from '../../docs/dory.json' with { type: 'json' };
 import type { DoryConfig } from '../types/config';
 import { MobileSearch, Search } from '../components/search';
-import { ALL_NAVIGATION } from '../components/store';
+import { getNavigationForPath } from '../components/store';
 import { MobileNavigation } from './mobile-navigation';
 import { ModeToggle } from '@clidey/ux';
 import { useIsEmbedded } from '../components/hooks';
 import { assetUrl } from '../utils/base-path';
+import { DocsHeaderView } from './docs-header-view';
 
 const config = docsConfig as DoryConfig;
 const isThemeForced = config.theme?.mode === 'dark' || config.theme?.mode === 'light';
@@ -22,32 +23,17 @@ const isThemeForced = config.theme?.mode === 'dark' || config.theme?.mode === 'l
  */
 export function Header({ ssr = false }: { ssr?: boolean }) {
   const pathname = usePathname();
+  const navigation = getNavigationForPath(pathname);
   const isEmbedded = useIsEmbedded();
-  const logo = useMemo(() => assetUrl(config.logo.light), []);
+  const logo = useMemo(() => config.logo?.light ? assetUrl(config.logo.light) : '', []);
+  const renderLink = (href: string, className: string, children: ComponentChildren) =>
+    <Link key={href} href={href} className={className}>{children}</Link>;
 
   return (
-    <header className="dory-topbar sticky top-0 z-50 flex h-14 shrink-0 items-stretch bg-[var(--sidebar)] text-white">
-      <Link href={ALL_NAVIGATION[0]?.groups[0]?.pages[0]?.href ?? '/'} className="flex w-60 shrink-0 items-center gap-2.5 px-4">
-        <img src={logo} alt="" className="h-7 w-7" />
-        <span className="font-heading text-lg font-bold tracking-tight text-white">{config.name}</span>
-        <span className="dory-docs-pill">Docs</span>
-      </Link>
-      <nav className="hidden md:flex items-stretch" aria-label="Sections">
-        {ALL_NAVIGATION.map((tab) => {
-          const isActive = tab.groups.some(group => group.pages.some(page => page.href === pathname));
-          return (
-            <Link
-              key={tab.title}
-              href={tab.groups[0].pages[0].href}
-              className={classNames('dory-topbar-tab', { active: isActive })}
-            >
-              {tab.title}
-            </Link>
-          );
-        })}
-      </nav>
-      <div className="ml-auto flex items-center gap-3 pr-4" data-testid="header-actions">
-        {!ssr && (
+    <DocsHeaderView name={config.name} logo={logo} homeHref={navigation[0]?.groups[0]?.pages[0]?.href ?? '/'}
+      tabs={navigation.map(tab => ({ title: tab.title, href: tab.groups[0].pages[0].href, active: tab.groups.some(group => group.pages.some(page => page.href === pathname)) }))}
+      renderLink={renderLink}
+      actions={!ssr && (
           <>
             <div className="dory-topbar-search relative hidden lg:block">
               <Search />
@@ -62,7 +48,6 @@ export function Header({ ssr = false }: { ssr?: boolean }) {
             <MobileNavigation />
           </>
         )}
-      </div>
-    </header>
+    />
   );
 }

@@ -5,7 +5,7 @@ description: 'Configure a custom web font for your documentation site using Goog
 
 # Fonts
 
-Dory supports custom web fonts configured in `dory.json`. By default, the site uses your system font — you can swap in any Google Font or custom font in a few lines.
+Dory uses the self-hosted Hanken Grotesk, Bricolage Grotesque, and JetBrains Mono fonts from `@clidey/ux` by default. You can set custom fonts in `dory.json` using a stylesheet URL or your own font files.
 
 ## Configuration
 
@@ -79,7 +79,7 @@ Dory supports custom web fonts configured in `dory.json`. By default, the site u
 
 ## Default Font
 
-If no `fonts` configuration is provided, Dory uses the operating system's default font — which looks clean and loads instantly with no extra network request.
+If no `fonts` configuration is provided, Dory uses the Clidey Design fonts bundled with `@clidey/ux`. They load from the built site without a Google Fonts request.
 
 <Tip>
   For a polished look, set a custom font that matches your brand. Google Fonts has hundreds of free options and the setup takes under a minute.

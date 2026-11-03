@@ -1,6 +1,6 @@
-import { Sheet, SheetContent, SheetTitle } from '@clidey/ux'
+import { CatalogIcon, Sheet, SheetContent, SheetTitle } from '@clidey/ux'
 import classNames from 'classnames'
-import { ChevronsUpDown, Play, Plus, Trash2 } from 'lucide-react'
+
 import { useEffect, useState } from 'preact/hooks'
 import type { Server } from './api-playground'
 import { Fence } from './fence'
@@ -151,7 +151,7 @@ export function TryItPanel({ open, onOpenChange, method, path, servers, paramete
           <div className="flex gap-3">
             <button type="button" className="dory-tryit-cancel" onClick={() => onOpenChange(false)}>Cancel</button>
             <button type="button" className="dory-tryit-send" onClick={send} disabled={loading}>
-              <Play aria-hidden="true" className="h-3 w-3 fill-current" />
+              <CatalogIcon name="play" aria-hidden="true" className="h-3 w-3 fill-current" />
               {loading ? 'Sending…' : 'Send request'}
             </button>
           </div>
@@ -178,7 +178,7 @@ export function TryItPanel({ open, onOpenChange, method, path, servers, paramete
                     </option>
                   ))}
                 </select>
-                <ChevronsUpDown aria-hidden="true" className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                <CatalogIcon name="up-down" aria-hidden="true" className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
               </span>
             </label>
           )}
@@ -236,7 +236,7 @@ export function TryItPanel({ open, onOpenChange, method, path, servers, paramete
                         onClick={() => setHeaders((list) => list.filter((_, i) => i !== index))}
                         className="rounded-lg px-2 text-muted-foreground hover:text-foreground"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <CatalogIcon name="trash" className="h-4 w-4" />
                       </button>
                     </div>
                   ))}
@@ -245,7 +245,7 @@ export function TryItPanel({ open, onOpenChange, method, path, servers, paramete
                     onClick={() => setHeaders((list) => [...list, { key: '', value: '' }])}
                     className="flex items-center gap-1.5 text-sm font-medium text-[var(--primary)]"
                   >
-                    <Plus className="h-3.5 w-3.5" />
+                    <CatalogIcon name="plus" className="h-3.5 w-3.5" />
                     Add header
                   </button>
                 </>

@@ -1,6 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { resolve } from 'path';
-import { isPathInside } from './html-files-middleware';
+import { mkdtempSync, mkdirSync, rmSync, symlinkSync, writeFileSync } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
+import { isPathInside, isRealPathInside } from './html-files-middleware';
 
 describe('isPathInside', () => {
   const root = resolve('/srv/app/dist');
@@ -17,5 +20,22 @@ describe('isPathInside', () => {
 
   it('rejects sibling directories sharing the root as a string prefix', () => {
     expect(isPathInside(root, resolve('/srv/app/dist-other/file'))).toBe(false);
+  });
+});
+
+describe('isRealPathInside', () => {
+  it('rejects a symlink that escapes the served directory', () => {
+    const parent = mkdtempSync(join(tmpdir(), 'dory-assets-'));
+    try {
+      const docs = join(parent, 'docs');
+      mkdirSync(docs);
+      writeFileSync(join(parent, 'secret'), 'private');
+      writeFileSync(join(docs, 'safe.svg'), '<svg />');
+      symlinkSync(join(parent, 'secret'), join(docs, 'leak.svg'));
+      expect(isRealPathInside(docs, join(docs, 'safe.svg'))).toBe(true);
+      expect(isRealPathInside(docs, join(docs, 'leak.svg'))).toBe(false);
+    } finally {
+      rmSync(parent, { recursive: true, force: true });
+    }
   });
 });

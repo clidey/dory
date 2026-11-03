@@ -1,5 +1,6 @@
+import { CatalogIcon } from '@clidey/ux'
 import classNames from 'classnames'
-import { ChevronsUpDown, X } from 'lucide-react'
+
 import { useCallback, useEffect, useRef, useState } from 'preact/hooks'
 import { Tag } from './tag'
 
@@ -45,7 +46,7 @@ function MonoLabel({ children }: { children: string }) {
 function RemoveButton({ onClick, label }: { onClick: () => void; label: string }) {
   return (
     <button type="button" onClick={onClick} aria-label={label} className="rounded-md p-1.5 text-muted-foreground transition hover:bg-muted hover:text-foreground">
-      <X className="h-3.5 w-3.5" />
+      <CatalogIcon name="close" className="h-3.5 w-3.5" />
     </button>
   )
 }
@@ -119,7 +120,7 @@ function Select({ value, onChange, children, label }: { value: string; onChange:
       >
         {children}
       </select>
-      <ChevronsUpDown aria-hidden="true" className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+      <CatalogIcon name="up-down" aria-hidden="true" className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
     </div>
   )
 }

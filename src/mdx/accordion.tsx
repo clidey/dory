@@ -1,11 +1,11 @@
-import {
+import { CatalogIcon,
   Accordion as UXAccordion,
   AccordionItem,
   AccordionTrigger,
   AccordionContent
 } from '@clidey/ux'
 import classNames from 'classnames'
-import { Plus } from 'lucide-react'
+
 import { Icon } from './icon'
 
 export function AccordionGroup({ children, numbered = false }: { children: React.ReactNode; numbered?: boolean }) {
@@ -32,7 +32,7 @@ export function Accordion({
           {icon && <Icon icon={icon} className="h-3.5 w-3.5 !stroke-[var(--primary)] text-[var(--primary)]" />}
           <span className="text-sm font-semibold">{title}</span>
         </div>
-        <Plus aria-hidden="true" className="size-3.5 shrink-0 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-45" />
+        <CatalogIcon name="plus" aria-hidden="true" className="size-3.5 shrink-0 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-45" />
       </AccordionTrigger>
       <AccordionContent>
         <div className="px-4 pb-3 leading-relaxed text-muted-foreground">

@@ -10,9 +10,22 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
-bin/dist
+dist-server
+# Compiled CLI output; keep bin/*.ts source and tests in Git.
+bin/dist/
+*.tsbuildinfo
+.vite/
+.vite-temp/
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
 *.local
+.env
+.env.*
+!.env.example
 .docs-backup
+.dory/
 
 # Editor directories and files
 .vscode/*

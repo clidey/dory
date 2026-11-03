@@ -1,4 +1,5 @@
-import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
+import { CatalogIcon } from '@clidey/ux'
+
 import classNames from 'classnames'
 import { useEffect, useMemo, useRef, useState } from 'preact/compat'
 
@@ -31,7 +32,7 @@ function paletteThemeVariables() {
     const v = (name: string) => css.getPropertyValue(name).trim()
     return {
         fontFamily: v('--font-body') || 'inherit',
-        fontSize: '13px',
+        fontSize: '14px',
         background: v('--card'),
         mainBkg: v('--accent'),
         primaryColor: v('--accent'),
@@ -114,6 +115,9 @@ export function MermaidRenderer({ content }: { content: string }) {
         let mounted = true
 
         const renderMermaid = async () => {
+            setError(null)
+            setIsValid(null)
+            setIsLoaded(false)
             try {
                 const mermaid = (await import('mermaid')).default
                 
@@ -122,6 +126,7 @@ export function MermaidRenderer({ content }: { content: string }) {
                 mermaid.initialize({
                     startOnLoad: false,
                     theme: 'base',
+                    look: 'classic',
                     themeVariables: paletteThemeVariables(),
                     flowchart: {
                         nodeSpacing: 50,
@@ -164,7 +169,6 @@ export function MermaidRenderer({ content }: { content: string }) {
             } catch (err) {
                 console.error('Mermaid rendering error:', err)
                 if (mounted) {
-                    setIsValid(false)
                     setError(err instanceof Error ? err.message : 'Failed to render diagram')
                 }
             }
@@ -186,13 +190,15 @@ export function MermaidRenderer({ content }: { content: string }) {
             <div className="mermaid-wrapper my-8">
                 <div className="flex flex-col items-center justify-center py-12 px-6 text-center bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 border-2 border-dashed border-red-300 dark:border-red-700 rounded-lg">
                     <div className="w-16 h-16 mb-4 flex items-center justify-center bg-red-100 dark:bg-red-900/30 rounded-full">
-                        <ExclamationTriangleIcon className="w-8 h-8 text-red-500" />
+                        <CatalogIcon name="warning" className="w-8 h-8 text-red-500" />
                     </div>
                     <h3 className="text-lg font-semibold text-red-700 dark:text-red-300 mb-2">
-                        Diagram Syntax Error
+                        {isValid === false ? 'Diagram Syntax Error' : 'Diagram Load Error'}
                     </h3>
                     <p className="text-red-600 dark:text-red-400 mb-4 max-w-md">
-                        The Mermaid diagram contains invalid syntax and cannot be rendered.
+                        {isValid === false
+                            ? 'The Mermaid diagram contains invalid syntax and cannot be rendered.'
+                            : 'The diagram could not be loaded. Please reload the page.'}
                     </p>
                     <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-md p-3 max-w-md">
                         <p className="text-sm text-red-700 dark:text-red-300 font-mono break-all">

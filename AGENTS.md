@@ -128,7 +128,7 @@ Plugins loaded in main config (in order):
 
 **MDX pipeline:** Content flows through `unified-mdx-plugin` → `remarkSafeVars` → `@mdx-js/rollup` → rendered via `mdx-provider.tsx`. The processor in `src/mdx/processor.ts` is the single source of truth for MDX compilation settings.
 
-**React compatibility:** Preact aliases in `tsconfig.app.json` (`react` → `preact/compat`). This allows using React-ecosystem libraries (`@headlessui/react`, `lucide-react`, etc.) with Preact.
+**React compatibility:** Preact aliases in `tsconfig.app.json` (`react` → `preact/compat`). This allows using React-ecosystem libraries such as `@headlessui/react` with Preact.
 
 **External UI library:** `@clidey/ux` provides base UI components (ThemeProvider, Toaster, etc.).
 
@@ -149,7 +149,7 @@ Plugins loaded in main config (in order):
 - `wouter-preact` — Routing
 - `sirv` — Static file serving (CLI preview)
 - `@clidey/ux` — Shared UI component library
-- `lucide-react`, `@heroicons/react`, `@fortawesome/*` — Icons
+- Local WhoDB SVG suite in `src/assets/whodb-icons/` — Icons
 
 ## When Making Changes
 

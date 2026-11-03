@@ -13,6 +13,19 @@ export class DoryWidget {
   private overlay: HTMLElement | null = null;
   private isOpenState = false;
   private eventHandlers: Map<string, Function[]> = new Map();
+  private readonly handleMessage = (event: MessageEvent) => {
+    if (event.source !== this.iframe?.contentWindow || event.origin !== new URL(this.config.baseUrl).origin) return;
+    const message = event.data;
+    if (!message || typeof message !== 'object' || message.source !== 'dory') return;
+
+    if (message.type === 'dory:ready') {
+      this.config.onReady?.();
+      this.emit('ready');
+    } else if (message.type === 'dory:navigate' && typeof message.path === 'string' && message.path.startsWith('/') && !message.path.startsWith('//')) {
+      this.config.onNavigate?.(message.path);
+      this.emit('navigate', message.path);
+    }
+  };
 
   constructor(config: DoryEmbedConfig) {
     this.config = config;
@@ -74,11 +87,11 @@ export class DoryWidget {
 
     // Add embedded mode flag
     params.set('embedded', 'true');
+    params.set('parentOrigin', window.location.origin);
 
-    // Add theme
-    if (this.config.theme && this.config.theme !== 'inherit') {
-      params.set('theme', this.config.theme);
-    }
+    // Match the host on first open; setTheme can update it later.
+    const hostIsDark = document.documentElement.classList.contains('dark') || document.documentElement.getAttribute('data-theme') === 'dark';
+    params.set('theme', this.config.theme && this.config.theme !== 'inherit' ? this.config.theme : hostIsDark ? 'dark' : 'light');
 
     const url = new URL(baseUrl);
     url.pathname = this.resolveDocsPath(path);
@@ -95,23 +108,7 @@ export class DoryWidget {
   }
 
   private setupIframeMessaging() {
-    window.addEventListener('message', (event) => {
-      // Verify origin
-      if (event.origin !== new URL(this.config.baseUrl).origin) {
-        return;
-      }
-
-      const message = event.data;
-
-      switch (message.type) {
-        case 'navigate':
-          this.emit('navigate', message.path);
-          break;
-        case 'ready':
-          this.emit('ready');
-          break;
-      }
-    });
+    window.addEventListener('message', this.handleMessage);
   }
 
   private getContainerStyles(): string {
@@ -286,6 +283,7 @@ export class DoryWidget {
   }
 
   destroy() {
+    window.removeEventListener('message', this.handleMessage);
     // Cleanup event listeners
     if (this.container && (this.container as any).__cleanup) {
       (this.container as any).__cleanup();

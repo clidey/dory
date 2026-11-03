@@ -5,14 +5,19 @@ import { DORY_REPO_URL, DoryMark } from './dory-mark'
 const config = docsConfig as DoryConfig
 
 /** Article footer: "Powered by Dory" and the copyright line. */
-export function PageFooter() {
+export function PageFooterView({ copyright, name }: { copyright?: string; name: string }) {
   return (
     <footer className="dory-page-footer mt-12 flex items-center justify-between pb-4">
       <a href={DORY_REPO_URL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
         <DoryMark className="h-3.5 w-3.5" />
         Powered by Dory
       </a>
-      <span>© {new Date().getFullYear()} {config.copyright ?? config.name}</span>
+      <span>© {new Date().getFullYear()} {copyright ?? name}</span>
     </footer>
   )
+}
+
+/** Article footer configured for the current built Dory site. */
+export function PageFooter() {
+  return <PageFooterView copyright={config.copyright} name={config.name} />
 }

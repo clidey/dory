@@ -1,26 +1,32 @@
 import { useEffect, useMemo } from 'preact/hooks';
 import { Route, Router, useLocation } from 'wouter-preact';
 import { usePathname } from './hooks';
-import { ALL_NAVIGATION, ALL_PAGES, pathFromFilename } from './store';
+import { ALL_PAGES, getNavigationForPath, pathFromFilename } from './store';
+import docsConfig from '../../docs/dory.json' with { type: 'json' };
+import type { DoryConfig } from '../types/config';
+import { contentScope } from '../utils/content-scope';
+import { NotFoundPage } from '@clidey/ux';
 
 
 export default function Routes() {
   const pathname = usePathname();
   const [, navigate] = useLocation();
+  const scope = contentScope(docsConfig as DoryConfig, pathname);
+  const isScopeRoot = pathname === '/' || (Boolean(scope.prefix) && pathname === scope.prefix);
 
   // Redirect root to the first page so the URL reflects the actual content
   useEffect(() => {
-    if (pathname === '/') {
-      const firstPage = ALL_NAVIGATION[0]?.groups[0]?.pages[0]?.href;
+    if (isScopeRoot) {
+      const firstPage = getNavigationForPath(pathname)[0]?.groups[0]?.pages[0]?.href;
       if (firstPage) navigate(firstPage, { replace: true });
     }
   }, [pathname]);
 
   const route = useMemo(() => {
     let targetPath = pathname;
-    if (pathname === '/') {
+    if (isScopeRoot) {
       const ssrRoute = typeof window !== 'undefined' ? window.__DORY_ROUTE__ : undefined;
-      targetPath = ssrRoute || ALL_NAVIGATION[0]?.groups[0]?.pages[0]?.href || pathname;
+      targetPath = (pathname === '/' ? ssrRoute : undefined) || getNavigationForPath(pathname)[0]?.groups[0]?.pages[0]?.href || pathname;
     }
 
     const entry = Object.entries(ALL_PAGES).find(([path]) => path === targetPath);
@@ -28,7 +34,7 @@ export default function Routes() {
 
     const [path, mod] = entry;
     return {
-      path: pathname === '/' ? '/' : pathFromFilename(path),
+      path: isScopeRoot ? pathname : pathFromFilename(path),
       component: (mod as any).default,
     };
   }, [pathname]);
@@ -36,19 +42,11 @@ export default function Routes() {
   // 404 — no MDX module for this path (even if it appears in navigation)
   if (!route && pathname !== '/') {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh] p-8">
-        <h1 className="text-6xl font-bold text-gray-300 dark:text-gray-700 mb-4">404</h1>
-        <h2 className="text-2xl font-semibold mb-4">Page Not Found</h2>
-        <p className="text-gray-600 dark:text-muted-foreground mb-6 text-center max-w-md">
-          The page <code className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-sm">{pathname}</code> doesn't exist.
-        </p>
-        <button
-          onClick={() => navigate(ALL_NAVIGATION[0]?.groups[0]?.pages[0]?.href ?? '/')}
-          className="px-4 py-2 text-sm font-medium rounded-md bg-[var(--brand-primary)] text-white hover:opacity-90 transition-opacity"
-        >
-          Go to Home
-        </button>
-      </div>
+      <NotFoundPage
+        description={`The page ${pathname} does not exist.`}
+        onHome={() => navigate(getNavigationForPath(pathname)[0]?.groups[0]?.pages[0]?.href ?? '/')}
+        homeLabel="Go to home"
+      />
     );
   }
 

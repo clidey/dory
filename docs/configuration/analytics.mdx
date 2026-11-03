@@ -1,78 +1,45 @@
 ---
-title: 'Analytics'
-description: 'Integrate PostHog analytics for page view tracking and user behavior insights.'
+title: Analytics
+description: Send documentation traffic, searches, feedback, engagement, and AI crawler requests to PostHog.
 ---
 
 # Analytics
 
-Dory supports [PostHog](https://posthog.com) for analytics. When configured, Dory automatically tracks page views as users navigate your documentation.
+Dory sends documentation analytics to your PostHog project. There is no Dory analytics account, dashboard, admin password, or local analytics database. If PostHog is not configured, Dory does not collect analytics.
 
-## Configuration
+## Connect PostHog
+
+Add your PostHog project key to `dory.json`:
 
 ```json
 "analytics": {
   "posthog": {
-    "token": "phc_your_project_api_key",
+    "token": "phc_your_project_key",
     "apiHost": "https://us.i.posthog.com"
   }
 }
 ```
 
-| Field | Type | Description |
-| --- | --- | --- |
-| `posthog.token` | `string` | Your PostHog project API key (starts with `phc_`). |
-| `posthog.apiHost` | `string` | PostHog instance URL. Use `https://us.i.posthog.com` for US cloud or `https://eu.i.posthog.com` for EU cloud. |
+| Field | Description |
+| --- | --- |
+| `posthog.token` | Public PostHog project key, usually beginning with `phc_`. |
+| `posthog.apiHost` | Your PostHog ingestion host. Defaults to the US cloud host; set your own region or self-hosted host when needed. |
 
-## Setup
+Run `dory build` and redeploy after changing `dory.json`. View the resulting events and reports in PostHog. The project key is embedded in the public site; do not put a private PostHog API key in `dory.json`.
 
-<Steps>
-  <Step title="Create a PostHog account">
-    Sign up at [posthog.com](https://posthog.com). The free tier supports up to 1 million events per month.
-  </Step>
-  <Step title="Create a project">
-    In the PostHog dashboard, create a new project for your documentation site.
-  </Step>
-  <Step title="Copy your API key">
-    Go to **Project Settings → Project API Key**. Copy the key that starts with `phc_`.
-  </Step>
-  <Step title="Add to dory.json">
-    Add the `analytics` block to your `dory.json`:
+If your host sets a Content Security Policy and you use a custom `apiHost`, allow that host's event endpoint in `connect-src` and its script asset origin in `script-src`.
 
-    ```json
-    "analytics": {
-      "posthog": {
-        "token": "phc_your_key_here",
-        "apiHost": "https://us.i.posthog.com"
-      }
-    }
-    ```
-  </Step>
-  <Step title="Rebuild and deploy">
-    Run `dory build` and redeploy. Page views will start appearing in your PostHog dashboard.
-  </Step>
-</Steps>
+## What is sent
 
-## What is Tracked
+| Source | Events |
+| --- | --- |
+| Browser | Page views and page leaves; `docs_search`, `docs_search_result_clicked`, `docs_page_feedback`, `docs_code_copied`, `docs_page_engaged`, and `docs_chat_*` interaction events. |
+| Dory Node server | `docs_page_request` for successful documentation page requests and `docs_ai_request` for requests from recognized AI crawler user agents. |
 
-By default, Dory tracks:
-- **Page views** — every navigation event, with the full page path
-- **Session duration** — how long users spend reading each page
+Browser events work on static hosting, including a CDN. Server request events require documentation requests to reach the Dory Node server; a CDN cache hit or direct static-file response cannot be counted by that server. Browser page views and server page requests are separate event types, so use the one that matches the report you want.
 
-No personally identifiable information is collected beyond what PostHog captures by default (IP geolocation, browser/OS).
+Use PostHog's browser `$pageview` events for visitor counts. Server request events use a new anonymous ID per request to avoid sending reader identifiers, so their unique-user count does not represent unique readers.
 
-## Self-Hosted PostHog
+Dory does not send chat question or answer text, conversation history, or copied code. Search terms are shortened and likely credentials are redacted before capture. Search terms can still contain personal information, so configure consent and retention in PostHog for your site. AI crawler names come from user-agent headers and are unverified.
 
-If you run a self-hosted PostHog instance, set `apiHost` to your instance URL:
-
-```json
-"analytics": {
-  "posthog": {
-    "token": "phc_your_key",
-    "apiHost": "https://posthog.yourdomain.com"
-  }
-}
-```
-
-<Note>
-  Analytics are only active in production builds. They are disabled during local development (`pnpm run dev`) to avoid polluting your analytics data.
-</Note>
+PostHog browser tracking is disabled during local Vite development so authoring activity does not appear in production reports.

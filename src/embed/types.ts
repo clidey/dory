@@ -18,8 +18,6 @@ export interface DoryEmbedConfig {
   onClose?: () => void;
   onNavigate?: (path: string) => void;
   onReady?: () => void;
-  authToken?: string;
-  getAuthToken?: () => Promise<string>;
 }
 
 export interface EmbeddedAppConfig {

@@ -1,143 +1,73 @@
 ---
-title: 'Embed'
-description: 'Embed your Dory documentation as a widget on any website using the embed loader script.'
+title: Embed
+description: Open contextual Dory documentation inside another application.
 ---
 
 # Embed
 
-Dory can be embedded as a floating widget on any website. Users click a button to open your documentation in an iframe overlay — without leaving the current page.
+Dory can open a hosted documentation site in a slide-out iframe. The host application chooses the starting documentation route and can navigate the iframe when its own context changes. Dory keeps its search and page navigation inside the iframe.
 
-## Configuration
+## Allow the host origin
+
+For a host on another origin, add its exact origin to the documentation site's `dory.json` and rebuild:
 
 ```json
-"embed": {
-  "enabled": true,
-  "defaults": {
-    "position": "bottom-right",
-    "width": 400,
-    "height": 600,
-    "theme": "system",
-    "showOverlay": true,
-    "closeOnEscape": true,
-    "closeOnOverlayClick": true
-  },
-  "branding": {
-    "showLogo": true,
-    "showName": true,
-    "customCSS": ""
-  },
-  "features": {
-    "search": true,
-    "toc": true,
-    "codeBlocks": true,
-    "mermaid": true,
-    "katex": true,
-    "apiPlayground": true,
-    "darkMode": true
-  },
-  "analytics": {
-    "enabled": true,
-    "trackEvents": true
-  },
-  "security": {
-    "allowedOrigins": ["https://yourdomain.com"],
-    "corsEnabled": true
-  },
-  "performance": {
-    "lazyLoadImages": true,
-    "prefetchPages": true,
-    "cacheStrategy": "stale-while-revalidate"
+{
+  "embed": {
+    "security": {
+      "allowedOrigins": ["https://app.example.com"]
+    }
   }
 }
 ```
 
-## Adding the Embed Script
+Use an origin without a path or trailing slash. Dory's preview server allows framing from these origins. If you serve the static build with another web server, configure its `Content-Security-Policy` `frame-ancestors` directive for the same origins and do not send `X-Frame-Options: SAMEORIGIN` on embeddable pages. Keep the list limited to applications you control.
 
-Add the embed loader script to your website's HTML:
+## Add the widget
+
+Load the `embed.js` file from the hosted docs, then initialize `DoryDocs`. The script derives the docs URL from its own address, including a `/docs` base path when present.
 
 ```html
-<script
-  src="https://your-dory-site.com/embed.js"
-  data-dory-url="https://your-dory-site.com"
-  data-position="bottom-right"
-  data-theme="system"
-  async
-></script>
+<button id="docs-help" type="button">Help</button>
+<script src="https://docs.example.com/embed.js"></script>
+<script>
+  window.DoryDocs.init({
+    trigger: '#docs-help',
+    position: 'right',
+    width: 560,
+    theme: 'inherit',
+    initialPath: '/getting-started',
+    onNavigate(path) {
+      console.log('Reader opened', path);
+    },
+  });
+</script>
 ```
 
-## Embed Options Reference
+The widget loads when the reader opens it. `theme: 'inherit'` uses the host's light or dark theme on first open. Call `setTheme` when the host theme changes.
 
-### `defaults`
+## Open the page that matches the app
 
-| Field | Type | Default | Description |
-| --- | --- | --- | --- |
-| `position` | `string` | `"bottom-right"` | Widget position. Options: `"bottom-right"`, `"bottom-left"`, `"top-right"`, `"top-left"`. |
-| `width` | `number` | `400` | Widget width in pixels. |
-| `height` | `number` | `600` | Widget height in pixels. |
-| `theme` | `string` | `"system"` | Color theme. Options: `"light"`, `"dark"`, `"system"`. |
-| `showOverlay` | `boolean` | `true` | Show a dimmed overlay behind the widget. |
-| `closeOnEscape` | `boolean` | `true` | Close the widget when pressing Escape. |
-| `closeOnOverlayClick` | `boolean` | `true` | Close the widget when clicking the overlay. |
+Map application routes or selected objects to documentation routes in the host. For example:
 
-### `branding`
+```js
+window.DoryDocs.open('/apps/overview');
+window.DoryDocs.navigate('/apps/building-a-transform');
+window.DoryDocs.setTheme('dark');
+```
 
-| Field | Type | Default | Description |
-| --- | --- | --- | --- |
-| `showLogo` | `boolean` | `true` | Show the site logo in the widget header. |
-| `showName` | `boolean` | `true` | Show the site name in the widget header. |
-| `customCSS` | `string` | — | Additional CSS injected into the widget iframe. |
+`open(path)` opens the widget at a route. `navigate(path)` changes its current page. `close()`, `toggle()`, `isOpen()`, and `destroy()` manage the widget. A route change inside the iframe calls `onNavigate(path)` in the host. Messaging checks both the iframe window and the docs origin; the docs only send messages to an origin listed in `embed.security.allowedOrigins` or their own origin.
 
-### `features`
-
-| Field | Type | Default | Description |
-| --- | --- | --- | --- |
-| `search` | `boolean` | `true` | Enable full-text search inside the widget. |
-| `toc` | `boolean` | `true` | Show the table of contents. |
-| `codeBlocks` | `boolean` | `true` | Enable syntax-highlighted code blocks. |
-| `mermaid` | `boolean` | `true` | Enable Mermaid diagram rendering. |
-| `katex` | `boolean` | `true` | Enable LaTeX math rendering. |
-| `apiPlayground` | `boolean` | `true` | Enable the interactive API playground. |
-| `darkMode` | `boolean` | `true` | Allow dark/light mode switching. |
-
-### `security`
-
-| Field | Type | Description |
+| Option | Default | Purpose |
 | --- | --- | --- |
-| `allowedOrigins` | `string[]` | List of allowed origins for the widget iframe. |
-| `corsEnabled` | `boolean` | Whether to enable CORS headers for embed requests. |
+| `position` | `right` | `left`, `right`, or `bottom` |
+| `width` | `500` | Width in pixels or a CSS width for side panels |
+| `height` | `100vh` | Height of a bottom panel |
+| `theme` | `inherit` | `inherit`, `light`, or `dark` |
+| `initialPath` | `/` | Route shown on first open |
+| `trigger` | — | CSS selector or element to open the widget |
+| `showOverlay` | `true` | Dim the host behind the widget |
+| `closeOnEscape` | `true` | Close when Escape is pressed |
+| `closeOnOverlayClick` | `true` | Close when the overlay is clicked |
 
-## React SDK
-
-For React applications, use the React SDK instead of the script tag:
-
-```tsx
-import { DoryWidget } from "@clidey/dory/sdk/react";
-
-export default function App() {
-  return (
-    <>
-      <YourApp />
-      <DoryWidget
-        url="https://your-dory-site.com"
-        position="bottom-right"
-        theme="system"
-      />
-    </>
-  );
-}
-```
-
-## Vue SDK
-
-For Vue applications:
-
-```ts
-import { createDoryWidget } from "@clidey/dory/sdk/vue";
-
-const app = createApp(App);
-app.use(createDoryWidget({
-  url: "https://your-dory-site.com",
-  position: "bottom-right"
-}));
-app.mount("#app");
-```
+The embed displays published documentation. It does not store or edit MDX, and it does not pass host credentials into the iframe. Keep private documentation behind your own authenticated hosting layer. To create docs from an application, generate MDX and `dory.json`, run `dory build`, and publish the resulting site.

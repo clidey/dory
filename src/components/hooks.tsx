@@ -2,6 +2,9 @@ import { useEffect, useState } from 'preact/hooks';
 import { useLocation } from 'wouter-preact';
 import { withBase } from '../utils/base-path';
 
+const initialEmbedParams = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('embedded') === 'true'
+  ? new URLSearchParams(window.location.search) : null;
+
 /**
  * Strips trailing slash from a pathname (except root "/").
  */
@@ -53,5 +56,21 @@ export const useSearchParams = () => {
  */
 export const useIsEmbedded = () => {
   const searchParams = useSearchParams();
-  return searchParams.get('embedded') === 'true';
+  const [pathname] = useLocation();
+
+  useEffect(() => {
+    if (!initialEmbedParams) return;
+    const params = new URLSearchParams(window.location.search);
+    let changed = false;
+    for (const key of ['embedded', 'parentOrigin', 'theme']) {
+      const value = initialEmbedParams.get(key);
+      if (value !== null && params.get(key) !== value) {
+        params.set(key, value);
+        changed = true;
+      }
+    }
+    if (changed) window.history.replaceState(window.history.state, '', `${window.location.pathname}?${params}${window.location.hash}`);
+  }, [pathname]);
+
+  return searchParams.get('embedded') === 'true' || initialEmbedParams !== null;
 };

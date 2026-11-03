@@ -2,7 +2,7 @@ import type { ComponentType } from 'preact';
 import { renderToString } from 'preact-render-to-string';
 import { Router } from 'wouter-preact';
 import { MDXProvider } from '@mdx-js/preact';
-import { ThemeProvider } from '@clidey/ux';
+import { ThemeProvider, Toaster } from '@clidey/ux';
 import * as mdxComponents from './mdx/mdx';
 import docsConfig from '../docs/dory.json' with { type: 'json' };
 import type { DoryConfig } from './types/config';
@@ -15,20 +15,21 @@ import { PageFooter } from './ui/page-footer';
 import { PrevNextLinks } from './ui/prev-next-link';
 import { TableOfContents } from './ui/table-of-content';
 import { BASE_PATH, withBase } from './utils/base-path';
+import { contentScope } from './utils/content-scope';
 
 const config = docsConfig as DoryConfig;
 
-const navigationTabs = config.navigation?.tabs ?? [];
 if (!config.navigation?.tabs) {
   console.warn('dory.json has no navigation.tabs — SSR navigation will be empty.');
 }
 
 function pathFromFilename(filename: string): string {
-  return filename
+  const path = filename
     .replace(/^.*?docs/, '')
     .replace(/\/?index\.mdx$/, '/')
     .replace(/\.mdx$/, '')
     .toLowerCase();
+  return path.length > 1 ? path.replace(/\/$/, '') : path;
 }
 
 const pages = import.meta.glob('../docs/**/*.mdx');
@@ -51,20 +52,21 @@ interface NavTab {
   groups: NavGroup[];
 }
 
-function buildNavigation(frontmatter?: Record<string, any>[]): NavTab[] {
-  return navigationTabs.map(tab => ({
+function buildNavigation(routePath: string, frontmatter?: Record<string, any>[]): NavTab[] {
+  const scope = contentScope(config, routePath);
+  return scope.navigation.tabs.map(tab => ({
     title: tab.tab,
     groups: tab.groups.map(group => ({
       title: group.group,
       pages: group.pages.map(entry => {
         const page = typeof entry === 'string' ? entry : entry.page;
-        const href = `/${page}`;
+        const href = `${scope.prefix}/${page}`;
         const fm = frontmatter?.find(f => f.path === href);
         return {
           title: fm?.title || page.charAt(0).toUpperCase() + page.slice(1).replace(/-/g, ' '),
           href,
         };
-      })
+      }).filter(page => !scope.prefix || Boolean(allPages[page.href]))
     }))
   }));
 }
@@ -77,7 +79,7 @@ export async function render(routePath: string, frontmatter?: Record<string, any
     const module = await loader() as { default: ComponentType };
     const Content = module.default;
 
-    const navigation = buildNavigation(frontmatter);
+    const navigation = buildNavigation(routePath, frontmatter);
     const pageFm = frontmatter?.find(fm => fm.path === routePath);
 
     // Find group/page titles (Layout uses swapped names: "title: group, group: title")
@@ -99,6 +101,7 @@ export async function render(routePath: string, frontmatter?: Record<string, any
 
     return renderToString(
       <ThemeProvider>
+        <Toaster />
         <Router base={BASE_PATH} ssrPath={withBase(routePath)}>
           <MDXProvider components={mdxComponents}>
                 {/* SYNC NOTE: this shell mirrors src/ui/layout.tsx (non-landing return).

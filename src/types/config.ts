@@ -115,6 +115,8 @@ export interface DorySeo {
   author?: string;
   /** Absolute URL or path resolved against config.url. */
   ogImage?: string;
+  /** Generate a branded PNG for each page at build time. Default: true. */
+  generateSocialImages?: boolean;
   twitterCard?: 'summary' | 'summary_large_image';
   /** e.g. "en_US" */
   locale?: string;
@@ -132,7 +134,25 @@ export interface DoryTheme {
 /** One entry in the sidebar version picker. */
 export interface DoryVersion {
   label: string;
-  url: string;
+  /** Local docs folder and URL prefix, e.g. "v1" for docs/v1/*.mdx. */
+  id?: string;
+  /** External published site; retained for existing configurations. */
+  url?: string;
+  navigation?: DoryNavigation;
+}
+
+export interface DoryLocale {
+  code: string;
+  label: string;
+  /** Optional translated tab and group labels; page keys remain the same. */
+  navigation?: DoryNavigation;
+  /** Navigation for translated older versions, keyed by version ID. */
+  versions?: Record<string, DoryNavigation>;
+}
+
+export interface DoryI18n {
+  defaultLocale: string;
+  locales: DoryLocale[];
 }
 
 /** Source repository for "Edit this page" and "Report an issue" links. GitHub-style URLs. */
@@ -158,6 +178,8 @@ export interface DoryConfig {
   version?: string;
   /** Other published versions; when set, the version card becomes a picker that opens the chosen URL. */
   versions?: DoryVersion[];
+  /** Place translations in docs/<locale>/ with the same page keys. */
+  i18n?: DoryI18n;
   /** Name in the footer copyright line. Default: `name`. */
   copyright?: string;
   repository?: DoryRepository;
@@ -170,5 +192,6 @@ export interface DoryConfig {
   logo: DoryLogo;
   embed?: DoryEmbedConfig;
   analytics?: DoryAnalytics;
+  chat?: { suggestedQuestions?: string[] };
   seo?: DorySeo;
 }

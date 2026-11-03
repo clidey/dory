@@ -1,7 +1,4 @@
-import remarkGfm from 'remark-gfm';
-import rehypeSlug from 'rehype-slug';
-import { remarkSafeVars } from '../plugins/sanitize.ts';
-import { rehypeCodeMeta } from '../plugins/code-meta.ts';
+import { getCommonMdxConfig } from './mdx-common.ts';
 import { remarkRelativeAssets } from '../plugins/relative-assets.ts';
 
 /**
@@ -13,9 +10,11 @@ import { remarkRelativeAssets } from '../plugins/relative-assets.ts';
  * remark-relative-assets turns relative image paths into root paths so they
  * work on pages served with a trailing slash.
  */
-export const getMdxConfig = (isDevelopment: boolean = false) => ({
-  providerImportSource: '@mdx-js/preact',
-  remarkPlugins: [remarkGfm, remarkSafeVars, remarkRelativeAssets],
-  rehypePlugins: [rehypeSlug, rehypeCodeMeta],
-  development: isDevelopment,
-});
+export const getMdxConfig = (isDevelopment: boolean = false) => {
+  const common = getCommonMdxConfig(isDevelopment);
+  return {
+    providerImportSource: '@mdx-js/preact',
+    ...common,
+    remarkPlugins: [...common.remarkPlugins, remarkRelativeAssets],
+  };
+};

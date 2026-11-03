@@ -2,6 +2,7 @@ import classNames from "classnames";
 import { withBase } from '../utils/base-path';
 import { Icon } from "./icon";
 import type { ComponentChildren } from "preact";
+import { Card as UxCard } from '@clidey/ux';
 
 export function CardGroup({ children, cols = 2, numbered = false }: { children: React.ReactNode; cols?: number; numbered?: boolean }) {
   return (
@@ -31,7 +32,7 @@ export function Card({
   children?: ComponentChildren
 }) {
   return (
-    <div className="dory-card group relative flex flex-col rounded-lg border border-[var(--border)] bg-card p-4 transition-shadow hover:shadow-[0_2px_10px_rgb(14_34_64/0.07)]">
+    <UxCard className="dory-card group relative gap-0 rounded-lg border-[var(--border)] bg-card p-4 shadow-none transition-shadow hover:shadow-[0_2px_10px_rgb(14_34_64/0.07)]">
       {href && <a href={withBase(href)} className="absolute inset-0 z-10 rounded-lg" aria-label={title} />}
       {(icon || href) && (
         <div className="mb-3 flex items-start justify-between">
@@ -47,6 +48,6 @@ export function Card({
       <div className="mt-1 text-[13px] leading-normal text-muted-foreground [&_p]:mb-0">
         {description ?? children}
       </div>
-    </div>
+    </UxCard>
   )
 }

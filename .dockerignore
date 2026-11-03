@@ -1,4 +1,13 @@
 .git
 *Dockerfile*
 node_modules
+.env
+.env.*
+**/.env
+**/.env.*
+!.env.example
+dist
+dist-ssr
+dist-server
+bin/dist
 k8s/Dockerfile

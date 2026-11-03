@@ -3,119 +3,29 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 
-    // Brand colors (dynamically set from dory.json via loadColors())
-    --brand-foreground: #2C6BD4;
-    --brand-primary: #2C6BD4;
-    --brand-light: #2C6BD4;
-    --brand-dark: #4787F3;
+    // UX brand.css owns the default palette. Dory keeps this alias for docs UI.
+    --brand-primary: var(--primary);
 
     // Font families
-    --font-body: inherit;
-    --font-heading: inherit;
-    --font-mono: inherit;
+    --font-body: 'Hanken Grotesk', sans-serif;
+    --font-heading: 'Bricolage Grotesque', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
 
-    // ShadCN/clidey/ux compatible primary color
-    --primary: var(--brand-light);
-    --primary-rgb: var(--brand-light-rgb);
-
-    --ring: rgba(0, 0, 0, 0.1);
 }
 
-:root.dark {
+:root[data-dory-colors="true"] {
+    --primary: var(--brand-light);
+}
+
+:root.dark[data-dory-colors="true"] {
     --primary: var(--brand-dark);
-    --primary-rgb: var(--brand-dark-rgb);
-    --ring: rgba(255, 255, 255, 0.1);
 }
 
 // Apply background from CSS variables
 html, body, #app {
     background-color: var(--background);
     color: var(--foreground);
-}
-
-// === THEMED MODE: override Tailwind utility classes ===
-[data-dory-themed="true"] {
-    // Override hardcoded Tailwind text colors
-    .text-slate-500,
-    .text-slate-400,
-    .text-slate-600,
-    .text-zinc-500,
-    .text-zinc-400,
-    .text-gray-500,
-    .text-gray-400 {
-        color: var(--muted-foreground) !important;
-    }
-
-    .text-slate-900,
-    .text-zinc-900,
-    .text-gray-900 {
-        color: var(--foreground) !important;
-    }
-
-    // Override hardcoded Tailwind border colors
-    .border-slate-100,
-    .border-slate-200,
-    .border-slate-800,
-    .border-zinc-200,
-    .border-zinc-800 {
-        border-color: var(--border) !important;
-    }
-
-    // Accordion & divider borders — subtle low opacity
-    [data-slot="accordion-item"],
-    hr,
-    .border-t,
-    .border-b {
-        border-color: color-mix(in oklch, var(--foreground) 8%, transparent) !important;
-    }
-}
-
-// === FONT OVERRIDES ===
-[data-dory-themed="true"] {
-    // Page title — large display serif
-    .dory-page-title {
-        font-family: var(--font-heading, var(--font-body, inherit));
-        font-weight: 700;
-        font-variation-settings: "opsz" 96;
-    }
-
-    // Article headings — serif with proper optical sizing
-    article h2 {
-        font-family: var(--font-heading, var(--font-body, inherit));
-        font-weight: 600;
-        font-variation-settings: "opsz" 48;
-        letter-spacing: -0.015em;
-    }
-
-    article h3,
-    article h4 {
-        font-family: var(--font-body, inherit);
-        font-weight: 600;
-    }
-
-    code, pre {
-        font-family: var(--font-mono, monospace);
-    }
-}
-
-// === CODE BLOCK STYLING ===
-// Make code blocks translucent to match app feel
-[data-dory-themed="true"] {
-    [data-slot="card"],
-    .bg-card {
-        background-color: transparent !important;
-        border-color: var(--border) !important;
-    }
-
-    pre {
-        background-color: transparent !important;
-    }
-
-    // Inline code
-    .dory-mdx-code {
-        background-color: transparent !important;
-        border: 1px solid var(--border);
-    }
+    font-family: var(--font-body);
 }
 
 // === DEFAULT STYLES ===
@@ -133,38 +43,7 @@ article img {
     margin-bottom: 1rem;
 }
 
-[data-testid="header-actions"] button,
-[data-slot="dropdown-menu-content"] {
-    border-color: var(--ring);
-}
-
-[data-slot="search-input-wrapper"] {
-    font-size: 12px;
-    outline: none;
-}
-
-[data-slot="search-input"] {
-    font-size: 12px;
-}
-
-[data-slot="search-input-wrapper"]:focus-within {
-    outline: none !important;
-}
-
-[role="dialog"] [data-slot="search-input-wrapper"]:focus-within {
-    outline: none !important;
-    border: 0px;
-    box-shadow: none !important;
-}
-
 // === EDITORIAL STYLE (Dory v2) ===
-:root {
-    --dory-code-string: #b65401;
-}
-
-:root.dark {
-    --dory-code-string: #f4a261;
-}
 
 .font-heading {
     font-family: var(--font-heading, var(--font-body, inherit));
@@ -336,7 +215,7 @@ article {
 
     .dory-line-add {
         background: var(--success-muted);
-        border-left-color: #2f7d4a;
+        border-left-color: var(--success);
     }
 
     .dory-line-del {
@@ -359,19 +238,11 @@ article {
     }
 
     .dory-line-add .dory-line-marker {
-        color: #2f7d4a;
+        color: var(--success);
     }
 
     .dory-line-del .dory-line-marker {
         color: var(--destructive);
-    }
-}
-
-:root.dark .dory-code .dory-line-add {
-    border-left-color: #6fbf87;
-
-    .dory-line-marker {
-        color: #6fbf87;
     }
 }
 
@@ -879,6 +750,82 @@ article .dory-h2 .dory-anchor {
     box-shadow: 0 24px 64px -16px rgba(15, 23, 42, 0.35);
 }
 
+.dory-search-ask-button {
+    flex-shrink: 0;
+    border-radius: 0.625rem;
+    padding: 0.5rem 0.875rem;
+    background: color-mix(in oklch, var(--brand-primary) 22%, var(--card));
+    color: var(--foreground);
+    font-size: 0.875rem;
+    font-weight: 600;
+    white-space: nowrap;
+
+    &:hover,
+    &:focus-visible {
+        background: color-mix(in oklch, var(--brand-primary) 34%, var(--card));
+    }
+}
+
+.dory-search-active {
+    flex-shrink: 0;
+    border-radius: 0.625rem;
+    padding: 0.5rem 0.875rem;
+    background: color-mix(in oklch, var(--brand-primary) 22%, var(--card));
+    color: var(--foreground);
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.dory-search-tabs {
+    background: var(--card);
+}
+
+.dory-search-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.625rem 1.25rem;
+    border-top: 1px solid var(--border);
+    padding: 0.75rem 1.5rem;
+    color: var(--muted-foreground);
+    font-size: 0.75rem;
+}
+
+.dory-search-footer span:last-child {
+    margin-left: auto;
+}
+
+.dory-search-chat {
+    background: var(--card);
+}
+
+.dory-chat-answer {
+    max-width: 50rem;
+}
+
+.dory-chat-composer {
+    background: var(--card);
+}
+
+@media (max-width: 640px) {
+    .dory-search-active {
+        display: none;
+    }
+
+    .dory-search-panel {
+        border-radius: 1rem;
+    }
+
+    .dory-search-footer {
+        gap: 0.5rem;
+        padding: 0.625rem 1rem;
+    }
+
+    .dory-search-footer span:last-child {
+        margin-left: 0;
+    }
+}
+
 .dory-search-input {
     font-size: 1.25rem;
     color: var(--foreground);
@@ -906,6 +853,32 @@ article .dory-h2 .dory-anchor {
 
 .dory-search-result[aria-selected="true"] {
     background: var(--muted);
+}
+
+.dory-search-highlight {
+    background: transparent;
+    color: inherit;
+    font-weight: inherit;
+    text-decoration: underline;
+    text-decoration-color: var(--primary);
+    text-underline-offset: 0.18em;
+}
+
+.dory-search-ask-result {
+    margin: 0 0.75rem;
+    border-radius: 0.75rem;
+    background: var(--accent);
+}
+
+.dory-search-ask-result[aria-selected="true"] {
+    background: color-mix(in oklch, var(--primary) 20%, var(--card));
+}
+
+.dory-search-key {
+    border: 1px solid var(--border);
+    border-radius: 0.375rem;
+    padding: 0.2rem 0.4rem;
+    font-family: var(--font-mono, monospace);
 }
 
 .dory-search-eyebrow {

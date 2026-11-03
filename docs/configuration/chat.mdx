@@ -1,0 +1,59 @@
+---
+title: Documentation chat
+description: Add a cited documentation assistant with server-side credentials and strict request limits.
+---
+
+# Documentation chat
+
+Dory can add an **Ask Dory** assistant to your site. It is optional. The browser sends questions to a same-origin `/api/chat` endpoint; only the server calls your model provider. Answers include links to the documentation sections used as sources. When the docs have no matching source, the assistant says it cannot find the answer.
+
+## Configure a model
+
+Set these environment variables on the server running `dory dev` or `dory preview`:
+
+```bash
+DORY_CHAT_API_KEY=your-server-only-key
+DORY_CHAT_MODEL=gpt-6-luna
+# Optional: an OpenAI-compatible provider endpoint; defaults to https://api.openai.com/v1
+DORY_CHAT_BASE_URL=https://api.openai.com/v1
+```
+
+If your existing `.env` uses `OPENAI_API_KEY`, Dory accepts that as a fallback. Set `DORY_CHAT_MODEL` as well; no model is chosen silently.
+
+The chosen provider must support the OpenAI-compatible `/chat/completions` API and `max_completion_tokens`. Keep the key in your server's secret manager or an uncommitted `.env` file. **Do not use a `VITE_` prefix** for the key: Vite exposes variables with that prefix to browser code. Dory never puts `DORY_CHAT_API_KEY` in the generated site or sends it to the browser.
+
+Run `dory dev` while writing, or `dory build && dory preview` to serve the built site with chat. A static-file host cannot execute `/api/chat`; if you deploy `dist/` to one, put a compatible server endpoint behind the same path. Dory hides the chat button when no backend is configured.
+
+When enabled, Ask Dory appears in the documentation search dialog. Readers can switch to chat, choose a suggested question, or select the Ask Dory result above page matches to ask their current search query. Supported answers include citations and documentation-focused follow-up questions. If a question is outside the published docs, Ask Dory says so without attaching an unrelated source and suggests topics from your configured questions instead.
+
+To customize the suggested questions for your site, add this optional section to `dory.json`:
+
+```json
+"chat": {
+  "suggestedQuestions": [
+    "How do I install the product?",
+    "What should I try first?",
+    "Explain this page"
+  ]
+}
+```
+
+Without this section, Dory suggests questions based on your site name. Keep provider keys in the server environment, never in `dory.json`.
+
+## Limits and security
+
+The backend rejects cross-origin requests, oversized messages, long conversation histories, and requests beyond its limits. The defaults are deliberately conservative:
+
+When using `dory dev` on `localhost`, `127.0.0.1`, or `::1`, Dory skips the per-minute and daily request quotas so you can iterate on chat locally. The concurrent-call guard still applies. `dory preview` and deployed servers keep the quotas below.
+
+| Environment variable | Default | Purpose |
+| --- | ---: | --- |
+| `DORY_CHAT_PER_MINUTE` | `3` | Requests per IP per minute |
+| `DORY_CHAT_PER_IP_DAY` | `20` | Requests per IP per day |
+| `DORY_CHAT_GLOBAL_DAY` | `100` | Requests across the server per day |
+| `DORY_CHAT_MAX_CONCURRENT` | `2` | Simultaneous model calls across the server |
+| `DORY_CHAT_MAX_OUTPUT_TOKENS` | `500` | Maximum model output tokens |
+
+Each request has a 20-second provider timeout. A question can contain at most 600 characters, and at most six previous turns are accepted. The limits above apply **per Node process**; for multiple replicas, enforce shared limits at your reverse proxy or edge as well. Dory uses the connection IP, not an untrusted `X-Forwarded-For` header. If you put the server behind a reverse proxy, configure limits there using its verified client IP.
+
+The server retrieves relevant MDX sections and gives only those excerpts to the model. It validates returned source IDs before showing an answer. Model output can still be imperfect, so keep examples and API facts reviewed and use `dory check` in CI.

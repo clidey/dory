@@ -20,6 +20,7 @@
     "bin/**/*.ts"
   ],
   "exclude": [
-    "bin/dist"
+    "bin/dist",
+    "bin/**/*.test.ts"
   ]
 }

@@ -7,9 +7,14 @@ import { resolve } from 'path';
  * PostHog is only injected if `analytics.posthog.token` is configured.
  */
 export function analyticsInjector(): Plugin {
+  let isProductionBuild = false;
   return {
     name: 'analytics-injector',
+    configResolved(config) {
+      isProductionBuild = config.command === 'build';
+    },
     transformIndexHtml(html) {
+      if (!isProductionBuild) return html;
       const doryJsonPath = resolve(process.cwd(), 'docs', 'dory.json');
       if (!existsSync(doryJsonPath)) return html;
 
@@ -28,6 +33,9 @@ export function analyticsInjector(): Plugin {
         posthog.init(${token}, {
             api_host: ${apiHost},
             person_profiles: 'identified_only',
+            autocapture: false,
+            capture_pageview: 'history_change',
+            capture_pageleave: 'if_capture_pageview',
         })
     </script>`;
 

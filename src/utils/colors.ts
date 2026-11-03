@@ -16,6 +16,13 @@ export function loadColors() {
   if (!colors) return;
 
   const root = document.documentElement;
+  const light = colors.light || colors.primary;
+  const dark = colors.dark || colors.primary;
+  if (light || dark) {
+    root.setAttribute('data-dory-colors', 'true');
+    root.style.setProperty('--brand-light', light || dark);
+    root.style.setProperty('--brand-dark', dark || light);
+  }
 
   // Brand accent colors
   if (colors.primary) {

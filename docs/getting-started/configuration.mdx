@@ -5,7 +5,7 @@ description: 'Configure your Dory site with dory.json — branding, navigation, 
 
 # Configuration
 
-All Dory configuration lives in a single `dory.json` file in your docs directory. Here is a complete example:
+All Dory configuration lives in a single `dory.json` file at the project root. Pages can live in `docs/`. Here is an example:
 
 ```json
 {
@@ -77,6 +77,8 @@ All Dory configuration lives in a single `dory.json` file in your docs directory
 | `logo` | Yes | Logo paths for light and dark mode. |
 | `navigation` | Yes | Navigation structure. See [Navigation](/configuration/navigation). |
 | `analytics` | No | Analytics integrations. See [Analytics](/configuration/analytics). |
+| `i18n` | No | Translated content. See [Languages and versions](/configuration/internationalization). |
+| `versions` | No | Versioned content. See [Languages and versions](/configuration/internationalization). |
 | `embed` | No | Embeddable widget config. See [Embed](/configuration/embed). |
 
 ## Configuration Sections
@@ -86,6 +88,8 @@ All Dory configuration lives in a single `dory.json` file in your docs directory
   <Card title="Theming" href="/configuration/theming" icon="palette" description="Set primary, light, and dark brand colors." />
   <Card title="Fonts" href="/configuration/fonts" icon="type" description="Use a custom web font from Google Fonts or any CDN." />
   <Card title="Analytics" href="/configuration/analytics" icon="bar-chart" description="Integrate PostHog for page view tracking." />
+  <Card title="Documentation chat" href="/configuration/chat" icon="message-square" description="Configure a server-side model for cited answers." />
+  <Card title="Languages and versions" href="/configuration/internationalization" icon="globe" description="Organize localized and versioned pages." />
   <Card title="Embed" href="/configuration/embed" icon="code-2" description="Configure the embeddable widget for external sites." />
   <Card title="Full Reference" href="/configuration/dory-json" icon="file-text" description="Complete dory.json reference with all fields." />
 </CardGroup>

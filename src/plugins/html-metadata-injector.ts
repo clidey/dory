@@ -1,5 +1,6 @@
 import type { Plugin } from 'vite';
 import { readDoryConfig, escapeHtml, applyTitleTemplate, getBasePath, getSiteUrl } from './shared.ts';
+import { socialPreviewPath } from './social-preview.ts';
 
 /**
  * Vite plugin that injects site metadata from dory.json into index.html.
@@ -25,7 +26,8 @@ export function htmlMetadataInjector(): Plugin {
         const twitterHandle: string = config.twitter || '';
 
         // Resolve image to absolute URL
-        const rawImage: string = config.image || '';
+        const generateImages = seo.generateSocialImages !== false;
+        const rawImage: string = generateImages ? socialPreviewPath('/') : seo.ogImage || config.image || '';
         const siteImage = rawImage && siteUrl && !rawImage.startsWith('http')
           ? `${siteUrl}${rawImage.startsWith('/') ? '' : '/'}${rawImage}`
           : rawImage;
@@ -47,6 +49,24 @@ export function htmlMetadataInjector(): Plugin {
         const injectHeadTag = (tag: string) => {
           html = html.replace('</head>', () => `  ${tag}\n  </head>`);
         };
+
+        // A single site URL is enough for clients to find the MDX index.
+        injectHeadTag(`<link rel="alternate" type="text/plain" title="LLM documentation index" href="${escapeHtml(basePath)}/llms.txt" />`);
+
+        const siteSchema = JSON.stringify({
+          '@context': 'https://schema.org',
+          '@graph': [
+            {
+              '@type': 'WebSite', name: siteName, description: defaultDescription,
+              ...(siteUrl ? { '@id': `${siteUrl}/#website`, url: `${siteUrl}/` } : {}),
+            },
+            {
+              '@type': 'WebPage', name: defaultTitle, description: defaultDescription,
+              ...(siteUrl ? { url: `${siteUrl}/`, isPartOf: { '@id': `${siteUrl}/#website` } } : {}),
+            },
+          ],
+        }).replace(/</g, '\\u003c');
+        injectHeadTag(`<script type="application/ld+json" data-dory-site-schema>${siteSchema}</script>`);
 
         // Title
         setTag(/<title>.*?<\/title>/, `<title>${escapeHtml(defaultTitle)}</title>`);
@@ -128,10 +148,10 @@ export function htmlMetadataInjector(): Plugin {
         }
 
         // Twitter tags
-        if (seo.twitterCard) {
+        if (generateImages || seo.twitterCard) {
           setTag(
             /<meta name="twitter:card" content=".*?" \/>/,
-            `<meta name="twitter:card" content="${escapeHtml(seo.twitterCard)}" />`
+            `<meta name="twitter:card" content="${generateImages ? 'summary_large_image' : escapeHtml(seo.twitterCard)}" />`
           );
         }
         setTag(

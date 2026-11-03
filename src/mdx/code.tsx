@@ -1,5 +1,5 @@
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react'
-import { ClipboardIcon } from '@heroicons/react/24/outline'
+
 import classNames from 'classnames'
 import {
   Children,
@@ -8,12 +8,13 @@ import {
   useEffect,
   useState
 } from 'react'
-import { File, SquareTerminal } from 'lucide-react'
+
 import { Tag } from './tag'
 import { diffBaseLanguage, isTerminalSession, parseFenceMeta, type FenceMeta } from './fence-meta'
 import { toTitleCase } from '../utils/functions'
-import { Button } from '@clidey/ux'
-import { CheckIcon } from 'lucide-react'
+import { CatalogIcon, Button } from '@clidey/ux'
+
+import { captureDocsEvent } from '../utils/analytics'
 
 export const supportedLanguages = {
   'python': 'Python',
@@ -111,6 +112,7 @@ export function CopyButton({ code }: { code: string }) {
       onClick={() => {
         window.navigator.clipboard.writeText(code).then(() => {
           setCopyCount((count) => count + 1)
+          captureDocsEvent('docs_code_copied', { path: window.location.pathname })
         })
       }}
     >
@@ -121,7 +123,7 @@ export function CopyButton({ code }: { code: string }) {
           copied && '-translate-y-1.5 opacity-0',
         )}
       >
-        <ClipboardIcon className="h-3.5 w-3.5 stroke-muted-foreground transition-colors group-hover/button:stroke-foreground" />
+        <CatalogIcon name="clipboard" className="h-3.5 w-3.5 stroke-muted-foreground transition-colors group-hover/button:stroke-foreground" />
       </span>
       <span
         aria-hidden={!copied}
@@ -130,7 +132,7 @@ export function CopyButton({ code }: { code: string }) {
           !copied && 'translate-y-1.5 opacity-0',
         )}
       >
-        <CheckIcon className="h-3.5 w-3.5" />
+        <CatalogIcon name="check" className="h-3.5 w-3.5" />
       </span>
     </Button>
   )
@@ -161,8 +163,8 @@ export function FenceHeader({ language, code, meta }: FenceProps) {
   return (
     <div className="flex min-h-10 items-center gap-2 border-b border-[var(--border)] bg-muted pl-4 pr-12">
       {terminal
-        ? <SquareTerminal aria-hidden="true" className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-        : meta.title && <File aria-hidden="true" className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />}
+        ? <CatalogIcon name="terminal" aria-hidden="true" className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+        : meta.title && <CatalogIcon name="file" aria-hidden="true" className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />}
       <p className="mr-auto truncate font-mono text-xs font-medium text-foreground">{title}</p>
       {diff && (
         <span className="font-mono text-xs">

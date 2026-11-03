@@ -1,107 +1,53 @@
 ---
 title: 'Quick Start'
-description: 'Build your first Dory documentation site in 5 minutes.'
+description: 'Create, check, and build your first Dory documentation site.'
 ---
 
 # Quick Start
 
-This guide walks you through creating a documentation site from scratch.
+## 1. Create a documentation project
 
-## 1. Create Your Project
+Install the CLI, create a folder, and initialize your site:
 
-Create a new folder for your documentation. Inside it, you'll place your `dory.json` config and your `.mdx` content files.
-
-## 2. Create dory.json
-
-Create a `dory.json` file with your site configuration:
-
-```json
-{
-  "name": "My Docs",
-  "description": "Documentation for my project.",
-  "favicon": "./favicon.svg",
-  "colors": {
-    "primary": "#6366f1",
-    "light": "#818cf8",
-    "dark": "#4f46e5"
-  },
-  "logo": {
-    "light": "./logo/logo.svg",
-    "dark": "./logo/logo.svg"
-  },
-  "navigation": {
-    "tabs": [
-      {
-        "tab": "Documentation",
-        "groups": [
-          {
-            "group": "Getting Started",
-            "pages": ["introduction"]
-          }
-        ]
-      }
-    ]
-  }
-}
+```bash
+pnpm add -g @clidey/dory
+mkdir my-docs
+cd my-docs
+dory init
 ```
 
-## 3. Create Your First Page
+`dory init` creates `dory.json`, `docs/introduction.mdx`, and a starter logo. Keep your pages in `docs/` and add their page keys to `dory.json` navigation.
 
-Create `introduction.mdx`:
+## 2. Write with a live preview
 
-```mdx
----
-title: 'Introduction'
-description: 'Welcome to my documentation.'
----
-
-# Introduction
-
-Welcome to my docs! This site is built with **Dory**.
-
-<Note>
-  You can use any of Dory's built-in components in your pages.
-</Note>
-
-## Features
-
-<CardGroup cols={2}>
-  <Card title="Fast" icon="zap" description="Instant builds and lightning-fast page loads." />
-  <Card title="Flexible" icon="layers" description="Mix Markdown with rich components." />
-</CardGroup>
+```bash
+dory dev
 ```
 
-## 4. Add a Logo
+Open the local URL shown in your terminal. Changes to your MDX files reload while you write.
 
-Create a `logo/` folder inside your docs directory and add your SVG logo files there.
+## 3. Check the whole site
 
-<Tip>
-  If you don't have a logo yet, create a simple SVG placeholder. Dory will render it in the header and sidebar.
-</Tip>
+```bash
+dory check
+```
 
-## 5. Build the Site
+The check reports missing navigation pages, broken local links and anchors, missing assets, and invalid frontmatter. Run it in CI before publishing.
+
+## 4. Build and preview
 
 ```bash
 dory build
-```
-
-This generates a static site in the `dist/` directory.
-
-## 6. Preview the Site
-
-```bash
 dory preview
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to see your documentation.
+The static site is written to `dist/`. The build accepts a top-level `docs/` folder and does not modify the installed Dory package. `dory preview` also serves the optional [documentation chat](/configuration/chat) when you configure a model on the server.
 
----
-
-## Next Steps
+## Next steps
 
 <CardGroup cols={2}>
-  <Card title="Configuration" href="/getting-started/configuration" icon="settings" description="Customize colors, fonts, navigation, and more." />
-  <Card title="Components" href="/components/overview" icon="layout-dashboard" description="Browse all available built-in components." />
-  <Card title="Theming" href="/configuration/theming" icon="palette" description="Apply your brand colors and typography." />
-  <Card title="Deploy" href="/configuration/dory-json" icon="rocket" description="Deploy your docs to any static host." />
+  <Card title="Configuration" href="/getting-started/configuration" icon="settings" description="Customize navigation, branding, and metadata." />
+  <Card title="Components" href="/components/overview" icon="layout-dashboard" description="Add richer examples to your pages." />
+  <Card title="Languages and versions" href="/configuration/internationalization" icon="globe" description="Organize translated and versioned content." />
+  <Card title="Documentation chat" href="/configuration/chat" icon="message-square" description="Add an optional cited assistant." />
 </CardGroup>

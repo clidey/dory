@@ -1,4 +1,5 @@
-import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
+import { CatalogIcon } from '@clidey/ux'
+
 import { useEffect, useRef, useState } from 'react'
 
 function extractText(node: React.ReactNode): string {
@@ -73,7 +74,7 @@ export function Latex({ children, inline = false }: LatexProps) {
       <div className="my-4">
         <div className="flex flex-col items-center justify-center py-12 px-6 text-center bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 border-2 border-dashed border-red-300 dark:border-red-700 rounded-lg">
           <div className="w-16 h-16 mb-4 flex items-center justify-center bg-red-100 dark:bg-red-900/30 rounded-full">
-            <ExclamationTriangleIcon className="w-8 h-8 text-red-500" />
+            <CatalogIcon name="warning" className="w-8 h-8 text-red-500" />
           </div>
           <h3 className="text-lg font-semibold text-red-700 dark:text-red-300 mb-2">
             LaTeX Rendering Error

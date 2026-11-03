@@ -1,0 +1,61 @@
+---
+title: Languages and versions
+description: Publish translated and versioned documentation in one Dory site.
+---
+
+# Languages and versions
+
+Dory uses file paths for translated and versioned pages. Existing sites keep their current URLs. The default language and current version stay at the root.
+
+## Add a language
+
+Run `dory i18n:init fr` in your project. Dory adds the locale to `dory.json` and creates `.mdx.template` copies of your default pages under `docs/fr/`. Translate a template and rename it to `.mdx` when it is ready to publish. Re-running the command only creates missing templates; it leaves authored translations untouched.
+
+Add `i18n` to `dory.json`:
+
+```json
+{
+  "i18n": {
+    "defaultLocale": "en",
+    "locales": [
+      { "code": "en", "label": "English" },
+      { "code": "fr", "label": "Français" }
+    ]
+  }
+}
+```
+
+Keep English pages where they are. Place the French version of `docs/introduction.mdx` at `docs/fr/introduction.mdx`. It publishes at `/fr/introduction`. Dory shows a language picker when more than one locale is configured. When the matching page exists, switching languages keeps the reader on that page. Otherwise, it opens the first page in the selected language.
+
+Translate page titles and descriptions in each file's frontmatter. To translate tab and group labels, add a complete `navigation` object to that locale's entry. Use the same page keys as the default navigation, relative to the locale directory:
+
+```json
+{
+  "code": "fr",
+  "label": "Français",
+  "navigation": {
+    "tabs": [{
+      "tab": "Guides",
+      "groups": [{ "group": "Démarrage", "pages": ["introduction"] }]
+    }]
+  }
+}
+```
+
+Only publish translated pages you have written. Dory does not generate machine translations or silently show English text at a French URL. Built pages use the locale in their HTML `lang` attribute and include alternate language links for pages that exist in both languages.
+
+## Add an older version
+
+Add a version with an `id`. The current version stays at the root, and older content goes in a folder with the version ID:
+
+```json
+{
+  "version": "2.0 · Latest",
+  "versions": [{ "id": "v1", "label": "1.0" }]
+}
+```
+
+For example, `docs/v1/introduction.mdx` publishes at `/v1/introduction`. The version picker keeps the reader on the same page where it exists. You can set a version's `navigation` to describe that version's pages. Existing `versions` entries with external `url` values continue to work.
+
+For translated older versions, place files under `docs/fr/v1/`. Their URLs start with `/fr/v1/`.
+If an older translation has different pages, set `versions.v1` inside the French locale entry to a complete navigation object for that content.

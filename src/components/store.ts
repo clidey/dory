@@ -4,6 +4,7 @@ import docsConfig from '../../docs/dory.json' with { type: 'json' };
 import type { DoryConfig } from '../types/config';
 import { addToSearchIndex } from './search-index';
 import { withBase } from '../utils/base-path';
+import { contentScope } from '../utils/content-scope';
 
 const config = docsConfig as DoryConfig;
 
@@ -42,28 +43,34 @@ export interface Navigation {
     }>;
 }
 
-export const ALL_NAVIGATION: Navigation[] = config.navigation.tabs.map(tab => ({
+export function getNavigationForPath(pathname: string): Navigation[] {
+  const scope = contentScope(config, pathname);
+  return scope.navigation.tabs.map(tab => ({
     title: tab.tab,
     groups: tab.groups.map(group => ({
       title: group.group,
       pages: group.pages.map(entry => {
         const page = typeof entry === 'string' ? entry : entry.page;
-        const path = `/${page}`;
+        const path = `${scope.prefix}/${page}`;
         return {
           title: page.charAt(0).toUpperCase() + page.slice(1).replace(/-/g, ' '),
           href: path,
           badge: typeof entry === 'string' ? undefined : entry.badge,
         };
-      })
+      }).filter(page => !scope.prefix || Boolean(ALL_PAGES[page.href]))
     }))
-}));
+  })).filter(tab => tab.groups.some(group => group.pages.length > 0));
+}
+
+export const ALL_NAVIGATION: Navigation[] = getNavigationForPath('/');
 
 export function pathFromFilename(filename: string): string {
-    return filename
+    const path = filename
         .replace('../../docs', '')
         .replace(/\/?index\.mdx$/, '/')
         .replace(/\.mdx$/, '')
         .toLowerCase();
+    return path.length > 1 ? path.replace(/\/$/, '') : path;
 }
 
 
@@ -80,7 +87,7 @@ if (typeof window !== 'undefined' && window.__DORY_FRONTMATTER__) {
     }
     delete window.__DORY_FRONTMATTER__;
     // Build search index in the background after the page has fully rendered
-    setTimeout(() => addPreloadedContentToSearch(), 2000);
+    setTimeout(() => void ensureSearchContent(), 2000);
 }
 
 // Preload frontmatter from JSON file (fallback when no inline data)
@@ -101,12 +108,20 @@ export async function preloadFrontmatter() {
 
                 // Build search index in the background after the page has fully rendered.
                 // Delay avoids competing with the route chunk for network connections.
-                setTimeout(() => addPreloadedContentToSearch(), 2000);
+                setTimeout(() => void ensureSearchContent(), 2000);
             }
         }
     } catch (error) {
         console.warn('Failed to load prebuilt frontmatter JSON, falling back to dynamic loading:', error);
     }
+}
+
+let searchContentPromise: Promise<void> | undefined;
+
+// Start immediately when search is used; otherwise load in the background.
+export function ensureSearchContent(): Promise<void> {
+    searchContentPromise ??= addPreloadedContentToSearch();
+    return searchContentPromise;
 }
 
 // Add preloaded content to search index (runs in background, never blocks rendering).

@@ -5,7 +5,7 @@ const config = docsConfig as DoryConfig;
 
 export function loadTheme() {
   const root = document.documentElement;
-  const { theme, colors } = config;
+  const { theme } = config;
 
   // Apply forced dark/light mode
   if (theme?.mode === 'dark') {
@@ -19,11 +19,5 @@ export function loadTheme() {
   // Apply border radius
   if (theme?.radius) {
     root.style.setProperty('--radius', theme.radius);
-  }
-
-  // Mark as themed if custom background colors are provided
-  const hasCustomColors = colors?.background || colors?.surface || colors?.foreground;
-  if (hasCustomColors) {
-    root.setAttribute('data-dory-themed', 'true');
   }
 }

@@ -1,5 +1,23 @@
-@import "tailwindcss";
+/* UX supplies the shared reset. Dory adds its own generated utilities. */
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
 
 @custom-variant dark (&:where(.dark, .dark *));
+
+.mermaid-wrapper .mermaid svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin-inline: auto;
+}
+
+@media (max-width: 480px) {
+  /* Keep the UX 404 illustration inside its narrow stage. Its animation sets left inline. */
+  .ux-not-found-character {
+    left: clamp(80px, 24vw, 100px) !important;
+    scale: .6;
+  }
+}
 
 
