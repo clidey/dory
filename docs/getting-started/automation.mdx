@@ -30,8 +30,8 @@ A Dory site served with `dory preview` also exposes a public, read-only Streamab
 Add the endpoint once in your MCP client:
 
 ```bash
-codex mcp add whodb-docs --url https://docs.whodb.com/mcp
-claude mcp add --transport http whodb-docs https://docs.whodb.com/mcp
+codex mcp add example-docs --url https://docs.example.com/mcp
+claude mcp add --transport http example-docs https://docs.example.com/mcp
 ```
 
 Replace the example URL with your Dory site. If the docs run behind a reverse proxy, forward `/mcp` to the Dory preview server. Its `dory.json` `url` must match the public hostname; for an additional preview hostname, set `DORY_MCP_ALLOWED_HOSTS` to a comma-separated list. The endpoint rejects other hostnames and cross-origin browser requests.

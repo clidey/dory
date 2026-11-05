@@ -149,7 +149,7 @@ Plugins loaded in main config (in order):
 - `wouter-preact` — Routing
 - `sirv` — Static file serving (CLI preview)
 - `@clidey/ux` — Shared UI component library
-- Local WhoDB SVG suite in `src/assets/whodb-icons/` — Icons
+- Shared `@clidey/ux` catalog — Icons
 
 ## When Making Changes
 
@@ -160,3 +160,10 @@ Plugins loaded in main config (in order):
 - Navigation changes require updating `docs/dory.json`.
 - Test both light and dark modes for UI changes.
 - The `.npmrc` enforces strict security: frozen lockfile, strict SSL, 7-day minimum release age for packages.
+
+## Review Before Pushing
+
+Before every push, show the user the code changes and, for documentation work,
+a local preview. Wait for explicit approval after that review before running
+`git push` or publishing/deploying documentation. Do not treat an earlier push
+approval as approval for later changes.

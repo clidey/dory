@@ -13,5 +13,5 @@
 <text x="76" y="420" fill="#b2bdd0" font-family="Hanken Grotesk,Arial,sans-serif" font-size="26">Build beautiful documentation from MDX.</text>
 <path d="M76 512H1124" stroke="#344767"/>
 <text x="76" y="559" fill="#aebace" font-family="Hanken Grotesk,Arial,sans-serif" font-size="21">Open source. Built for teams.</text>
-<text x="1124" y="559" text-anchor="end" fill="#8caffb" font-family="Hanken Grotesk,Arial,sans-serif" font-size="21">dory.clidey.com</text>
+<text x="1124" y="559" text-anchor="end" fill="#8caffb" font-family="Hanken Grotesk,Arial,sans-serif" font-size="21">clidey.github.io/dory</text>
 </svg>

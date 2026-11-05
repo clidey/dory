@@ -6,7 +6,7 @@ import { preview } from 'vite';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const docsRoot = join(root, 'docs');
-const pagePath = 'getting-started/whodb-ee-apps';
+const pagePath = 'getting-started/automation';
 
 function docsFiles(directory = docsRoot) {
   return readdirSync(directory, { withFileTypes: true }).flatMap(entry => {
@@ -19,6 +19,7 @@ function docsFiles(directory = docsRoot) {
 }
 
 const config = JSON.parse(readFileSync(join(docsRoot, 'dory.json'), 'utf8'));
+const basePath = String(config.basePath || '').replace(/\/$/, '');
 const logo = readFileSync(join(docsRoot, 'logo/logo.svg')).toString('base64');
 config.logo = {
   light: `data:image/svg+xml;base64,${logo}`,
@@ -100,17 +101,17 @@ try {
   browser = await chromium.launch({ channel: 'chrome', headless: true });
   for (const theme of ['light', 'dark']) {
     const full = await browser.newPage({ viewport: { width: 2048, height: 1200 } });
-    await full.goto(`${origin}/${pagePath}`, { waitUntil: 'networkidle' });
+    await full.goto(`${origin}${basePath}/${pagePath}`, { waitUntil: 'networkidle' });
     if (theme === 'dark') await full.locator('html').evaluate(element => { element.classList.remove('light'); element.classList.add('dark'); });
     await full.evaluate(() => document.fonts.ready);
     const fullMetrics = await full.evaluate(visualMetrics);
 
     const embed = await browser.newPage({ viewport: { width: 2048, height: 1200 } });
-    await embed.goto(`${origin}/runtime/dory-runtime.html`, { waitUntil: 'networkidle' });
+    await embed.goto(`${origin}${basePath}/runtime/dory-runtime.html`, { waitUntil: 'networkidle' });
     await embed.evaluate(({ files, config, theme, pagePath }) => {
       window.postMessage({ __dory_docs: true, type: 'load', files, path: `docs/${pagePath}.mdx`, theme, locale: 'en_US', config }, '*');
     }, { files: docsFiles(), config, theme, pagePath });
-    await embed.getByRole('heading', { name: 'Document WhoDB EE apps' }).waitFor();
+    await embed.getByRole('heading', { name: 'CLI and MCP automation' }).waitFor();
     await embed.evaluate(() => document.fonts.ready);
     const embedMetrics = await embed.evaluate(visualMetrics);
     compare(fullMetrics, embedMetrics, theme);

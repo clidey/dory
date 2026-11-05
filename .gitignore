@@ -24,6 +24,18 @@ test-results/
 .env
 .env.*
 !.env.example
+
+# Local credentials and private signing material
+.aws/
+.ssh/
+.gnupg/
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+credentials.json
+service-account*.json
 .docs-backup
 .dory/
 

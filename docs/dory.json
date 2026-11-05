@@ -1,8 +1,8 @@
 {
   "name": "Dory",
-  "url": "https://dory.clidey.com",
+  "url": "https://clidey.github.io",
   "image": "/social-card.png",
-  "version": "1.0.8 · Latest",
+  "version": "1.9.0 · Latest",
   "copyright": "Clidey",
   "repository": {
     "url": "https://github.com/clidey/dory",
@@ -39,7 +39,6 @@
               "getting-started/installation",
               "getting-started/quick-start",
               "getting-started/automation",
-              "getting-started/whodb-ee-apps",
               "getting-started/configuration"
             ]
           },
@@ -125,5 +124,6 @@
         ]
       }
     ]
-  }
+  },
+  "basePath": "/dory"
 }

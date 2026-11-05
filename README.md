@@ -139,16 +139,11 @@ npm install -g pnpm
 
 ---
 
-### 3️⃣ Copy Documentation Content
+### 3️⃣ Browse Dory's Own Documentation
 
-Copy your existing documentation into the `./docs` directory:
-
-```bash
-rm -rf ./docs
-cp ../wherever-the-docs-are/. ./docs
-```
-
-> Replace `../wherever-the-docs-are/` with the actual path to your documentation source files.
+This repository already contains Dory's documentation in `docs/`. Edit its MDX
+pages and `docs/dory.json` to work on the site. To create documentation for a
+separate project, use `dory init` in a new folder rather than replacing these pages.
 
 ---
 
@@ -160,7 +155,7 @@ Start the development server to preview the documentation locally:
 pnpm run dev
 ```
 
-This will launch a local server (typically at `http://localhost:3000`) where you can preview and edit your documentation in real-time.
+This will launch a local server (typically at `http://localhost:3000/dory/`) where you can preview and edit your documentation in real-time.
 
 ---
 
@@ -174,6 +169,28 @@ pnpm run build
 
 This will create a `dist` directory containing the fully built static site, ready to be served.
 
+
+## GitHub Pages for Dory's Docs
+
+The documentation workflow builds the docs from this repository's source. Its
+Pages target is `https://clidey.github.io/dory/`, configured with `url` and
+`basePath` in `docs/dory.json`.
+
+Preview the production build locally before reviewing or publishing changes:
+
+```sh
+pnpm run build
+node bin/dist/dory.js check
+pnpm run preview --host 127.0.0.1 --port 3188 --strictPort
+```
+
+Open `http://127.0.0.1:3188/dory/`. Review the code and preview with the user
+before pushing. Once approved, the workflow validates pull requests and deploys
+approved changes pushed to `main`. A repository administrator must enable Pages
+with **GitHub Actions** as its source before the first deployment.
+
+Pages serves the static documentation and search. Optional server-backed chat,
+analytics collection, and HTTP MCP require a separate server.
 
 ## 🐳 Docker Deployment (Optional)
 
