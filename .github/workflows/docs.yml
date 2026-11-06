@@ -78,6 +78,17 @@ jobs:
       - run: pnpm test
       - run: node --import tsx --test bin/dependency-overlay.test.mts bin/preview-static.test.mts
       - run: pnpm run build
+      - name: Check component preview layout and interactions
+        run: node scripts/verify-component-examples.mjs
+      - name: Save component review screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: dory-component-review
+          path: .dory/component-review/
+          include-hidden-files: true
+          if-no-files-found: ignore
+          retention-days: 7
       - name: Scan generated site for secrets
         run: '"$RUNNER_TEMP/dory-secret-scan/gitleaks" dir dist --redact --no-banner'
       - run: node bin/dist/dory.js check

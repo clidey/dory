@@ -66,11 +66,11 @@ Publish the generated `dist/` directory to your static host. No Dory server is r
 
 ## Give readers more than a wall of text
 
-Compose guides from code blocks, tabs, cards, callouts, steps, diagrams, tables, and mathematical notation. Keep related examples together and let readers move between explanation and source.
+Compose guides from code blocks, tabs, cards, callouts, steps, diagrams, tables, and mathematical notation. Import trusted JSX components for live examples with real state and events, paired with copyable source. Keep related examples together and let readers move between explanation and source.
 
 OpenAPI and AsyncAPI references bring your operations into the same site. HTTP and WebSocket playgrounds let readers explore requests and events alongside the documentation.
 
-[Explore the components](https://clidey.github.io/dory/components/overview/) · [HTTP playground](https://clidey.github.io/dory/playgrounds/api-playground/) · [WebSocket playground](https://clidey.github.io/dory/playgrounds/websocket-playground/)
+[Explore the components](https://clidey.github.io/dory/components/overview/) · [Interactive JSX examples](https://clidey.github.io/dory/getting-started/custom-components/) · [HTTP playground](https://clidey.github.io/dory/playgrounds/api-playground/) · [WebSocket playground](https://clidey.github.io/dory/playgrounds/websocket-playground/)
 
 ## Make your docs useful to AI tools
 

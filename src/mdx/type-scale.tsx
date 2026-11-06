@@ -9,10 +9,10 @@ const scale = [
 /** Shows each heading level with its size and letter-spacing, without emitting real headings. */
 export function TypeScale() {
   return (
-    <div className="not-prose my-2">
+    <div className="dory-type-scale not-prose my-2 min-w-0">
       {scale.map(({ level, size, tracking, weight }) => (
-        <div key={level} className="flex items-baseline gap-6 border-b border-[var(--border)] py-4 last:border-b-0">
-          <span className="w-36 shrink-0 font-mono text-[11px] tracking-[0.12em] text-muted-foreground">
+        <div key={level} className="flex min-w-0 flex-col items-start gap-2 border-b border-[var(--border)] py-4 last:border-b-0 sm:flex-row sm:items-baseline sm:gap-6">
+          <span className="shrink-0 font-mono text-[11px] tracking-[0.12em] text-muted-foreground sm:w-36">
             {level} · {size} / {tracking}
           </span>
           <span

@@ -1,5 +1,5 @@
 import { Children, isValidElement } from 'preact/compat'
-import { Tabs as UxTabs, TabsList, TabsTrigger, TabsContent } from '@clidey/ux'
+import { Tabs as UxTabs, TabsList, TabsTrigger, TabsContent, cn } from '@clidey/ux'
 import { handleTabKeyDown } from './tabs'
 import { CopyButton, fencePropsOf } from './code'
 import { Fence, Pre } from './fence'
@@ -45,7 +45,13 @@ function isPropsBlock(child: preact.ComponentChild): boolean {
  * An MDX, TSX, or JSX fence becomes the Code tab, a <SpecimenProps> block becomes the
  * Props tab, and everything else is the rendered preview.
  */
-export function Specimen({ label, children }: { label?: string; children: preact.ComponentChildren }) {
+export function Specimen({ label, children, padding = 'default' }: {
+  label?: string
+  children: preact.ComponentChildren
+  /** Use none only when the example supplies its own preview spacing. */
+  padding?: 'default' | 'none'
+}) {
+  const previewClassName = cn('m-0 min-w-0 [&>:first-child]:mt-0 [&>:last-child]:mb-0', padding === 'none' ? 'p-0' : 'p-5 sm:p-6')
   const items = Children.toArray(children)
   const code = items.filter(isSourceFence)
   const props = items.filter(isPropsBlock)
@@ -62,7 +68,7 @@ export function Specimen({ label, children }: { label?: string; children: preact
       <CopyButton code={fence.code} />
     </div>
   })
-  if (tabs.length === 1) return <div className="dory-specimen not-prose my-5 overflow-hidden rounded-lg border border-[var(--border)] bg-card"><div className="px-4 py-3 font-mono text-xs text-[var(--primary)]">{label}</div><div className="p-5">{preview}</div></div>
+  if (tabs.length === 1) return <div className="dory-specimen not-prose my-5 overflow-hidden rounded-lg border border-[var(--border)] bg-card"><div className="px-4 py-3 font-mono text-xs text-[var(--primary)]">{label}</div><div data-dory-preview data-padding={padding} className={previewClassName}>{preview}</div></div>
   return <UxTabs defaultValue="Preview" className="dory-specimen not-prose my-5 gap-0 overflow-hidden rounded-lg border border-[var(--border)] bg-card">
     <div className="flex min-h-12 flex-wrap items-center justify-between gap-3 border-b border-[var(--border)] py-2 pl-4 pr-2">
       <p className="truncate font-mono text-xs text-[var(--primary)]">{label}</p>
@@ -70,7 +76,7 @@ export function Specimen({ label, children }: { label?: string; children: preact
         {tabs.map(tab => <TabsTrigger key={tab} value={tab}>{tab}</TabsTrigger>)}
       </TabsList>
     </div>
-    <TabsContent value="Preview" className="m-0 p-0 [&>:first-child]:mt-0 [&>:last-child]:mb-0">{preview}</TabsContent>
+    <TabsContent value="Preview" data-dory-preview data-padding={padding} className={previewClassName}>{preview}</TabsContent>
     {code.length > 0 && <TabsContent value="Code" className="m-0 p-0">{renderCode()}</TabsContent>}
     {props.length > 0 && <TabsContent value="Props" className="m-0 p-0">{props}</TabsContent>}
   </UxTabs>

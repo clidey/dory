@@ -39,7 +39,7 @@ export const p = function P(props: preact.ComponentProps<'p'>) {
 
 export function Row({ children, cols = 1, className }: { children: preact.ComponentChildren, cols?: number, className?: string }) {
   return (
-    <div className={cn(`py-6 grid grid-cols-1 items-start gap-x-16 gap-y-10 xl:max-w-none`, className)} style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
+    <div className={cn(`dory-row py-6 grid min-w-0 grid-cols-1 items-start gap-6 sm:grid-cols-[repeat(var(--dory-columns),minmax(0,1fr))] xl:max-w-none`, className)} style={{ '--dory-columns': cols }}>
       {children}
     </div>
   )
@@ -58,7 +58,7 @@ export function Col({
 }) {
   return (
     <div
-      className={classNames("[&>:first-child]:mt-0 [&>:last-child]:mb-0", {
+      className={classNames("min-w-0 [&>:first-child]:mt-0 [&>:last-child]:mb-0", {
         'xl:sticky xl:top-24': sticky,
       })}
       style={{ 

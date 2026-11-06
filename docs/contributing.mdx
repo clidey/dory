@@ -23,7 +23,10 @@ pnpm test
 node --import tsx --test bin/dependency-overlay.test.mts bin/preview-static.test.mts
 pnpm build
 node bin/dist/dory.js check
+node scripts/verify-component-examples.mjs
 ```
+
+The component browser check uses installed Chrome (or `DORY_CHROME_PATH`), measures preview padding and clipping, exercises tabs, and verifies math loading and failure states on desktop and mobile. It saves screenshots and a report under ignored `.dory/component-review/`; inspect these before publishing.
 
 Review browser behavior in light and dark modes. For custom components, verify interactions and focus handling; compilation alone cannot do that.
 

@@ -122,6 +122,8 @@ Use `sticky` on the code column so it stays visible while the prose scrolls.
 
 </Specimen>
 
+Rows stack on narrow screens and use the requested column count from the small-screen breakpoint (640px). Columns can shrink within their grid so long content stays inside the preview.
+
 ## Specimen
 
 `<Specimen>` frames a component example with **Preview**, **Code** and **Props** tabs. Put the MDX source in an ` ```mdx ` fence, the rendered example after it, and optional `<Prop>` rows inside `<SpecimenProps>`. Tabs only appear for the parts you include.
@@ -149,6 +151,7 @@ Use `sticky` on the code column so it stays visible while the prose scrolls.
 <SpecimenProps>
 
 <Prop name="label" type="string">Mono caption in the header, usually the component tag. Write angle brackets as `&lt;` and `&gt;`.</Prop>
+<Prop name="padding" type="'default' | 'none'">Preview spacing. Defaults to an inset preview. Use `none` only when the example provides its own padding.</Prop>
 <Prop name="children" type="ReactNode">An ` ```mdx ` fence (Code tab), a `<SpecimenProps>` block (Props tab), and the preview.</Prop>
 
 </SpecimenProps>

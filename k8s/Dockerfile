@@ -13,7 +13,7 @@ ARG DORY_VERSION=latest
 # Retry the requested version; never substitute a different release.
 RUN set -eu; \
     attempt=1; \
-    until npm install -g --registry=https://registry.npmjs.org "@clidey/dory@${DORY_VERSION}"; do \
+    until npm install -g --ignore-scripts --registry=https://registry.npmjs.org "@clidey/dory@${DORY_VERSION}"; do \
       if [ "$attempt" -ge 6 ]; then \
         echo "Dory ${DORY_VERSION} could not be installed after ${attempt} attempts." >&2; \
         exit 1; \

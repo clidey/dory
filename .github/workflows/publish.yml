@@ -4,70 +4,128 @@ on:
   workflow_dispatch:
 
 permissions:
-  id-token: write  # Required for OIDC
-  contents: write  # Required for creating releases
+  contents: read
+
+concurrency:
+  group: dory-release
+  cancel-in-progress: false
 
 jobs:
-  publish:
+  prepare:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     outputs:
       version: ${{ steps.version.outputs.version }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          cache: pnpm
+      - name: Determine version
+        id: version
+        run: |
+          node -e 'const v=require("./package.json").version;if(!/^\d+\.\d+\.\d+$/.test(v))throw Error("Expected a stable release version");require("fs").appendFileSync(process.env.GITHUB_OUTPUT,`version=${v}\n`)'
+      - run: pnpm install --frozen-lockfile --ignore-scripts
+      - run: pnpm test
+      - run: node --import tsx --test bin/dependency-overlay.test.mts bin/preview-static.test.mts
+      - run: pnpm run build
+      - run: node bin/dist/dory.js check
+      - run: node scripts/verify-component-examples.mjs
+      - name: Pack and scan the exact release
+        env:
+          PACKAGE_VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/dory-package" "$RUNNER_TEMP/dory-package-scan" "$RUNNER_TEMP/dory-scanner"
+          npm pack --ignore-scripts --pack-destination "$RUNNER_TEMP/dory-package"
+          tar -xzf "$RUNNER_TEMP/dory-package/clidey-dory-$PACKAGE_VERSION.tgz" -C "$RUNNER_TEMP/dory-package-scan"
+          curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz -o "$RUNNER_TEMP/dory-scanner/scanner.tar.gz"
+          echo "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  $RUNNER_TEMP/dory-scanner/scanner.tar.gz" | sha256sum --check
+          tar -xzf "$RUNNER_TEMP/dory-scanner/scanner.tar.gz" -C "$RUNNER_TEMP/dory-scanner" gitleaks
+          "$RUNNER_TEMP/dory-scanner/gitleaks" dir "$RUNNER_TEMP/dory-package-scan" --redact --no-banner
+          cd "$RUNNER_TEMP/dory-package"
+          sha256sum "clidey-dory-$PACKAGE_VERSION.tgz" > SHA256SUMS
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: dory-npm-package-${{ github.sha }}
+          path: ${{ runner.temp }}/dory-package/
+          if-no-files-found: error
+          retention-days: 7
 
-      - uses: pnpm/action-setup@v6
-
-      - uses: actions/setup-node@v7
+  publish:
+    needs: prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      PACKAGE_VERSION: ${{ needs.prepare.outputs.version }}
+    steps:
+      # This privileged job only publishes the tested artifact; it runs no source build.
+      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: dory-npm-package-${{ github.sha }}
+          path: ${{ runner.temp }}/dory-package/
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
-          cache: 'pnpm'
+      - name: Publish verified package through npm trusted publishing
+        run: |
+          cd "$RUNNER_TEMP/dory-package"
+          sha256sum --check SHA256SUMS
+          npm publish "clidey-dory-$PACKAGE_VERSION.tgz" --ignore-scripts --access public --provenance
+      - name: Confirm exact version is available before downstream release jobs
+        run: |
+          for attempt in $(seq 1 24); do
+            published=$(npm view "@clidey/dory@$PACKAGE_VERSION" version --registry=https://registry.npmjs.org 2>/dev/null || true)
+            if [ "$published" = "$PACKAGE_VERSION" ]; then exit 0; fi
+            sleep 10
+          done
+          echo "The exact published version is not yet available from npm." >&2
+          exit 1
 
-      - run: pnpm install --frozen-lockfile
-
-      - run: pnpm run build
-
-      - run: npm publish
-
-      - name: Determine version
-        id: version
-        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
-
+  release:
+    needs: [prepare, publish]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
-          VERSION: ${{ steps.version.outputs.version }}
-        run: |
-          gh release create "v${VERSION}" --generate-notes --title "v${VERSION}"
+          PACKAGE_VERSION: ${{ needs.prepare.outputs.version }}
+        run: gh release create "v$PACKAGE_VERSION" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --generate-notes --title "v$PACKAGE_VERSION"
 
   build-and-push-docker:
     name: Build and Push Docker Image
-    needs: [ publish ]
+    needs: [prepare, publish]
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: read
     steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build and push
-        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
           file: ./k8s/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
           build-args: |
-            DORY_VERSION=${{ needs.publish.outputs.version }}
+            DORY_VERSION=${{ needs.prepare.outputs.version }}
           tags: |
-            clidey/dory:${{ needs.publish.outputs.version }}
+            clidey/dory:${{ needs.prepare.outputs.version }}
             clidey/dory:latest
