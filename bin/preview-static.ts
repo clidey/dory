@@ -5,11 +5,16 @@ import sirv from 'sirv';
 
 /** Reject hidden files and traversal before sirv's development lookup. */
 function publicPath(url: string): string | undefined {
+  const rawPath = url.split(/[?#]/, 1)[0];
+  let decoded: string;
   let path: string;
-  try { path = decodeURIComponent(url.split('?')[0]); }
-  catch { return undefined; }
-  if (!path.startsWith('/') || path.includes('\\') || path.includes('\0')) return undefined;
-  if (path.split('/').some(segment => segment.startsWith('.'))) return undefined;
+  try {
+    decoded = decodeURIComponent(rawPath);
+    // Match sirv's actual lookup: reserved characters remain percent encoded.
+    path = decodeURI(rawPath);
+  } catch { return undefined; }
+  if (!decoded.startsWith('/') || decoded.includes('\\') || decoded.includes('\0')) return undefined;
+  if (decoded.split('/').some(segment => segment.startsWith('.'))) return undefined;
   return path;
 }
 

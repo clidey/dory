@@ -73,6 +73,19 @@ test('rejects symlink files, directory indexes and compressed variants outside d
   }
 });
 
+test('guards the same reserved-character and fragment paths that sirv resolves', async () => {
+  const { root, dist, request } = await fixture();
+  writeFileSync(join(root, 'outside.txt'), 'Fake outside fixture');
+  for (const name of ['encoded%2Ffile', 'encoded%3Ffile', 'encoded%23file', 'fragment.txt']) {
+    symlinkSync(join(root, 'outside.txt'), join(dist, name));
+  }
+  for (const path of ['/encoded%2Ffile', '/encoded%3Ffile', '/encoded%23file', '/fragment.txt#ignored', '/fragment.txt?ignored=1']) {
+    const response = await request(path);
+    assert.equal(response.status, 404, path);
+    assert.equal(response.body, '', path);
+  }
+});
+
 test('does not leak a hidden target through an in-tree symlink', async () => {
   const { dist, request } = await fixture();
   writeFileSync(join(dist, '.env'), 'Fake private fixture');
