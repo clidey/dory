@@ -36,7 +36,8 @@ export function startPreview({ projectRoot = process.cwd(), version }: { project
   }
 
   const serve = sirv(distDir, {
-    dev: false,
+    // Re-stat rebuilt files instead of caching stale asset metadata.
+    dev: true,
     single: false,
     etag: true,
     gzip: true,

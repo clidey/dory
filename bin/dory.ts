@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { execFileSync, spawn } from 'child_process';
-import { existsSync, rmSync, mkdirSync, mkdtempSync, cpSync, readFileSync, readdirSync, lstatSync, writeFileSync, symlinkSync, watch } from 'fs';
+import { existsSync, rmSync, mkdirSync, mkdtempSync, cpSync, readFileSync, readdirSync, lstatSync, writeFileSync, watch } from 'fs';
 import { resolve, dirname, basename } from 'path';
 import { tmpdir } from 'os';
 import { fileURLToPath, pathToFileURL } from 'url';
@@ -11,6 +11,7 @@ import { checkProject, formatCheckResult } from './check.js';
 import { initLocale } from './i18n-init.js';
 import { startPreview } from './preview-server.js';
 import { validateDoryConfig, type DoryConfig } from './project-config.js';
+import { createDependencyOverlay } from './dependency-overlay.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -88,7 +89,7 @@ const createWorkspace = (userRoot: string): string => {
       if (!existsSync(source)) throw new Error(`Installed Dory package is missing ${item}`);
       cpSync(source, resolve(workspace, item), { recursive: true, force: true });
     }
-    symlinkSync(findDependencyDir(doryRoot), resolve(workspace, 'node_modules'), 'dir');
+    createDependencyOverlay(resolve(workspace, 'node_modules'), findDependencyDir(doryRoot), userRoot, process.env.DORY_PACKAGE_OVERRIDES);
     stageDocs(userRoot, workspace);
     return workspace;
   } catch (error) {
@@ -101,6 +102,7 @@ const viteCli = (workspace: string): string => resolve(workspace, 'node_modules'
 
 
 const commands = {
+  capabilities: () => console.log(JSON.stringify({customComponents: true, packageOverrides: true, specimenSourceLanguages: ['mdx', 'tsx', 'jsx']})),
   reference: () => {
     const root = resolve(getDoryRoot(), 'docs');
     const page = process.argv[3];

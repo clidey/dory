@@ -1,0 +1,56 @@
+---
+title: 'Custom interactive components'
+description: 'Import a local component into static MDX and let readers try its real behavior.'
+---
+
+Static Dory projects can import JSX components into an MDX page. Use a local component module for hooks, events, and stateful interactions; Dory preserves its imported name during preprocessing.
+
+## Put the implementation under docs
+
+```tsx
+// docs/examples/counter.tsx
+import { useState } from 'react';
+import { Button } from '@clidey/ux';
+
+export function Counter() {
+  const [count, setCount] = useState(0);
+  return <div>
+    <Button onClick={() => setCount(value => value + 1)}>Add one</Button>
+    <p role="status">Clicked {count} times</p>
+  </div>;
+}
+```
+
+## Import it into a page
+
+```mdx
+---
+title: 'Try the button'
+---
+
+import { Counter } from '../examples/counter.tsx';
+
+<Counter />
+```
+
+Default imports, named aliases, and namespace imports are supported. Keep imported component names explicit. An unimported custom tag retains the existing prose-escaping behavior; a name mentioned inside a fenced example does not register a component.
+
+## Keep state in the module
+
+Dory treats inline MDX text expressions as literal code. Put state displays, event handlers, and business logic in the imported component module instead of inline MDX expressions. Import a scoped stylesheet from the module if the example needs layout styling.
+
+Static builds and prerendering alias React to Preact compatibility. Keep browser-only work in effects or event handlers, and make the initial render work without `window` or `document`.
+
+## Build boundaries
+
+The CLI stages the documentation directory into an isolated build workspace. Keep local modules and styles under that directory. Imports reaching into a sibling application source tree do not survive staging.
+
+The build resolves Dory's installed dependencies first, then makes missing installed dependencies from the consuming project available up to its nearest workspace or lockfile root. React uses Dory's Preact compatibility aliases.
+
+For an intentional package replacement, set `DORY_PACKAGE_OVERRIDES` to a JSON object mapping package names to absolute package directories. Dory validates each name, directory, and matching package manifest before creating the isolated dependency overlay. Installed dependencies are not modified.
+
+## Static source and embedded content
+
+This feature applies to trusted documentation built from a local checkout. It does not enable custom imports in Dory's sandboxed embedded runtime. That runtime keeps its existing component allowlist, import restrictions, and content security policy.
+
+Run `dory check`, build the site, then test the interactions in the actual output. Compilation alone does not prove a button updates state or an overlay handles focus correctly.

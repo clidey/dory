@@ -1,7 +1,7 @@
 import { preprocessMdxTags } from '../plugins/sanitize.ts';
 
 /** Browser-safe preprocessing shared by the static build and embedded runtime. */
-export function preprocessMdxSource(content: string, fileName = 'content.mdx'): string {
+export function preprocessMdxSource(content: string, fileName = 'content.mdx', importedComponents: readonly string[] = []): string {
   let processed = content;
   const frontmatter = processed.match(/^---\n([\s\S]*?)\n---\n?/);
   if (frontmatter) processed = processed.slice(frontmatter[0].length);
@@ -36,7 +36,7 @@ export function preprocessMdxSource(content: string, fileName = 'content.mdx'): 
   const strayYaml = processed.match(/^```yaml\n([\s\S]*?)\n---\n?/);
   if (strayYaml) processed = processed.slice(strayYaml[0].length);
 
-  const transformed = preprocessMdxTags().transform(processed, fileName);
+  const transformed = preprocessMdxTags(importedComponents).transform(processed, fileName);
   processed = typeof transformed === 'string' ? transformed : transformed?.code ?? processed;
 
   let inCodeBlock = false;

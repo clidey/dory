@@ -17,7 +17,7 @@ export default defineConfig({
     mdx(getMdxConfig(false)),
   ],
   resolve: {
-    dedupe: ['preact', 'preact/compat', 'preact/hooks', 'preact/jsx-runtime', 'preact/compat/jsx-runtime'],
+    dedupe: ['recharts', 'preact', 'preact/compat', 'preact/hooks', 'preact/jsx-runtime', 'preact/compat/jsx-runtime'],
     alias: {
       react: 'preact/compat',
       'react-dom': 'preact/compat',

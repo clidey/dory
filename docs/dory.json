@@ -39,7 +39,8 @@
               "getting-started/installation",
               "getting-started/quick-start",
               "getting-started/automation",
-              "getting-started/configuration"
+              "getting-started/configuration",
+              "getting-started/custom-components"
             ]
           },
           {

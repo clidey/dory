@@ -1,6 +1,6 @@
-import classNames from 'classnames'
 import { Children, isValidElement } from 'preact/compat'
-import { useState } from 'preact/hooks'
+import { Tabs as UxTabs, TabsList, TabsTrigger, TabsContent } from '@clidey/ux'
+import { handleTabKeyDown } from './tabs'
 import { CopyButton, fencePropsOf } from './code'
 import { Fence, Pre } from './fence'
 
@@ -32,8 +32,8 @@ export function Prop({ name, type, children }: { name: string; type?: string; ch
 
 type SpecimenTab = 'Preview' | 'Code' | 'Props'
 
-function isMdxSource(child: preact.ComponentChild): boolean {
-  return isValidElement(child) && (child as preact.VNode).type === Pre && fencePropsOf(child as preact.JSX.Element).language === 'mdx'
+function isSourceFence(child: preact.ComponentChild): boolean {
+  return isValidElement(child) && (child as preact.VNode).type === Pre && ['mdx', 'tsx', 'jsx'].includes(fencePropsOf(child as preact.JSX.Element).language)
 }
 
 function isPropsBlock(child: preact.ComponentChild): boolean {
@@ -42,60 +42,36 @@ function isPropsBlock(child: preact.ComponentChild): boolean {
 
 /**
  * Framed component example with Preview / Code / Props tabs.
- * An ```mdx fence becomes the Code tab, a <SpecimenProps> block becomes the
+ * An MDX, TSX, or JSX fence becomes the Code tab, a <SpecimenProps> block becomes the
  * Props tab, and everything else is the rendered preview.
  */
 export function Specimen({ label, children }: { label?: string; children: preact.ComponentChildren }) {
   const items = Children.toArray(children)
-  const code = items.filter(isMdxSource)
+  const code = items.filter(isSourceFence)
   const props = items.filter(isPropsBlock)
-  const preview = items.filter((child) => !isMdxSource(child) && !isPropsBlock(child))
+  const preview = items.filter((child) => !isSourceFence(child) && !isPropsBlock(child))
 
   const tabs: SpecimenTab[] = ['Preview']
   if (code.length > 0) tabs.push('Code')
   if (props.length > 0) tabs.push('Props')
 
-  const [active, setActive] = useState<SpecimenTab>('Preview')
-  const panels: Record<SpecimenTab, preact.ComponentChildren[]> = { Preview: preview, Code: code, Props: props }
-
-  return (
-    <div className="dory-specimen not-prose my-5 overflow-hidden rounded-lg border border-[var(--border)] bg-card">
-      <div className="flex min-h-10 items-center justify-between gap-3 border-b border-[var(--border)] py-1.5 pl-4 pr-1.5">
-        <p className="truncate font-mono text-xs text-[var(--primary)]">{label}</p>
-        {tabs.length > 1 && (
-          <div role="tablist" className="flex shrink-0 rounded-md bg-muted p-0.5">
-            {tabs.map((tab) => (
-              <button
-                key={tab}
-                type="button"
-                role="tab"
-                aria-selected={active === tab}
-                onClick={() => setActive(tab)}
-                className={classNames('rounded-[5px] px-2.5 py-1 text-xs font-medium transition', {
-                  'bg-card text-foreground shadow-[0_1px_2px_rgb(14_34_64/0.08)] dark:bg-[var(--border)]': active === tab,
-                  'text-muted-foreground hover:text-foreground': active !== tab,
-                })}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-      <div role="tabpanel" className={classNames('[&>:first-child]:mt-0 [&>:last-child]:mb-0', { 'p-5': active === 'Preview' })}>
-        {active === 'Code'
-          ? code.map((child, index) => {
-              // Bare source with a copy button, without the filename frame a standalone fence gets.
-              const fence = fencePropsOf(child as preact.JSX.Element)
-              return (
-                <div key={index} className="relative px-5 py-4 font-mono text-[12.5px] leading-[1.7]">
-                  <Fence language={fence.language} meta={{ ...fence.meta, title: undefined }}>{fence.code}</Fence>
-                  <CopyButton code={fence.code} />
-                </div>
-              )
-            })
-          : panels[active]}
-      </div>
+  const renderCode = () => code.map((child, index) => {
+    const fence = fencePropsOf(child as preact.JSX.Element)
+    return <div key={index} className="relative max-h-[32rem] overflow-auto px-5 py-4 font-mono text-[12.5px] leading-[1.7]">
+      <Fence language={fence.language} meta={{ ...fence.meta, title: undefined }}>{fence.code}</Fence>
+      <CopyButton code={fence.code} />
     </div>
-  )
+  })
+  if (tabs.length === 1) return <div className="dory-specimen not-prose my-5 overflow-hidden rounded-lg border border-[var(--border)] bg-card"><div className="px-4 py-3 font-mono text-xs text-[var(--primary)]">{label}</div><div className="p-5">{preview}</div></div>
+  return <UxTabs defaultValue="Preview" className="dory-specimen not-prose my-5 gap-0 overflow-hidden rounded-lg border border-[var(--border)] bg-card">
+    <div className="flex min-h-12 flex-wrap items-center justify-between gap-3 border-b border-[var(--border)] py-2 pl-4 pr-2">
+      <p className="truncate font-mono text-xs text-[var(--primary)]">{label}</p>
+      <TabsList aria-label={`${label ?? 'Component'} example views`} onKeyDown={handleTabKeyDown}>
+        {tabs.map(tab => <TabsTrigger key={tab} value={tab}>{tab}</TabsTrigger>)}
+      </TabsList>
+    </div>
+    <TabsContent value="Preview" className="m-0 p-0 [&>:first-child]:mt-0 [&>:last-child]:mb-0">{preview}</TabsContent>
+    {code.length > 0 && <TabsContent value="Code" className="m-0 p-0">{renderCode()}</TabsContent>}
+    {props.length > 0 && <TabsContent value="Props" className="m-0 p-0">{props}</TabsContent>}
+  </UxTabs>
 }

@@ -43,7 +43,7 @@ if (embedTheme) document.documentElement.style.colorScheme = embedTheme;
 
 const tree = (
     <ThemeProvider defaultTheme={defaultTheme} storageKey={embedTheme ? `@clidey/dory/embed-theme-${embedTheme}` : '@clidey/dory/theme'}>
-        <Toaster />
+        <Toaster closeButton />
         <ErrorBoundary>
             <Router base={BASE_PATH}>
                 <AppWithMDX />

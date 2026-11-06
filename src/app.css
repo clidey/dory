@@ -3,6 +3,9 @@
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/utilities.css" layer(utilities);
 
+/* Emit UX variants alongside Dory’s utilities so responsive rules stay ordered. */
+@source "../node_modules/@clidey/ux/dist";
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 .mermaid-wrapper .mermaid svg {

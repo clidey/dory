@@ -117,7 +117,8 @@ function hasMatchingClosingTag(code: string, tagName: string, openingTagOffset: 
 }
 
 // Allow any <[a-z][a-z0-9]*> tag inside code blocks to be left as-is (not parsed as JSX).
-export function preprocessMdxTags() {
+export function preprocessMdxTags(importedComponents: readonly string[] = []) {
+  const knownComponents = new Set([...KNOWN_COMPONENTS, ...importedComponents]);
   return {
     name: 'preprocess-mdx-tags',
     enforce: 'pre' as const,
@@ -137,7 +138,7 @@ export function preprocessMdxTags() {
         }
 
         // If unknown component, treat as text
-        if (!KNOWN_COMPONENTS.includes(tag)) {
+        if (!knownComponents.has(tag)) {
           return `\`${match}\``;
         }
         return match;
@@ -152,7 +153,7 @@ export function preprocessMdxTags() {
         }
 
         // If known component, check if it has a closing tag
-        if (KNOWN_COMPONENTS.includes(tag)) {
+        if (knownComponents.has(tag)) {
           // If it doesn't have a matching closing tag, treat it as text
           if (!hasMatchingClosingTag(processed, tag, offset)) {
             return `\`<${tag}>\``;
@@ -173,7 +174,7 @@ export function preprocessMdxTags() {
         }
 
         // If known component, check if it has a closing tag (only for opening tags)
-        if (KNOWN_COMPONENTS.includes(tag)) {
+        if (knownComponents.has(tag)) {
           // Only check for matching closing tag for opening tags
           if (!match.startsWith('</')) {
             if (!hasMatchingClosingTag(processed, tag, offset)) {
