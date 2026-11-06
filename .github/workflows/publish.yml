@@ -75,20 +75,50 @@ jobs:
         with:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
+      - name: Check whether this exact artifact is already published
+        run: |
+          node --input-type=module <<'JS'
+          import {readFileSync, appendFileSync} from 'node:fs';
+          import {createHash} from 'node:crypto';
+          const version = process.env.PACKAGE_VERSION;
+          const file = `${process.env.RUNNER_TEMP}/dory-package/clidey-dory-${version}.tgz`;
+          const expected = 'sha512-' + createHash('sha512').update(readFileSync(file)).digest('base64');
+          const response = await fetch(`https://registry.npmjs.org/@clidey/dory/${version}`, {headers: {'Cache-Control': 'no-cache'}});
+          let exists = false;
+          if (response.ok) {
+            const published = await response.json();
+            if (published.version !== version || published.dist?.integrity !== expected) throw new Error('This version already exists with a different package checksum; publish a new version instead.');
+            exists = true;
+          } else if (response.status !== 404) throw new Error(`Registry check failed: ${response.status}`);
+          appendFileSync(process.env.GITHUB_ENV, `DORY_ALREADY_PUBLISHED=${exists}\n`);
+          JS
       - name: Publish verified package through npm trusted publishing
+        if: env.DORY_ALREADY_PUBLISHED != 'true'
         run: |
           cd "$RUNNER_TEMP/dory-package"
           sha256sum --check SHA256SUMS
           npm publish "clidey-dory-$PACKAGE_VERSION.tgz" --ignore-scripts --access public --provenance
       - name: Confirm exact version is available before downstream release jobs
         run: |
-          for attempt in $(seq 1 24); do
-            published=$(npm view "@clidey/dory@$PACKAGE_VERSION" version --registry=https://registry.npmjs.org 2>/dev/null || true)
-            if [ "$published" = "$PACKAGE_VERSION" ]; then exit 0; fi
-            sleep 10
-          done
-          echo "The exact published version is not yet available from npm." >&2
-          exit 1
+          node --input-type=module <<'JS'
+          import {readFileSync} from 'node:fs';
+          import {createHash} from 'node:crypto';
+          import {setTimeout} from 'node:timers/promises';
+          const version = process.env.PACKAGE_VERSION;
+          const file = `${process.env.RUNNER_TEMP}/dory-package/clidey-dory-${version}.tgz`;
+          const expected = 'sha512-' + createHash('sha512').update(readFileSync(file)).digest('base64');
+          for (let attempt = 0; attempt < 24; attempt++) {
+            const response = await fetch(`https://registry.npmjs.org/@clidey/dory/${version}`, {headers: {'Cache-Control': 'no-cache'}});
+            if (response.ok) {
+              const published = await response.json();
+              if (published.version === version && published.dist?.integrity === expected) process.exit(0);
+              throw new Error('Published package checksum differs from the tested artifact.');
+            }
+            if (response.status !== 404) throw new Error(`Registry check failed: ${response.status}`);
+            await setTimeout(10000);
+          }
+          throw new Error('The exact published version is not yet available from npm.');
+          JS
 
   release:
     needs: [prepare, publish]
@@ -100,7 +130,10 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           PACKAGE_VERSION: ${{ needs.prepare.outputs.version }}
-        run: gh release create "v$PACKAGE_VERSION" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --generate-notes --title "v$PACKAGE_VERSION"
+        run: |
+          if ! gh release view "v$PACKAGE_VERSION" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release create "v$PACKAGE_VERSION" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --generate-notes --title "v$PACKAGE_VERSION"
+          fi
 
   build-and-push-docker:
     name: Build and Push Docker Image
