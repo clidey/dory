@@ -247,7 +247,7 @@ export default function Layout({ children }: LayoutProps) {
     return (
       <main className="dory-main flex min-h-dvh w-full items-center justify-center bg-background px-6 py-12 text-foreground">
         <div className="w-full">
-          <ErrorBoundary fallback={errorFallback}>{children}</ErrorBoundary>
+          <ErrorBoundary key={pathname} fallback={errorFallback}>{children}</ErrorBoundary>
         </div>
       </main>
     );
@@ -258,7 +258,7 @@ export default function Layout({ children }: LayoutProps) {
       <Header />
       <div className="flex flex-1">
         <main className="dory-main min-w-0 flex-1 bg-background px-6 py-10 text-foreground sm:px-10">
-          <ErrorBoundary fallback={errorFallback}>{children}</ErrorBoundary>
+          <ErrorBoundary key={pathname} fallback={errorFallback}>{children}</ErrorBoundary>
         </main>
       </div>
     </div> : <DocsPageFrame
@@ -269,7 +269,7 @@ export default function Layout({ children }: LayoutProps) {
       title={group}
       lead={page?.lead}
       meta={<PageMeta meta={page?.meta} />}
-      content={<ErrorBoundary fallback={errorFallback}>{content}</ErrorBoundary>}
+      content={<ErrorBoundary key={pathname} fallback={errorFallback}>{content}</ErrorBoundary>}
       afterContent={<><PageFeedback pathname={pathname} /><PrevNextLinks /><PageFooter /></>}
       toc={!isOpenAPIPage && <TableOfContents />}
       embedded={isEmbedded}

@@ -11,5 +11,6 @@ describe('MDX icon name compatibility', () => {
     expect(resolveIconName('Search')).toBe('search')
     expect(resolveIconName('alert-triangle')).toBe('warning')
     expect(resolveIconName('sparkles')).toBe('ai')
+    expect(resolveIconName('line-chart')).toBe('chart')
   })
 })

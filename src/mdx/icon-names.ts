@@ -24,6 +24,7 @@ const aliases: Record<string, string> = {
   'layout-dashboard': 'dashboard',
   layers: 'layout',
   'list-ordered': 'list',
+  'line-chart': 'chart',
   'message-square': 'chat',
   'maximize-2': 'fullscreen',
   map: 'globe',

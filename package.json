@@ -51,6 +51,7 @@
     "build:embed:widget": "vite build -c vite.config.embed-widget.ts",
     "preview": "vite preview",
     "test": "node scripts/check-trigger-children.mjs src && vitest run",
+    "test:error-recovery": "node scripts/verify-error-recovery.mjs",
     "test:runtime-parity": "pnpm run build && node scripts/verify-runtime-parity.mjs",
     "lint:triggers": "node scripts/check-trigger-children.mjs src",
     "publish": "npm run build && npm publish --access public --no-git-checks",
