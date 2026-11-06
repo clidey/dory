@@ -1,7 +1,27 @@
+# Admin release: Run workflow on main, then choose patch, minor, or major.
+# Tests/build and package scanning finish before the action commits version
+# metadata to main and publishes the tested artifact. No manual version edit.
+# If main advances during validation, start a fresh run from current main.
+# After the version commit succeeds, retry downstream failures with Re-run failed
+# jobs; Re-run all jobs from the old source fails the stale-main guard.
+# Requires Actions to write main and npm to trust this publish.yml workflow.
+# GITHUB_TOKEN version commits do not trigger push workflows; run Documentation
+# manually when the Pages site needs a refresh after releasing.
+
 name: Publish Package
 
 on:
   workflow_dispatch:
+    inputs:
+      version-bump:
+        description: Version bump
+        required: true
+        type: choice
+        default: patch
+        options:
+          - patch
+          - minor
+          - major
 
 permissions:
   contents: read
@@ -17,19 +37,24 @@ jobs:
     timeout-minutes: 20
     outputs:
       version: ${{ steps.version.outputs.version }}
+      previous-version: ${{ steps.version.outputs.previous-version }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          fetch-depth: 0
       - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '24'
           cache: pnpm
-      - name: Determine version
+      - name: Test release version handling
+        run: node --test .github/scripts/release-version.test.mjs
+      - name: Prepare the next version
         id: version
-        run: |
-          node -e 'const v=require("./package.json").version;if(!/^\d+\.\d+\.\d+$/.test(v))throw Error("Expected a stable release version");require("fs").appendFileSync(process.env.GITHUB_OUTPUT,`version=${v}\n`)'
+        env:
+          BUMP_TYPE: ${{ inputs.version-bump }}
+        run: node .github/scripts/release-version.mjs prepare
       - run: pnpm install --frozen-lockfile --ignore-scripts
       - run: pnpm test
       - run: node --import tsx --test bin/dependency-overlay.test.mts bin/preview-static.test.mts
@@ -56,8 +81,38 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-  publish:
+  commit-version:
+    name: Record the tested version
     needs: prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    outputs:
+      commit: ${{ steps.commit.outputs.commit }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+      - name: Commit the tested package and documentation versions
+        id: commit
+        env:
+          PACKAGE_VERSION: ${{ needs.prepare.outputs.version }}
+          PREVIOUS_VERSION: ${{ needs.prepare.outputs.previous-version }}
+          BUMP_TYPE: ${{ inputs.version-bump }}
+        run: node .github/scripts/release-version.mjs commit
+      - name: Push version commit without overwriting concurrent work
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: git -c credential.helper= -c 'credential.helper=!gh auth git-credential' push origin HEAD:refs/heads/main
+
+  publish:
+    needs: [prepare, commit-version]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -121,7 +176,7 @@ jobs:
           JS
 
   release:
-    needs: [prepare, publish]
+    needs: [prepare, commit-version, publish]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -130,14 +185,15 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           PACKAGE_VERSION: ${{ needs.prepare.outputs.version }}
+          RELEASE_COMMIT: ${{ needs.commit-version.outputs.commit }}
         run: |
           if ! gh release view "v$PACKAGE_VERSION" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            gh release create "v$PACKAGE_VERSION" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --generate-notes --title "v$PACKAGE_VERSION"
+            gh release create "v$PACKAGE_VERSION" --repo "$GITHUB_REPOSITORY" --target "$RELEASE_COMMIT" --generate-notes --title "v$PACKAGE_VERSION"
           fi
 
   build-and-push-docker:
     name: Build and Push Docker Image
-    needs: [prepare, publish]
+    needs: [prepare, commit-version, publish]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -145,6 +201,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ needs.commit-version.outputs.commit }}
           persist-credentials: false
       - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
       - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
