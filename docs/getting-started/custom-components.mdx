@@ -49,6 +49,10 @@ The build resolves Dory's installed dependencies first, then makes missing insta
 
 For an intentional package replacement, set `DORY_PACKAGE_OVERRIDES` to a JSON object mapping package names to absolute package directories. Dory validates each name, directory, and matching package manifest before creating the isolated dependency overlay. Installed dependencies are not modified.
 
+## Security and trusted source
+
+Imported components are executable application code. Their modules may execute during bundling and server rendering with the build process's privileges, then in the reader's browser. Review their source and dependencies before building. The staging directory is not a security sandbox. Build pull requests on disposable runners without secrets, persisted checkout credentials, or deployment tokens, and deploy a reviewed artifact in a separate job. See the repository security policy.
+
 ## Static source and embedded content
 
 This feature applies to trusted documentation built from a local checkout. It does not enable custom imports in Dory's sandboxed embedded runtime. That runtime keeps its existing component allowlist, import restrictions, and content security policy.

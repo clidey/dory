@@ -1,7 +1,7 @@
 import { createServer } from 'node:http';
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
-import sirv from 'sirv';
+import { createPreviewStatic } from './preview-static.js';
 import { hostHeaderValidation, originValidation } from '@modelcontextprotocol/node';
 import { handleChatRequest } from './chat-server.js';
 import { createDocsMcp } from './mcp-http.js';
@@ -35,14 +35,7 @@ export function startPreview({ projectRoot = process.cwd(), version }: { project
     process.exit(1);
   }
 
-  const serve = sirv(distDir, {
-    // Re-stat rebuilt files instead of caching stale asset metadata.
-    dev: true,
-    single: false,
-    etag: true,
-    gzip: true,
-    brotli: true,
-  });
+  const serve = createPreviewStatic(distDir);
 
   // Mirror the production layout: a `basePath` build is served under that
   // prefix, so strip it before handing the request to sirv.
@@ -108,14 +101,7 @@ export function startPreview({ projectRoot = process.cwd(), version }: { project
         const handled = await handleChatRequest(req, res, {
           docsDir: existsSync(resolve(userRoot, 'docs')) ? resolve(userRoot, 'docs') : userRoot,
         });
-          if (!handled) serve(req, res, () => {
-            res.statusCode = 404;
-            res.setHeader('Content-Type', 'text/html; charset=utf-8');
-            res.setHeader('Cache-Control', 'no-store');
-            const notFound = resolve(distDir, '404.html');
-            const body = existsSync(notFound) ? readFileSync(notFound) : 'Page not found';
-            res.end(req.method === 'HEAD' ? undefined : body);
-          });
+        if (!handled) serve(req, res);
       } catch {
         console.error('Request handling failed');
         if (!res.headersSent) {
