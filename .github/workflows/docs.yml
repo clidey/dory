@@ -65,9 +65,21 @@ jobs:
         with:
           node-version: '24'
           cache: pnpm
+      - name: Scan documentation source for secrets
+        run: |
+          mkdir -p "$RUNNER_TEMP/dory-secret-scan" "$RUNNER_TEMP/dory-source"
+          curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz -o "$RUNNER_TEMP/dory-secret-scan/scanner.tar.gz"
+          echo "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  $RUNNER_TEMP/dory-secret-scan/scanner.tar.gz" | sha256sum --check
+          tar -xzf "$RUNNER_TEMP/dory-secret-scan/scanner.tar.gz" -C "$RUNNER_TEMP/dory-secret-scan" gitleaks
+          git archive HEAD | tar -x -C "$RUNNER_TEMP/dory-source"
+          "$RUNNER_TEMP/dory-secret-scan/gitleaks" dir "$RUNNER_TEMP/dory-source" --redact --no-banner
       # Dory uses prebuilt packages; dependency lifecycle hooks stay disabled.
       - run: pnpm install --frozen-lockfile --ignore-scripts
+      - run: pnpm test
+      - run: node --import tsx --test bin/dependency-overlay.test.mts bin/preview-static.test.mts
       - run: pnpm run build
+      - name: Scan generated site for secrets
+        run: '"$RUNNER_TEMP/dory-secret-scan/gitleaks" dir dist --redact --no-banner'
       - run: node bin/dist/dory.js check
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: github.event_name == 'pull_request'

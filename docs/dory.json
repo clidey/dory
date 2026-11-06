@@ -2,7 +2,7 @@
   "name": "Dory",
   "url": "https://clidey.github.io",
   "image": "/social-card.png",
-  "version": "1.9.0 · Latest",
+  "version": "1.9.0 \u00b7 Latest",
   "copyright": "Clidey",
   "repository": {
     "url": "https://github.com/clidey/dory",
@@ -11,7 +11,7 @@
   },
   "description": "Static documentation site generator for modern teams. Build beautiful docs from MDX files.",
   "seo": {
-    "titleTemplate": "%s — Dory"
+    "titleTemplate": "%s \u2014 Dory"
   },
   "favicon": "./favicon.svg",
   "fonts": {
@@ -54,6 +54,12 @@
               "configuration/chat",
               "configuration/internationalization",
               "configuration/embed"
+            ]
+          },
+          {
+            "group": "Contribute",
+            "pages": [
+              "contributing"
             ]
           }
         ]
