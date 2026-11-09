@@ -1,6 +1,7 @@
-# Admin release: Run workflow on main, then choose patch, minor, or major.
+# Admin release: Run on main using the current package version or a SemVer bump.
 # Tests/build and package scanning finish before the action commits version
-# metadata to main and publishes the tested artifact. No manual version edit.
+# metadata to main when a bump is selected, then publishes the tested artifact.
+# "current" preserves existing version metadata and does not create/push a commit.
 # If main advances during validation, start a fresh run from current main.
 # After the version commit succeeds, retry downstream failures with Re-run failed
 # jobs; Re-run all jobs from the old source fails the stale-main guard.
@@ -14,11 +15,12 @@ on:
   workflow_dispatch:
     inputs:
       version-bump:
-        description: Version bump
+        description: Use the version already in package.json, or increment it
         required: true
         type: choice
-        default: patch
+        default: current
         options:
+          - current
           - patch
           - minor
           - major
@@ -50,7 +52,7 @@ jobs:
           cache: pnpm
       - name: Test release version handling
         run: node --test .github/scripts/release-version.test.mjs
-      - name: Prepare the next version
+      - name: Prepare the selected release version
         id: version
         env:
           BUMP_TYPE: ${{ inputs.version-bump }}
@@ -82,7 +84,7 @@ jobs:
           retention-days: 7
 
   commit-version:
-    name: Record the tested version
+    name: Validate source and record version if needed
     needs: prepare
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -99,7 +101,7 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: '24'
-      - name: Commit the tested package and documentation versions
+      - name: Validate the tested source and prepare its release commit
         id: commit
         env:
           PACKAGE_VERSION: ${{ needs.prepare.outputs.version }}
@@ -107,6 +109,7 @@ jobs:
           BUMP_TYPE: ${{ inputs.version-bump }}
         run: node .github/scripts/release-version.mjs commit
       - name: Push version commit without overwriting concurrent work
+        if: inputs.version-bump != 'current'
         env:
           GH_TOKEN: ${{ github.token }}
         run: git -c credential.helper= -c 'credential.helper=!gh auth git-credential' push origin HEAD:refs/heads/main

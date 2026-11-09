@@ -7,6 +7,33 @@ description: 'Customize your documentation site colors, fonts, and appearance to
 
 Dory uses the default Clidey Design theme from `@clidey/ux`. It provides the Paper and Ink surfaces, Signal Blue actions, and light and dark modes. Add `dory.json` overrides to match your product's visual identity.
 
+## Global stylesheets
+
+Register site-wide CSS once in `dory.json`:
+
+```json
+"styles": ["./custom.css"]
+```
+
+Paths are relative to the documentation content directory: next to your MDX pages, or inside `docs/` when your project has a nested documentation folder. For example, a root `dory.json` with `docs/introduction.mdx` uses `docs/custom.css` for the configuration above.
+
+Dory loads the files in array order after its default styles. They apply to every page, including direct visits to nested routes and iframe widgets that load the built site. You do not need CSS imports in individual MDX pages. CSS entry files and every imported stylesheet or referenced asset must stay within the documentation directory and must not use symlinks. Remote URLs, absolute paths, SVG assets, and arbitrary file types are rejected. Supported assets are raster images and fonts. `dory check`, builds, and dev-server CSS updates validate these dependencies. Graph size, total bytes, and import depth are bounded.
+
+Use Dory's theme variables and root `.dark` class for theme-aware rules:
+
+```css
+.product-example {
+  color: var(--foreground);
+  background: var(--background);
+}
+
+.dark .product-example {
+  border-color: var(--border);
+}
+```
+
+Vite processes validated CSS imports and referenced assets, and updates stylesheet edits in the dev server. Changing the configured list reloads the site. Global styles also work when a `basePath` is configured. App-owned sandbox runtimes use a separate, validated stylesheet payload; see [sandboxed runtime styles](/configuration/embed#sandboxed-runtime-styles).
+
 ## Color Configuration
 
 ### Brand Colors

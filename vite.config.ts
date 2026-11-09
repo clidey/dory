@@ -17,6 +17,7 @@ import { prerender } from './src/plugins/prerender.ts';
 import { chatDevServer } from './src/plugins/chat-dev-server.ts';
 import { getMdxConfig } from './src/config/mdx.ts';
 import { getBasePath, readDoryConfig } from './src/plugins/shared.ts';
+import { globalStylesPlugin } from './src/plugins/global-styles.ts';
 
 export default defineConfig(({ command }) => ({
   // Serve and build under `basePath` from dory.json (asset URLs, import.meta.env.BASE_URL).
@@ -26,6 +27,7 @@ export default defineConfig(({ command }) => ({
     htmlFilesMiddleware(), // Must be first to intercept HTML file requests
     chatDevServer(),
     unifiedMdxPreprocessor(),
+    globalStylesPlugin(),
     preact(),
     mdx(getMdxConfig(command === 'serve')),
     tailwindcss(),

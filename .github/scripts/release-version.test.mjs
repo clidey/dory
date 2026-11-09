@@ -3,6 +3,7 @@ import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'nod
 import os from 'node:os';
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import { nextVersion, parseVersion, updateVersion, updateDocumentationVersion, validateReleaseHead, commitVersion } from './release-version.mjs';
 
@@ -10,6 +11,12 @@ test('bump choices follow stable SemVer and reset lower fields', () => {
   assert.equal(nextVersion('1.10.7', [], 'patch'), '1.10.8');
   assert.equal(nextVersion('1.10.7', [], 'minor'), '1.11.0');
   assert.equal(nextVersion('1.10.7', [], 'major'), '2.0.0');
+});
+
+test('current uses the existing package version without incrementing it', () => {
+  assert.equal(nextVersion('1.11.0', ['v1.10.0'], 'current'), '1.11.0');
+  assert.throws(() => nextVersion('invalid', [], 'current'));
+  assert.throws(() => nextVersion('1.11.0', ['v1.12.0'], 'current'), /older than/);
 });
 
 test('uses the newest stable package or tag without lexical sorting or prereleases', () => {
@@ -129,4 +136,58 @@ test('rejects dirty source, incorrect SHA, invalid bump, and a mismatched releas
   assert.throws(() => commitVersion(root, args), /clean checkout/);
   assert.equal(git(root, 'rev-parse', 'HEAD'), source);
   assert.equal(JSON.parse(readFileSync(path.join(root, 'package.json'))).version, '1.10.0');
+});
+
+test('current validates main without changing files, creating a commit, or pushing', t => {
+  const { root, source } = repository(t);
+  const manifest = readFileSync(path.join(root, 'package.json'), 'utf8');
+  const docs = readFileSync(path.join(root, 'docs/dory.json'), 'utf8');
+  const commit = commitVersion(root, {
+    previousVersion: '1.10.0', version: '1.10.0', source, bump: 'current',
+  });
+  assert.equal(commit, source);
+  assert.equal(git(root, 'rev-parse', 'HEAD'), source);
+  assert.equal(readFileSync(path.join(root, 'package.json'), 'utf8'), manifest);
+  assert.equal(readFileSync(path.join(root, 'docs/dory.json'), 'utf8'), docs);
+  assert.equal(git(root, 'status', '--porcelain'), '');
+  assert.equal(git(root, 'ls-remote', 'origin', 'refs/heads/main').split(/\s/)[0], source);
+});
+
+test('current preparation preserves package and docs metadata byte-for-byte', t => {
+  const { root } = repository(t);
+  const manifest = readFileSync(path.join(root, 'package.json'), 'utf8');
+  const docs = readFileSync(path.join(root, 'docs/dory.json'), 'utf8');
+  const output = path.join(path.dirname(root), 'prepare-output');
+  execFileSync(process.execPath, [fileURLToPath(new URL('./release-version.mjs', import.meta.url)), 'prepare'], {
+    cwd: root,
+    env: {
+      ...process.env, GITHUB_REF: 'refs/heads/main', BUMP_TYPE: 'current', GITHUB_OUTPUT: output,
+      GITHUB_STEP_SUMMARY: path.join(path.dirname(root), 'prepare-summary'),
+    },
+  });
+  assert.equal(readFileSync(output, 'utf8'), 'version=1.10.0\nprevious-version=1.10.0\n');
+  assert.equal(readFileSync(path.join(root, 'package.json'), 'utf8'), manifest);
+  assert.equal(readFileSync(path.join(root, 'docs/dory.json'), 'utf8'), docs);
+  assert.equal(git(root, 'status', '--porcelain'), '');
+});
+
+test('current rejects mismatched metadata and tags belonging to different source', t => {
+  const { root, source } = repository(t);
+  const options = { previousVersion: '1.10.0', version: '1.10.0', source, bump: 'current' };
+  assert.throws(() => commitVersion(root, { ...options, version: '1.10.1' }), /tested bump/);
+  git(root, 'tag', 'v1.10.0');
+  assert.equal(commitVersion(root, options), source);
+  writeFileSync(path.join(root, 'docs/dory.json'), '{"version":"1.9.0"}\n');
+  git(root, 'add', 'docs/dory.json');
+  git(root, 'commit', '-m', 'mismatch documentation metadata');
+  git(root, 'push', 'origin', 'main');
+  const changed = git(root, 'rev-parse', 'HEAD');
+  assert.throws(() => commitVersion(root, options), /tested source/);
+  assert.throws(() => commitVersion(root, { ...options, source: changed }), /documentation version/);
+  writeFileSync(path.join(root, 'docs/dory.json'), '{"version":"1.10.0"}\n');
+  git(root, 'add', 'docs/dory.json');
+  git(root, 'commit', '-m', 'restore documentation metadata');
+  git(root, 'push', 'origin', 'main');
+  assert.throws(() => commitVersion(root, { ...options, source: git(root, 'rev-parse', 'HEAD') }), /tag belongs to another commit/);
+  assert.equal(git(root, 'status', '--porcelain'), '');
 });

@@ -187,6 +187,8 @@ export interface DoryConfig {
   favicon: string;
   colors?: DoryColors;
   fonts?: DoryFonts;
+  /** Ordered CSS paths relative to the documentation content directory. */
+  styles?: string[];
   theme?: DoryTheme;
   navigation: DoryNavigation;
   logo: DoryLogo;

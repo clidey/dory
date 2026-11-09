@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'fs';
+import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { checkProject } from './check';
@@ -66,5 +66,18 @@ describe('checkProject', () => {
     french.navigation.tabs[0].groups[0].pages = ['missing'];
     writeFileSync(join(root, 'dory.json'), JSON.stringify(config));
     expect(checkProject(root).issues.map(issue => issue.message)).toContain('Locale fr navigation page does not exist: missing');
+  });
+});
+
+describe('global stylesheet configuration', () => {
+  it.each(['root', 'docs'] as const)('checks styles from the %s content directory', layout => {
+    const { root, content } = project(layout);
+    const configPath = join(root, 'dory.json');
+    const config = JSON.parse(readFileSync(configPath, 'utf8'));
+    config.styles = ['./custom.css'];
+    writeFileSync(configPath, JSON.stringify(config));
+    expect(checkProject(root).issues.some(issue => issue.message.includes('Stylesheet not found'))).toBe(true);
+    writeFileSync(join(content, 'custom.css'), 'body { color: red; }');
+    expect(checkProject(root).errors).toBe(0);
   });
 });
