@@ -26,8 +26,6 @@ verifyStoreIntegrity: true
 minimumReleaseAge: 10080
 minimumReleaseAgeExclude:
   - '@clidey/ux'
-  # semver 6.3.2 restores provenance for the 6.x line Babel needs; drop after 2026-11-09.
-  - semver@6.3.2
 
 # Block packages whose trust level dropped since earlier releases (e.g. lost
 # trusted publishing).
