@@ -18,6 +18,7 @@ The `dory.json` file is the single configuration file for your Dory documentatio
   "image": "/og-card.png",
   "twitter": "@yourhandle",
   "favicon": "./favicon.svg",
+  "styles": ["./custom.css"],
   "colors": {
     "primary": "#6366f1",
     "light": "#818cf8",
@@ -118,6 +119,10 @@ When set, the "On this page" rail shows **Edit this page** and **Report an issue
 | `url` | **Yes** | Repository URL. |
 | `branch` | No | Branch the edit link opens. Defaults to `main`. |
 | `path` | No | Folder holding the docs inside the repository. Defaults to the repository root. |
+
+## Global stylesheets
+
+`styles` is an optional array of local `.css` paths, resolved from the documentation content directory. Files load once, in order, after Dory's default styles. See [Theming](/configuration/theming#global-stylesheets) for setup and examples.
 
 ## Colors
 

@@ -71,3 +71,31 @@ window.DoryDocs.setTheme('dark');
 | `closeOnOverlayClick` | `true` | Close when the overlay is clicked |
 
 The embed displays published documentation. It does not store or edit MDX, and it does not pass host credentials into the iframe. Keep private documentation behind your own authenticated hosting layer. To create docs from an application, generate MDX and `dory.json`, run `dory build`, and publish the resulting site.
+
+## Sandboxed runtime styles
+
+Hosts that render app-owned MDX through `dory-runtime.js` must include CSS contents in the runtime's `load` message. The runtime never reads stylesheet paths or fetches imports. It accepts only the files listed in `config.styles`, in that order.
+
+A trusted Node build or service can prepare the payload from a documentation directory:
+
+```js
+import { prepareEmbeddedStylesheets } from '@clidey/dory/bin/dist/embedded-styles.js';
+
+const stylesheets = prepareEmbeddedStylesheets(['./custom.css'], docsDirectory);
+```
+
+This helper validates the full local dependency graph, inlines imports, converts approved raster and font assets to data URLs, and validates the resulting CSS. It preserves import media queries, layers, and supports conditions. Circular imports and excessive expansion are rejected. Pass the resulting array through the existing host bridge:
+
+```js
+iframe.contentWindow.postMessage({
+  ...documentationPayload,
+  __dory_docs: true,
+  type: 'load',
+  config: { ...siteConfig, styles: ['./custom.css'] },
+  stylesheets,
+}, '*');
+```
+
+Keep the runtime in an iframe with `sandbox="allow-scripts"`, without `allow-same-origin`. The host must verify incoming messages originate from that iframe. The runtime verifies messages originate from its parent. Each update replaces the previous custom styles, and omitting styles removes them.
+
+The runtime injects validated CSS through `style.textContent`. It rejects network URLs, CSS imports, escaped syntax, unknown resource functions, and SVG or HTML data URLs. Payloads are limited to 16 stylesheets, 256 KB per file, and 1 MB total. Supported self-contained CSS includes theme rules, media queries, gradients, and approved base64 raster/font URLs. If styles are invalid or missing, rendering fails closed instead of fetching an alternative resource. No broader network or iframe permissions are required.

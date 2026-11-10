@@ -15,6 +15,7 @@ import { preloadFrontmatter } from './components/store'
 import docsConfig from '../docs/dory.json' with { type: 'json' };
 import type { DoryConfig } from './types/config';
 import { BASE_PATH, withBase } from './utils/base-path';
+import 'virtual:dory-styles';
 
 const config = docsConfig as DoryConfig;
 

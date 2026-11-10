@@ -1,4 +1,5 @@
 import type { DoryColors, DoryNavigation } from '../types/config';
+import { embeddedStyleLimits, normalizeEmbeddedStylePath } from './styles';
 
 export type EmbeddedConfig = {
   name?: string;
@@ -13,6 +14,7 @@ export type EmbeddedConfig = {
   navigation?: DoryNavigation;
   i18n?: { defaultLocale?: string; locales?: Array<{ code: string; label?: string; navigation?: DoryNavigation }> };
   chat?: { suggestedQuestions?: string[] };
+  styles?: string[];
 };
 
 const safeText = (value: unknown, length = 100) =>
@@ -92,6 +94,9 @@ export function parseEmbeddedConfig(value: unknown): EmbeddedConfig {
     theme: { mode: mode === 'light' || mode === 'dark' || mode === 'system' ? mode : undefined, radius },
     navigation: safeNavigation(input.navigation), i18n: { defaultLocale: /^[a-z]{2}(?:[-_][a-zA-Z]{2})?$/.test(input.i18n?.defaultLocale ?? '') ? input.i18n?.defaultLocale : undefined, locales },
     chat: { suggestedQuestions },
+    styles: Array.isArray(input.styles) && input.styles.length <= embeddedStyleLimits.files
+      ? input.styles.flatMap(value => { const path = normalizeEmbeddedStylePath(value); return path ? [path] : []; })
+      : undefined,
   };
 }
 

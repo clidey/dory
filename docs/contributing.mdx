@@ -42,6 +42,14 @@ Open `http://127.0.0.1:3188/dory/`. Review code and the exact generated site bef
 
 The documentation workflow validates pull requests and deploys main-branch documentation to `https://clidey.github.io/dory/`. Its canonical URL and path are configured in `docs/dory.json`; GitHub Pages uses GitHub Actions as the publishing source.
 
+To deploy documentation without changing package versions, run the **Documentation** workflow manually on `main`.
+
 Publish only the generated `dist/` artifact. Static Pages hosting includes navigation and search. Documentation chat and HTTP MCP need a separately hosted Dory server; do not put server credentials into static assets.
 
 Imported MDX and component modules are executable source. Review them, build untrusted contributions without secrets or deployment credentials, and deploy reviewed artifacts separately. See the repository security policy for the trust boundary.
+
+## Release the package
+
+Run **Publish Package** on `main`. Choose **current** to release the version already recorded in `package.json` and `docs/dory.json`. This runs the validation, npm publishing, GitHub release, and Docker image jobs without incrementing versions or creating a version commit. The two version fields must agree.
+
+Choose **patch**, **minor**, or **major** when the workflow should calculate and commit a new version. A current version older than an existing release tag, or a tag attached to another commit, is rejected. npm versions are immutable: an already published version is reused only when its package checksum matches the tested artifact exactly.

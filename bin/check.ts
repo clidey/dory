@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, readdirSync } from 'fs';
 import { extname, join, relative, resolve, dirname, sep } from 'path';
 import matter from 'gray-matter';
+import { resolveStylesheets } from './styles.js';
 
 export interface CheckIssue {
   level: 'error' | 'warning';
@@ -124,6 +125,11 @@ export function checkProject(projectRoot: string): CheckResult {
 
   const configDir = dirname(configPath);
   const contentRoot = configDir === root && walkMdx(join(root, 'docs')).length ? join(root, 'docs') : configDir;
+  try {
+    resolveStylesheets(config.styles, contentRoot);
+  } catch (error) {
+    issue('error', filePath(root, configPath), error instanceof Error ? error.message : String(error));
+  }
   const files = walkMdx(contentRoot);
   if (!files.length) issue('error', filePath(root, contentRoot), 'No MDX pages found');
   const pages = new Map<string, Page>();

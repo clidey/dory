@@ -1,6 +1,7 @@
-# Admin release: Run workflow on main, then choose patch, minor, or major.
+# Admin release: Run on main using the current package version or a SemVer bump.
 # Tests/build and package scanning finish before the action commits version
-# metadata to main and publishes the tested artifact. No manual version edit.
+# metadata to main when a bump is selected, then publishes the tested artifact.
+# "current" preserves existing version metadata and does not create/push a commit.
 # If main advances during validation, start a fresh run from current main.
 # After the version commit succeeds, retry downstream failures with Re-run failed
 # jobs; Re-run all jobs from the old source fails the stale-main guard.
@@ -14,11 +15,12 @@ on:
   workflow_dispatch:
     inputs:
       version-bump:
-        description: Version bump
+        description: Use the version already in package.json, or increment it
         required: true
         type: choice
-        default: patch
+        default: current
         options:
+          - current
           - patch
           - minor
           - major
@@ -43,14 +45,14 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
-      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '24'
           cache: pnpm
       - name: Test release version handling
-        run: node --test .github/scripts/release-version.test.mjs
-      - name: Prepare the next version
+        run: node --test .github/scripts/release-version.test.mjs .github/scripts/npm-registry.test.mjs
+      - name: Prepare the selected release version
         id: version
         env:
           BUMP_TYPE: ${{ inputs.version-bump }}
@@ -72,9 +74,10 @@ jobs:
           echo "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  $RUNNER_TEMP/dory-scanner/scanner.tar.gz" | sha256sum --check
           tar -xzf "$RUNNER_TEMP/dory-scanner/scanner.tar.gz" -C "$RUNNER_TEMP/dory-scanner" gitleaks
           "$RUNNER_TEMP/dory-scanner/gitleaks" dir "$RUNNER_TEMP/dory-package-scan" --redact --no-banner
+          cp .github/scripts/npm-registry.mjs "$RUNNER_TEMP/dory-package/npm-registry.mjs"
           cd "$RUNNER_TEMP/dory-package"
-          sha256sum "clidey-dory-$PACKAGE_VERSION.tgz" > SHA256SUMS
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+          sha256sum "clidey-dory-$PACKAGE_VERSION.tgz" npm-registry.mjs > SHA256SUMS
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: dory-npm-package-${{ github.sha }}
           path: ${{ runner.temp }}/dory-package/
@@ -82,7 +85,7 @@ jobs:
           retention-days: 7
 
   commit-version:
-    name: Record the tested version
+    name: Validate source and record version if needed
     needs: prepare
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -96,10 +99,10 @@ jobs:
           ref: ${{ github.sha }}
           persist-credentials: false
           fetch-depth: 0
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '24'
-      - name: Commit the tested package and documentation versions
+      - name: Validate the tested source and prepare its release commit
         id: commit
         env:
           PACKAGE_VERSION: ${{ needs.prepare.outputs.version }}
@@ -107,6 +110,7 @@ jobs:
           BUMP_TYPE: ${{ inputs.version-bump }}
         run: node .github/scripts/release-version.mjs commit
       - name: Push version commit without overwriting concurrent work
+        if: inputs.version-bump != 'current'
         env:
           GH_TOKEN: ${{ github.token }}
         run: git -c credential.helper= -c 'credential.helper=!gh auth git-credential' push origin HEAD:refs/heads/main
@@ -114,7 +118,7 @@ jobs:
   publish:
     needs: [prepare, commit-version]
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     permissions:
       contents: read
       id-token: write
@@ -126,27 +130,15 @@ jobs:
         with:
           name: dory-npm-package-${{ github.sha }}
           path: ${{ runner.temp }}/dory-package/
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
       - name: Check whether this exact artifact is already published
         run: |
-          node --input-type=module <<'JS'
-          import {readFileSync, appendFileSync} from 'node:fs';
-          import {createHash} from 'node:crypto';
-          const version = process.env.PACKAGE_VERSION;
-          const file = `${process.env.RUNNER_TEMP}/dory-package/clidey-dory-${version}.tgz`;
-          const expected = 'sha512-' + createHash('sha512').update(readFileSync(file)).digest('base64');
-          const response = await fetch(`https://registry.npmjs.org/@clidey/dory/${version}`, {headers: {'Cache-Control': 'no-cache'}});
-          let exists = false;
-          if (response.ok) {
-            const published = await response.json();
-            if (published.version !== version || published.dist?.integrity !== expected) throw new Error('This version already exists with a different package checksum; publish a new version instead.');
-            exists = true;
-          } else if (response.status !== 404) throw new Error(`Registry check failed: ${response.status}`);
-          appendFileSync(process.env.GITHUB_ENV, `DORY_ALREADY_PUBLISHED=${exists}\n`);
-          JS
+          cd "$RUNNER_TEMP/dory-package"
+          sha256sum --check SHA256SUMS
+          node npm-registry.mjs check
       - name: Publish verified package through npm trusted publishing
         if: env.DORY_ALREADY_PUBLISHED != 'true'
         run: |
@@ -155,25 +147,9 @@ jobs:
           npm publish "clidey-dory-$PACKAGE_VERSION.tgz" --ignore-scripts --access public --provenance
       - name: Confirm exact version is available before downstream release jobs
         run: |
-          node --input-type=module <<'JS'
-          import {readFileSync} from 'node:fs';
-          import {createHash} from 'node:crypto';
-          import {setTimeout} from 'node:timers/promises';
-          const version = process.env.PACKAGE_VERSION;
-          const file = `${process.env.RUNNER_TEMP}/dory-package/clidey-dory-${version}.tgz`;
-          const expected = 'sha512-' + createHash('sha512').update(readFileSync(file)).digest('base64');
-          for (let attempt = 0; attempt < 24; attempt++) {
-            const response = await fetch(`https://registry.npmjs.org/@clidey/dory/${version}`, {headers: {'Cache-Control': 'no-cache'}});
-            if (response.ok) {
-              const published = await response.json();
-              if (published.version === version && published.dist?.integrity === expected) process.exit(0);
-              throw new Error('Published package checksum differs from the tested artifact.');
-            }
-            if (response.status !== 404) throw new Error(`Registry check failed: ${response.status}`);
-            await setTimeout(10000);
-          }
-          throw new Error('The exact published version is not yet available from npm.');
-          JS
+          cd "$RUNNER_TEMP/dory-package"
+          sha256sum --check SHA256SUMS
+          node npm-registry.mjs wait
 
   release:
     needs: [prepare, commit-version, publish]
@@ -204,7 +180,7 @@ jobs:
           ref: ${{ needs.commit-version.outputs.commit }}
           persist-credentials: false
       - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
-      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+      - uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}

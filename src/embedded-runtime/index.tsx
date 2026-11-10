@@ -41,6 +41,7 @@ import { PageMeta } from '../ui/page-meta';
 import { TableOfContentsView } from '../ui/table-of-content-view';
 import '@clidey/ux/theme-fonts.css';
 import { applyEmbeddedConfig, parseEmbeddedConfig, type EmbeddedConfig } from './config';
+import { applyEmbeddedStylesheets, validateEmbeddedStylesheets, type EmbeddedStylesheet } from './styles';
 import '@clidey/ux/styles.css';
 import '@clidey/ux/brand.css';
 import '../app.css';
@@ -79,7 +80,7 @@ type Labels = {
   chatSearch: string;
   chatClose: string;
 };
-type LoadMessage = { __dory_docs: true; type: 'load'; files?: DocFile[]; manifest?: DocManifestEntry[]; path: string; theme?: 'light' | 'dark'; locale?: string; labels?: Partial<Labels>; config?: EmbeddedConfig; chatEnabled?: boolean };
+type LoadMessage = { __dory_docs: true; type: 'load'; files?: DocFile[]; manifest?: DocManifestEntry[]; path: string; theme?: 'light' | 'dark'; locale?: string; labels?: Partial<Labels>; config?: EmbeddedConfig; chatEnabled?: boolean; stylesheets?: EmbeddedStylesheet[] };
 type FileMessage = { __dory_docs: true; type: 'file'; path: string; requestId: string; content: string };
 type ChatResultMessage = { __dory_docs: true; type: 'chat-result'; requestId: string; answer?: string; citations?: ChatCitation[]; followUps?: string[]; error?: string };
 type MdxModule = { default: (props: { components: typeof components }) => ComponentChildren };
@@ -581,6 +582,16 @@ window.addEventListener('message', event => {
   }
   const message = data as Partial<LoadMessage>;
   if (message.__dory_docs !== true || message.type !== 'load' || !(Array.isArray(message.manifest) || Array.isArray(message.files))) return;
+  let stylesheets: EmbeddedStylesheet[];
+  try {
+    stylesheets = validateEmbeddedStylesheets(message.config?.styles, message.stylesheets);
+  } catch (error) {
+    const text = error instanceof Error ? error.message : 'Invalid embedded styles';
+    applyEmbeddedStylesheets([]);
+    render(<Status message={text} error />, root);
+    send('error', { message: text });
+    return;
+  }
   site = parseEmbeddedConfig(message.config);
   const locale = typeof message.locale === 'string' && /^[a-z]{2}(?:[-_][a-zA-Z]{2})?$/.test(message.locale) ? message.locale : site.i18n?.defaultLocale ?? 'en_US';
   activeLocale = locale;
@@ -646,6 +657,7 @@ window.addEventListener('message', event => {
   chatEnabled = message.chatEnabled === true;
   activeTheme = message.theme === 'light' || message.theme === 'dark' ? message.theme : site.theme?.mode === 'light' || site.theme?.mode === 'dark' ? site.theme.mode : window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   applyEmbeddedConfig(site, activeTheme);
+  applyEmbeddedStylesheets(stylesheets);
   void showPage(manifest.has(message.path) ? message.path : [...manifest.keys()][0] ?? '');
 });
 
