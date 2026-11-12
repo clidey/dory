@@ -104,6 +104,6 @@
     "@types/node": "26.6.6",
     "@types/react-highlight-words": "0.20.1",
     "@typescript/typescript6": "6.0.2",
-    "vitest": "5.0.5"
+    "vitest": "5.1.0"
   }
 }
