@@ -2,15 +2,16 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { withBase } from '../utils/base-path';
 import { captureDocsEvent } from '../utils/analytics';
 
-import { CatalogIcon, Button, CopyButton, copyToClipboard } from '@clidey/ux';
+import { CatalogIcon, Button, copyToClipboard } from '@clidey/ux';
 import docsConfig from '../../docs/dory.json' with { type: 'json' };
 import type { DoryConfig } from '../types/config';
+import { ChatAnswer, type ChatMedia } from './chat-answer';
 
 export type Citation = { id: string; title: string; url: string; excerpt: string };
-export type Message = { role: 'user' | 'assistant'; content: string; citations?: Citation[]; followUps?: string[] };
+export type Message = { role: 'user' | 'assistant'; content: string; citations?: Citation[]; media?: ChatMedia[]; followUps?: string[] };
 export type ChatTransport = {
   status: () => Promise<boolean>;
-  ask: (message: string, history: Pick<Message, 'role' | 'content'>[], pathname: string, signal: AbortSignal) => Promise<{ answer?: string; citations?: Citation[]; followUps?: string[]; error?: string }>;
+  ask: (message: string, history: Pick<Message, 'role' | 'content'>[], pathname: string, signal: AbortSignal) => Promise<{ answer?: string; citations?: Citation[]; media?: ChatMedia[]; followUps?: string[]; error?: string }>;
 };
 
 class ChatRequestError extends Error {
@@ -31,7 +32,7 @@ const defaultTransport: ChatTransport = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message, history, pathname }),
     });
-    const result = await response.json() as { answer?: string; citations?: Citation[]; followUps?: string[]; error?: string };
+    const result = await response.json() as { answer?: string; citations?: Citation[]; media?: ChatMedia[]; followUps?: string[]; error?: string };
     if (!response.ok) throw new ChatRequestError(result.error || 'The answer is unavailable right now.', response.status);
     return result;
   },
@@ -46,31 +47,6 @@ const starters = suggestedQuestions?.length ? suggestedQuestions : [
   `What can I do with ${site.name}?`,
   'Explain this page',
 ];
-
-function renderInline(text: string) {
-  return text.split(/(\*\*[^*]+\*\*|`[^`]+`)/g).map((part, index) => {
-    if (part.startsWith('**') && part.endsWith('**')) return <strong key={index}>{part.slice(2, -2)}</strong>;
-    if (part.startsWith('`') && part.endsWith('`')) return <code key={index} className="rounded bg-[var(--accent)] px-1 py-0.5 font-mono text-[0.9em]">{part.slice(1, -1)}</code>;
-    return part;
-  });
-}
-
-function AnswerText({ text }: { text: string }) {
-  return <div className="space-y-3 text-sm leading-7 text-foreground sm:text-base">{text.split(/(```[^\n]*\n[\s\S]*?```)/g).map((part, index) => {
-    if (part.startsWith('```') && part.endsWith('```')) {
-      const language = part.slice(3, part.indexOf('\n')).trim();
-      const code = part.slice(part.indexOf('\n') + 1, -3).trimEnd();
-      return <div key={index} className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--accent)]">
-        <div className="flex items-center justify-between border-b border-[var(--border)] px-3 py-1 text-xs text-muted-foreground">
-          <span>{language || 'Code'}</span>
-          <CopyButton text={code} tooltipLabel="Copy code" copiedLabel="Code copied" onCopy={() => captureDocsEvent('docs_chat_code_copied', { path: window.location.pathname })} />
-        </div>
-        <pre className="overflow-x-auto p-4 text-sm leading-6"><code>{code}</code></pre>
-      </div>;
-    }
-    return part.split(/\n\s*\n/).filter(Boolean).map((paragraph, paragraphIndex) => <p key={`${index}-${paragraphIndex}`} className="whitespace-pre-wrap">{renderInline(paragraph.trim())}</p>);
-  })}</div>;
-}
 
 function CopyAnswerButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
@@ -133,7 +109,7 @@ export function useChatAssistant(options: { transport?: ChatTransport; initialMe
       const result = await transport.ask(text, previous, window.location.pathname, request.signal);
       if (!result.answer) { errorKind = 'invalid_answer'; throw new Error(result.error || 'The answer is unavailable right now.'); }
       if (!request.signal.aborted) {
-        setMessages(current => [...current, { role: 'assistant', content: result.answer!, citations: result.citations, followUps: result.followUps }]);
+        setMessages(current => [...current, { role: 'assistant', content: result.answer!, citations: result.citations, media: result.media, followUps: result.followUps }]);
         captureDocsEvent('docs_chat_answer', { path: window.location.pathname, citation_count: result.citations?.length ?? 0 });
       }
     } catch (cause) {
@@ -198,7 +174,7 @@ export function ChatAssistant({ chat, onNavigate, onSearch, siteName = site.name
                 <h2 className="text-xl font-semibold leading-snug text-foreground">{message.content}</h2>
               ) : (
                 <div className="dory-chat-answer space-y-4">
-                  <AnswerText text={message.content} />
+                  <ChatAnswer text={message.content} media={message.media} />
                   <CopyAnswerButton text={message.content} />
                   {message.citations && message.citations.length > 0 && (
                     <div className="space-y-2 pt-2">

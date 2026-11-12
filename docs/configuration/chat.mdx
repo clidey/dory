@@ -40,6 +40,14 @@ To customize the suggested questions for your site, add this optional section to
 
 Without this section, Dory suggests questions based on your site name. Keep provider keys in the server environment, never in `dory.json`.
 
+## Diagrams and media in answers
+
+Ask Dory can explain documented workflows with Mermaid diagrams, formatted tables, and code examples with copy controls. Diagrams use your site's colors and fonts and adapt when readers switch themes.
+
+Answers can also include images, video, and audio referenced in the cited documentation. Add media to your MDX using Markdown images or literal `src` attributes on `<img>`, `<Image>`, `<video>`, and `<audio>` elements. Local assets must exist inside your documentation directory; explicit HTTPS media URLs are also supported. Include descriptive alt text or a title so Dory can choose relevant media. The model selects verified asset IDs; it cannot invent media URLs. Video and audio use playback controls and never autoplay.
+
+Media is included when relevant to the answer. Dory does not generate images or search the web for illustrations. A static host or reverse proxy must allow the media's origin in its content security policy.
+
 ## Limits and security
 
 The backend rejects cross-origin requests, oversized messages, long conversation histories, and requests beyond its limits. The defaults are deliberately conservative:
@@ -52,7 +60,7 @@ When using `dory dev` on `localhost`, `127.0.0.1`, or `::1`, Dory skips the per-
 | `DORY_CHAT_PER_IP_DAY` | `20` | Requests per IP per day |
 | `DORY_CHAT_GLOBAL_DAY` | `100` | Requests across the server per day |
 | `DORY_CHAT_MAX_CONCURRENT` | `2` | Simultaneous model calls across the server |
-| `DORY_CHAT_MAX_OUTPUT_TOKENS` | `500` | Maximum model output tokens |
+| `DORY_CHAT_MAX_OUTPUT_TOKENS` | `1000` | Maximum model output tokens (up to 2000) |
 
 Each request has a 20-second provider timeout. A question can contain at most 600 characters, and at most six previous turns are accepted. The limits above apply **per Node process**; for multiple replicas, enforce shared limits at your reverse proxy or edge as well. Dory uses the connection IP, not an untrusted `X-Forwarded-For` header. If you put the server behind a reverse proxy, configure limits there using its verified client IP.
 

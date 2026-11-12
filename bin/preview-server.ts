@@ -80,7 +80,7 @@ export function startPreview({ projectRoot = process.cwd(), version }: { project
       res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
       res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
       res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
-      res.setHeader('Content-Security-Policy', `default-src 'self'; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com ${ingestHosts} ${scriptHosts}; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' ${ingestHosts}; frame-ancestors ${frameAncestors}`);
+      res.setHeader('Content-Security-Policy', `default-src 'self'; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com ${ingestHosts} ${scriptHosts}; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: https:; media-src 'self' https:; connect-src 'self' ${ingestHosts}; frame-ancestors ${frameAncestors}`);
       res.once('finish', () => analytics.recordRequest(req, res.statusCode));
       if (basePath && req.url) {
         if (req.url === basePath || req.url.startsWith(`${basePath}/`) || req.url.startsWith(`${basePath}?`)) {

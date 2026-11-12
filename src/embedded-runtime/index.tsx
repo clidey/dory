@@ -28,6 +28,7 @@ import { IconGrid } from '../mdx/icon-grid';
 import { CatalogIcon, Button, Sheet, SheetContent } from '@clidey/ux';
 import { Breadcrumb } from '../ui/breadcrumb';
 import { ChatAssistant, useChatAssistant, type ChatTransport, type Message } from '../components/chat-assistant';
+import type { ChatMedia } from '../components/chat-answer';
 import { createSearchIndex } from '../components/search-index';
 import { stripMdxToText } from '../utils/search-content';
 import { PageActionsView } from '../ui/page-actions';
@@ -82,7 +83,7 @@ type Labels = {
 };
 type LoadMessage = { __dory_docs: true; type: 'load'; files?: DocFile[]; manifest?: DocManifestEntry[]; path: string; theme?: 'light' | 'dark'; locale?: string; labels?: Partial<Labels>; config?: EmbeddedConfig; chatEnabled?: boolean; stylesheets?: EmbeddedStylesheet[] };
 type FileMessage = { __dory_docs: true; type: 'file'; path: string; requestId: string; content: string };
-type ChatResultMessage = { __dory_docs: true; type: 'chat-result'; requestId: string; answer?: string; citations?: ChatCitation[]; followUps?: string[]; error?: string };
+type ChatResultMessage = { __dory_docs: true; type: 'chat-result'; requestId: string; answer?: string; citations?: ChatCitation[]; media?: ChatMedia[]; followUps?: string[]; error?: string };
 type MdxModule = { default: (props: { components: typeof components }) => ComponentChildren };
 
 const root = (() => {
@@ -275,6 +276,7 @@ function ChatDialog({ initialQuery, onClose, onSearch }: { initialQuery: string;
       const result = await askHost(message, history);
       return {
         answer: result.answer,
+        media: result.media,
         error: result.error,
         followUps: result.followUps,
         citations: result.citations?.map(citation => ({
@@ -576,8 +578,18 @@ window.addEventListener('message', event => {
       return [{ path: item.path, title, excerpt }];
     }) : [];
     const followUps = Array.isArray(chatResult.followUps) ? chatResult.followUps.slice(0, 4).filter((item): item is string => typeof item === 'string' && item.length >= 3 && item.length <= 120) : [];
+    const media = Array.isArray(chatResult.media) ? chatResult.media.slice(0, 4).filter(item => {
+      if (!item || typeof item.id !== 'string' || item.id.length > 100 || !['image', 'video', 'audio'].includes(item.type)) return false;
+      if (typeof item.alt !== 'string' || item.alt.length > 200 || !citations.some(citation => citation.path === item.sourceId)) return false;
+      if (typeof item.url !== 'string' || item.url.length > 2048) return false;
+      // Opaque embedded frames have no docs asset origin. The host resolves asset URLs.
+      try {
+        const url = new URL(item.url);
+        return url.protocol === 'https:' && !url.username && !url.password;
+      } catch { return false; }
+    }) : [];
     if (!answer && !error) pending.reject(new Error(labels.chatError));
-    else pending.resolve({ __dory_docs: true, type: 'chat-result', requestId: chatResult.requestId!, answer, error, citations, followUps });
+    else pending.resolve({ __dory_docs: true, type: 'chat-result', requestId: chatResult.requestId!, answer, error, citations, media, followUps });
     return;
   }
   const message = data as Partial<LoadMessage>;

@@ -22,8 +22,8 @@ export function docsAssetsPlugin(): Plugin {
 
       // Define asset extensions to copy
       const assetExtensions = new Set([
-        '.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.ico',
-        '.pdf', '.mp4', '.webm', '.mp3', '.wav',
+        '.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.avif', '.ico',
+        '.pdf', '.mp4', '.webm', '.ogv', '.mp3', '.wav', '.ogg', '.m4a', '.flac',
         '.woff', '.woff2', '.ttf', '.eot',
       ]);
 

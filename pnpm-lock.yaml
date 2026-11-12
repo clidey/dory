@@ -248,6 +248,9 @@ importers:
       remark-gfm:
         specifier: 4.0.1
         version: 4.0.1(supports-color@8.1.1)
+      remark-parse:
+        specifier: 11.0.0
+        version: 11.0.0(supports-color@8.1.1)
       sass-embedded:
         specifier: 1.107.0
         version: 1.107.0
@@ -263,6 +266,9 @@ importers:
       typescript:
         specifier: 7.0.2
         version: 7.0.2
+      unified:
+        specifier: 11.0.5
+        version: 11.0.5
       unist-util-visit:
         specifier: 5.2.0
         version: 5.2.0

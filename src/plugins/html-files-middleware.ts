@@ -27,8 +27,8 @@ export function isRealPathInside(root: string, target: string): boolean {
 export function htmlFilesMiddleware(): Plugin {
   // Define asset extensions
   const assetExtensions = new Set([
-    '.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.ico',
-    '.pdf', '.mp4', '.webm', '.mp3', '.wav', '.mov',
+    '.png', '.jpg', '.jpeg', '.gif', '.svg', '.webp', '.avif', '.ico',
+    '.pdf', '.mp4', '.webm', '.ogv', '.mp3', '.wav', '.ogg', '.m4a', '.flac', '.mov',
     '.woff', '.woff2', '.ttf', '.eot',
   ]);
 
@@ -44,13 +44,18 @@ export function htmlFilesMiddleware(): Plugin {
     '.jpeg': 'image/jpeg',
     '.gif': 'image/gif',
     '.webp': 'image/webp',
+    '.avif': 'image/avif',
     '.ico': 'image/x-icon',
     '.pdf': 'application/pdf',
     '.mp4': 'video/mp4',
     '.webm': 'video/webm',
+    '.ogv': 'video/ogg',
     '.mov': 'video/quicktime',
     '.mp3': 'audio/mpeg',
     '.wav': 'audio/wav',
+    '.ogg': 'audio/ogg',
+    '.m4a': 'audio/mp4',
+    '.flac': 'audio/flac',
     '.woff': 'font/woff',
     '.woff2': 'font/woff2',
     '.ttf': 'font/ttf',

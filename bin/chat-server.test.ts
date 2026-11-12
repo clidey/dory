@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createServer, request, type Server } from 'node:http';
-import { mkdtempSync, writeFileSync, rmSync, mkdirSync } from 'node:fs';
+import { mkdtempSync, writeFileSync, rmSync, mkdirSync, symlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import type { IncomingMessage, ServerResponse } from 'node:http';
@@ -168,5 +168,92 @@ describe('documentation chat endpoint', () => {
     const response = await post(base, { message: 'x'.repeat(601) });
     expect(response.status).toBe(400);
     expect(provider).toHaveBeenCalledTimes(1);
+  });
+
+  it('preserves complete Mermaid diagrams and code examples in bounded source evidence', async () => {
+    const diagram = '```mermaid\nflowchart LR\n  A[Write MDX] --> B[Build Dory]\n```';
+    const example = '```mdx\n# Heading inside example\n<Callout title="Dory">Build docs</Callout>\n```';
+    writeFileSync(join(docsDir, 'diagrams.mdx'), `# Dory diagrams\nExplain the Dory build process.\n${diagram}\n${example}\n`);
+    const fetchReal = globalThis.fetch.bind(globalThis);
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input, init) => {
+      if (String(input).startsWith('https://provider.example')) {
+        const body = JSON.parse(String(init?.body)) as { max_completion_tokens: number; messages: Array<{ content: string }> };
+        expect(body.messages[0].content).toContain('complete fenced mermaid diagram');
+        expect(body.messages[1].content).toContain(diagram);
+        expect(body.messages[1].content).toContain(example);
+        expect(body.max_completion_tokens).toBe(1000);
+        return new Response(JSON.stringify({ choices: [{ message: { content: JSON.stringify({ answer: `The Dory build process:\n${diagram}`, answerable: true, citations: ['S1'] }) } }] }));
+      }
+      return fetchReal(input, init);
+    });
+    const response = await post(base, { message: 'Explain Dory diagrams', pathname: '/diagrams' });
+    expect(response.status).toBe(200);
+    expect((await response.json() as { answer: string }).answer).toContain(diagram);
+  });
+
+  it('returns only selected source-owned media and never trusts provider URLs', async () => {
+    mkdirSync(join(docsDir, 'assets'));
+    for (const name of ['architecture.png', 'demo.webp', 'tour.mp4', 'guide.mp3']) writeFileSync(join(docsDir, 'assets', name), 'test-media');
+    writeFileSync(join(docsDir, 'media.mdx'), '# Dory media guide\nSee the Dory architecture and follow the tour.\n![Architecture](./assets/architecture.png)\n<Image src="/assets/demo.webp" alt="Dory demo" />\n<video src="./assets/tour.mp4" title="Dory tour" />\n<audio><source src="./assets/guide.mp3" /></audio>\n');
+    const fetchReal = globalThis.fetch.bind(globalThis);
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input, init) => {
+      if (String(input).startsWith('https://provider.example')) {
+        const body = JSON.parse(String(init?.body)) as { messages: Array<{ content: string }> };
+        expect(body.messages[1].content).toContain('"id":"S1M1","type":"image","url":"/assets/architecture.png","alt":"Architecture","sourceId":"S1"');
+        expect(body.messages[1].content).toContain('"type":"video"');
+        expect(body.messages[1].content).toContain('"type":"audio"');
+        return new Response(JSON.stringify({ choices: [{ message: { content: JSON.stringify({ answer: 'See this Dory architecture and tour.', answerable: true, citations: ['S1'], media: ['S1M1', 'S1M2', 'S1M3', 'S1M4', 'made-up', { url: 'https://attacker.example/tracking.png' }] }) } }] }));
+      }
+      return fetchReal(input, init);
+    });
+    const response = await post(base, { message: 'Explain Dory media', pathname: '/media' });
+    expect(response.status).toBe(200);
+    const result = await response.json() as { media: Array<{ type: string; url: string; sourceId: string; alt: string }> };
+    expect(result.media).toHaveLength(4);
+    expect(result.media.map(media => media.type)).toEqual(['image', 'image', 'video', 'audio']);
+    expect(result.media[0]).toMatchObject({ sourceId: 'S1', alt: 'Architecture' });
+    expect(JSON.stringify(result)).not.toContain('attacker');
+  });
+
+  it('excludes hidden files, symlinks, traversal, executable media, and code examples from the media inventory', async () => {
+    mkdirSync(join(docsDir, 'assets'));
+    writeFileSync(join(docsDir, '.secret.png'), 'private');
+    writeFileSync(join(docsDir, 'assets', 'unsafe.html'), '<script>alert(1)</script>');
+    symlinkSync(join(docsDir, '.secret.png'), join(docsDir, 'assets', 'symlink.png'));
+    writeFileSync(join(docsDir, 'unsafe.mdx'), '# Dory unsafe media\nDory media inventory must only contain safe documentation assets.\n![secret](/.secret.png)\n![linked](./assets/symlink.png)\n![traversal](/%2e%2e/.secret.png)\n![html](./assets/unsafe.html)\n![data](data:image/png;base64,AAAA)\n![unsafe](javascript:alert)\n![credentials](https://user:pass@example.com/image.png)\n```mdx\n<Image src="https://example.com/example.png" />\n```\n');
+    const fetchReal = globalThis.fetch.bind(globalThis);
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input, init) => {
+      if (String(input).startsWith('https://provider.example')) {
+        const body = JSON.parse(String(init?.body)) as { messages: Array<{ content: string }> };
+        expect(body.messages[1].content).not.toContain('Available media');
+        return new Response(JSON.stringify({ choices: [{ message: { content: JSON.stringify({ answer: 'Only use safe Dory media.', answerable: true, citations: ['S1'], media: ['S1M1'] }) } }] }));
+      }
+      return fetchReal(input, init);
+    });
+    const response = await post(base, { message: 'Dory unsafe media', pathname: '/unsafe' });
+    expect(response.status).toBe(200);
+    expect((await response.json() as { media: unknown[] }).media).toEqual([]);
+  });
+
+  it('supports source SVGs and HTTPS CDN images while restricting media to cited sections', async () => {
+    writeFileSync(join(docsDir, 'architecture.svg'), '<svg xmlns="http://www.w3.org/2000/svg"/>');
+    writeFileSync(join(docsDir, 'architecture.mdx'), '# Dory architecture\nThe Dory architecture builds documentation from MDX.\n![Diagram](/architecture.svg)\n![Screenshot](https://cdn.example/images/render?id=demo)\n![Internal](https://127.0.0.1/private.png)\n\n## Other Dory architecture\nThis other Dory architecture section has a separate screenshot.\n![Other](https://cdn.example/other.png)\n');
+    const fetchReal = globalThis.fetch.bind(globalThis);
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input, init) => {
+      if (String(input).startsWith('https://provider.example')) {
+        const body = JSON.parse(String(init?.body)) as { messages: Array<{ content: string }> };
+        const prompt = body.messages[1].content;
+        expect(prompt).toContain('"url":"/architecture.svg"');
+        expect(prompt).toContain('"url":"https://cdn.example/images/render?id=demo"');
+        expect(prompt).not.toContain('"url":"https://127.0.0.1/private.png"');
+        return new Response(JSON.stringify({ choices: [{ message: { content: JSON.stringify({ answer: 'Dory builds MDX documentation.', answerable: true, citations: ['S1'], media: ['S1M1', 'S1M2', 'S2M1'] }) } }] }));
+      }
+      return fetchReal(input, init);
+    });
+    const response = await post(base, { message: 'Explain Dory architecture', pathname: '/architecture' });
+    expect(response.status).toBe(200);
+    const result = await response.json() as { media: Array<{ sourceId: string; url: string }> };
+    expect(result.media.map(media => media.url)).toEqual(['/architecture.svg', 'https://cdn.example/images/render?id=demo']);
+    expect(result.media.every(media => media.sourceId === 'S1')).toBe(true);
   });
 });

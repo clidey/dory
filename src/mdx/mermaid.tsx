@@ -1,7 +1,7 @@
 import { CatalogIcon } from '@clidey/ux'
 
 import classNames from 'classnames'
-import { useEffect, useMemo, useRef, useState } from 'preact/compat'
+import { useEffect, useId, useMemo, useRef, useState } from 'preact/compat'
 
 function fixNodeLabelsWithSpecialChars(content: string): string {
     // Pattern to match node definitions with brackets containing special characters
@@ -101,7 +101,8 @@ function useThemeVersion() {
     return version
 }
 
-export function MermaidRenderer({ content }: { content: string }) {
+export function MermaidRenderer({ content, untrusted = false }: { content: string; untrusted?: boolean }) {
+    const instanceId = useId().replace(/[^a-zA-Z0-9_-]/g, '')
     const themeVersion = useThemeVersion()
     const mermaidRef = useRef<HTMLDivElement>(null)
     const [isFullscreen, setIsFullscreen] = useState(false)
@@ -109,7 +110,7 @@ export function MermaidRenderer({ content }: { content: string }) {
     const [error, setError] = useState<string | null>(null)
     const [isValid, setIsValid] = useState<boolean | null>(null)
 
-    const diagramId = useMemo(() => `mermaid-${hashContent(content)}-${themeVersion}`, [content, themeVersion])
+    const diagramId = useMemo(() => `mermaid-${instanceId}-${hashContent(content)}-${themeVersion}`, [content, instanceId, themeVersion])
 
     useEffect(() => {
         let mounted = true
@@ -119,16 +120,23 @@ export function MermaidRenderer({ content }: { content: string }) {
             setIsValid(null)
             setIsLoaded(false)
             try {
+                if (untrusted && (content.length > 12_000 || /%%\{|^\s*---|^\s*(?:click|link|links)\s/im.test(content))) {
+                    throw new Error('This diagram contains unsupported configuration or interactive content.')
+                }
                 const mermaid = (await import('mermaid')).default
                 
                 if (!mounted || !mermaidRef.current) return
 
                 mermaid.initialize({
                     startOnLoad: false,
+                    securityLevel: 'strict',
+                    maxTextSize: untrusted ? 12_000 : 50_000,
+                    suppressErrorRendering: true,
                     theme: 'base',
                     look: 'classic',
                     themeVariables: paletteThemeVariables(),
                     flowchart: {
+                        htmlLabels: false,
                         nodeSpacing: 50,
                         rankSpacing: 80,
                         padding: 20,
@@ -179,7 +187,7 @@ export function MermaidRenderer({ content }: { content: string }) {
         return () => {
             mounted = false
         }
-    }, [content, diagramId, themeVersion])
+    }, [content, diagramId, themeVersion, untrusted])
 
     const toggleFullscreen = () => {
         setIsFullscreen(!isFullscreen)
