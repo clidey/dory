@@ -1,4 +1,46 @@
 {
+  "attribution": {
+    "commit": "",
+    "pr": "",
+    "sessionUrl": false
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.agents/hooks/repo-hooks.py\"",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.agents/hooks/repo-hooks.py\"",
+            "timeout": 300
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.agents/hooks/repo-hooks.py\"",
+            "timeout": 600
+          }
+        ]
+      }
+    ]
+  },
   "permissions": {
     "allow": [
       "Bash(find:*)",
@@ -6,7 +48,6 @@
       "Bash(rg:*)",
       "Bash(npm run generate:*)",
       "Bash(ls:*)",
-      "Bash(rm:*)",
       "Bash(npm run build:*)",
       "Bash(npx tsc:*)",
       "Bash(npx typescript:*)",
@@ -17,12 +58,19 @@
       "Bash(git config*)",
       "Bash(git checkout -b*)",
       "Bash(git add*)",
-      "Bash(git commit -m*)",
-      "Bash(git push*)",
-      "Bash(gh pr create*)",
-      "Bash(git status*)", 
+      "Bash(git status*)",
       "Bash(git diff*)",
       "Bash(git log*)"
+    ],
+    "ask": [
+      "Bash(git commit *)",
+      "Bash(git * commit *)",
+      "Bash(git push *)",
+      "Bash(git * push *)",
+      "Bash(npm publish *)",
+      "Bash(pnpm publish *)",
+      "Bash(pnpm run publish*)",
+      "Bash(pnpm run release*)"
     ]
   },
   "enableAllProjectMcpServers": false

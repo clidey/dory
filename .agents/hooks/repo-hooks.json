@@ -1,0 +1,7 @@
+{
+  "before_finish": [
+    {"paths": ["src/*", "bin/*", "scripts/*", "*.ts", "tsconfig*.json", "package.json"], "run": "pnpm test"},
+    {"paths": ["src/*", "bin/*", "*.ts", "tsconfig*.json", "package.json"], "run": "pnpm run build"},
+    {"paths": ["pnpm-workspace.yaml", ".npmrc"], "run": "node scripts/check-supply-chain.mjs"}
+  ]
+}
