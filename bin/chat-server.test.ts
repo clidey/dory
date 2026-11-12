@@ -111,6 +111,69 @@ describe('documentation chat endpoint', () => {
     expect(statuses).toEqual([200, 200, 200, 429]);
   });
 
+  it('does not spend request quotas on malformed JSON or invalid questions', async () => {
+    process.env.DORY_CHAT_PER_MINUTE = '1';
+    process.env.DORY_CHAT_PER_IP_DAY = '1';
+    process.env.DORY_CHAT_GLOBAL_DAY = '1';
+    const fetchReal = globalThis.fetch.bind(globalThis);
+    let providerCalls = 0;
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input, init) => {
+      if (String(input).startsWith('https://provider.example')) {
+        providerCalls++;
+        return new Response(JSON.stringify({ choices: [{ message: { content: JSON.stringify({ answer: 'Run dory build.', answerable: true, citations: ['S1'] }) } }] }));
+      }
+      return fetchReal(input, init);
+    });
+    for (let i = 0; i < 4; i++) {
+      const malformed = await fetch(`${base}/api/chat`, {
+        method: 'POST', headers: { Origin: base, 'Content-Type': 'application/json' }, body: '{',
+      });
+      expect(malformed.status).toBe(400);
+      expect((await post(base, { message: 'x'.repeat(601) })).status).toBe(400);
+    }
+    expect((await post(base, { message: 'How do I build Dory?' })).status).toBe(200);
+    expect((await post(base, { message: 'How do I build Dory?' })).status).toBe(429);
+    expect(providerCalls).toBe(1);
+  });
+
+  it('holds concurrency admission while an incomplete body is being read', async () => {
+    const received = new Promise<void>(resolve => server.once('request', () => resolve()));
+    const slow = request(`${base}/api/chat`, {
+      method: 'POST', headers: { Origin: base, 'Content-Type': 'application/json', 'Content-Length': '1024' },
+    });
+    slow.on('error', () => {});
+    slow.write('{');
+    await received;
+    try {
+      expect((await post(base, { message: 'How do I build Dory?' })).status).toBe(429);
+    } finally { slow.destroy(); }
+  });
+
+  it('uses only trusted proxy-appended client addresses for quotas', async () => {
+    process.env.DORY_CHAT_TRUSTED_PROXY_CIDRS = '127.0.0.0/8';
+    process.env.DORY_CHAT_PROXY_HOPS = '2';
+    process.env.DORY_CHAT_PER_MINUTE = '1';
+    const ask = (forwarded: string) => fetch(`${base}/api/chat`, {
+      method: 'POST', headers: { Origin: base, 'Content-Type': 'application/json', 'X-Forwarded-For': forwarded },
+      body: JSON.stringify({ message: 'Unrelated topic xyzzy' }),
+    });
+    expect((await ask('198.51.100.1, 203.0.113.5')).status).toBe(200);
+    expect((await ask('198.51.100.2, 203.0.113.5')).status).toBe(200);
+    expect((await ask('192.0.2.99, 198.51.100.1, 203.0.113.5')).status).toBe(429);
+  });
+
+  it('ignores forwarded addresses from untrusted peers', async () => {
+    process.env.DORY_CHAT_TRUSTED_PROXY_CIDRS = '192.0.2.0/24';
+    process.env.DORY_CHAT_PROXY_HOPS = '2';
+    process.env.DORY_CHAT_PER_MINUTE = '1';
+    const ask = (forwarded: string) => fetch(`${base}/api/chat`, {
+      method: 'POST', headers: { Origin: base, 'Content-Type': 'application/json', 'X-Forwarded-For': forwarded },
+      body: JSON.stringify({ message: 'Unrelated topic xyzzy' }),
+    });
+    expect((await ask('198.51.100.1, 203.0.113.5')).status).toBe(200);
+    expect((await ask('198.51.100.2, 203.0.113.5')).status).toBe(429);
+  });
+
   it('skips time quotas only for loopback requests to the dev server', async () => {
     localDevelopment = true;
     process.env.DORY_CHAT_PER_MINUTE = '1';

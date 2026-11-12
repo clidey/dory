@@ -1,6 +1,7 @@
 import { readFileSync, readdirSync, existsSync, lstatSync, realpathSync } from 'node:fs';
 import { join, relative, extname, dirname, resolve, sep } from 'node:path';
 import type { IncomingMessage, ServerResponse } from 'node:http';
+import { BlockList, isIP } from 'node:net';
 
 type ChatOptions = { docsDir: string; localDevelopment?: boolean };
 type Turn = { role: 'user' | 'assistant'; content: string };
@@ -39,6 +40,29 @@ function isSameOrigin(req: IncomingMessage): boolean {
   } catch { return false; }
 }
 
+function clientIp(req: IncomingMessage): string {
+  const peer = (req.socket.remoteAddress ?? 'unknown').replace(/^::ffff:(?=\d+\.)/, '');
+  const cidrs = (process.env.DORY_CHAT_TRUSTED_PROXY_CIDRS ?? '').split(',').map(value => value.trim()).filter(Boolean);
+  if (!cidrs.length || !isIP(peer)) return peer;
+  const hops = Number(process.env.DORY_CHAT_PROXY_HOPS ?? '1');
+  if (!Number.isInteger(hops) || hops < 1 || hops > 8) return peer;
+  const trusted = new BlockList();
+  try {
+    for (const cidr of cidrs) {
+      const parts = cidr.split('/');
+      if (parts.length !== 2 || !isIP(parts[0]) || !/^\d+$/.test(parts[1])) return peer;
+      trusted.addSubnet(parts[0], Number(parts[1]), isIP(parts[0]) === 6 ? 'ipv6' : 'ipv4');
+    }
+  } catch { return peer; }
+  if (!trusted.check(peer, isIP(peer) === 6 ? 'ipv6' : 'ipv4')) return peer;
+  const header = req.headers['x-forwarded-for'];
+  if (typeof header !== 'string') return peer;
+  // Count only proxy-appended hops from the right; client-supplied prefixes are untrusted.
+  const forwarded = header.split(',').map(value => value.trim());
+  const address = forwarded[forwarded.length - hops];
+  return address && isIP(address) ? address.replace(/^::ffff:(?=\d+\.)/, '') : peer;
+}
+
 function isLocalRequest(req: IncomingMessage): boolean {
   const ip = req.socket.remoteAddress;
   if (ip !== '127.0.0.1' && ip !== '::1' && ip !== '::ffff:127.0.0.1') return false;
@@ -48,7 +72,9 @@ function isLocalRequest(req: IncomingMessage): boolean {
   } catch { return false; }
 }
 
-function takeSlot(ip: string, skipRateLimits = false): { ok: true; release: () => void } | { ok: false; seconds: number } {
+type QuotaResult = { ok: true } | { ok: false; seconds: number };
+
+function takeSlot(ip: string, skipRateLimits = false): { ok: true; charge: () => QuotaResult; release: () => void } | { ok: false; seconds: number } {
   const now = Date.now();
   const minuteMs = 60_000;
   const dayMs = 86_400_000;
@@ -59,23 +85,33 @@ function takeSlot(ip: string, skipRateLimits = false): { ok: true; release: () =
   const bucket = ipBuckets.get(ip) ?? { minute: [], day: [], active: 0 };
   bucket.minute = bucket.minute.filter(time => now - time < minuteMs);
   bucket.day = bucket.day.filter(time => now - time < dayMs);
-  globalDay = globalDay.filter(time => now - time < dayMs);
   ipBuckets.set(ip, bucket);
   // Remove idle addresses so an attacker cannot grow this map without bound.
   if (ipBuckets.size > 5000) for (const [key, value] of ipBuckets) {
     if (value.active === 0 && value.day.length === 0) ipBuckets.delete(key);
   }
-  if (!skipRateLimits && bucket.minute.length >= perMinute) return { ok: false, seconds: Math.max(1, Math.ceil((minuteMs - (now - bucket.minute[0])) / 1000)) };
-  if (!skipRateLimits && (bucket.day.length >= perDay || globalDay.length >= dailyGlobal)) return { ok: false, seconds: 3600 };
   if (bucket.active >= 1 || globalActive >= maxActive) return { ok: false, seconds: 5 };
-  if (!skipRateLimits) {
-    bucket.minute.push(now);
-    bucket.day.push(now);
-    globalDay.push(now);
-  }
   bucket.active++;
   globalActive++;
-  return { ok: true, release: () => { bucket.active--; globalActive--; } };
+  return {
+    ok: true,
+    // Reserve concurrency while reading the body; charge time quotas only after validation.
+    charge: (): QuotaResult => {
+      const now = Date.now();
+      bucket.minute = bucket.minute.filter(time => now - time < minuteMs);
+      bucket.day = bucket.day.filter(time => now - time < dayMs);
+      globalDay = globalDay.filter(time => now - time < dayMs);
+      if (!skipRateLimits && bucket.minute.length >= perMinute) return { ok: false, seconds: Math.max(1, Math.ceil((minuteMs - (now - bucket.minute[0])) / 1000)) };
+      if (!skipRateLimits && (bucket.day.length >= perDay || globalDay.length >= dailyGlobal)) return { ok: false, seconds: 3600 };
+      if (!skipRateLimits) {
+        bucket.minute.push(now);
+        bucket.day.push(now);
+        globalDay.push(now);
+      }
+      return { ok: true };
+    },
+    release: () => { bucket.active--; globalActive--; },
+  };
 }
 
 const fencedCode = /^([ \t]*)(`{3,}|~{3,})[^\n]*\n[\s\S]*?^\1\2[ \t]*$/gm;
@@ -302,12 +338,14 @@ export async function handleChatRequest(req: IncomingMessage, res: ServerRespons
   if (!chatApiKey() || !process.env.DORY_CHAT_MODEL) { send(res, 503, { error: 'Documentation chat is not configured.' }); return true; }
   if (!isSameOrigin(req)) { send(res, 403, { error: 'Invalid request origin.' }); return true; }
   if (!req.headers['content-type']?.startsWith('application/json')) { send(res, 415, { error: 'Expected JSON.' }); return true; }
-  const ip = req.socket.remoteAddress || 'unknown';
+  const ip = clientIp(req);
   const slot = takeSlot(ip, options.localDevelopment === true && isLocalRequest(req));
   if (!slot.ok) { send(res, 429, { error: 'Chat limit reached. Please try again later.' }, slot.seconds); return true; }
   try {
     const input = validRequest(await readBody(req));
     if (!input) { send(res, 400, { error: 'Please send a short question.' }); return true; }
+    const quota = slot.charge();
+    if (!quota.ok) { send(res, 429, { error: 'Chat limit reached. Please try again later.' }, quota.seconds); return true; }
     const sources = retrieve(input.message, options, input.pathname);
     if (!sources.length) {
       send(res, 200, noAnswer(options));

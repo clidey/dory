@@ -17,6 +17,7 @@
   "files": [
     "bin/dist",
     "dist/runtime",
+    "dist-server",
     "bin/chat-server.ts",
     "bin/styles.ts",
     "bin/embedded-css.ts",
@@ -43,7 +44,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "pnpm run build:cli && tsc -b && pnpm run build:docs && pnpm run build:runtime",
+    "build": "pnpm run build:cli && tsc -b && pnpm run build:docs && pnpm run build:runtime && pnpm run build:server",
     "build:runtime": "vite build -c vite.config.runtime.ts && cp src/embedded-runtime/runtime.html dist/runtime/dory-runtime.html",
     "build:server": "vite build -c vite.config.server.ts",
     "build:cli": "tsc -p tsconfig.bin.json",

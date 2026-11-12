@@ -48,6 +48,12 @@ Answers can also include images, video, and audio referenced in the cited docume
 
 Media is included when relevant to the answer. Dory does not generate images or search the web for illustrations. A static host or reverse proxy must allow the media's origin in its content security policy.
 
+## Serving-only containers
+
+Build `pnpm run build:server` to produce `dist-server/server.js`, then run that bundle with Node from your site's directory. Supply `dist/`, `dory.json`, and the authored MDX files used for source retrieval. The Dory version is embedded in the bundle; a customer site does not need Dory's package.json or build toolchain at runtime. The default package build includes this serving bundle.
+
+Keep model credentials in the runtime environment or a mounted secret. Do not copy local `.env` files into the image. The server can run as a non-root user with a read-only filesystem and a writable temporary directory.
+
 ## Limits and security
 
 The backend rejects cross-origin requests, oversized messages, long conversation histories, and requests beyond its limits. The defaults are deliberately conservative:
@@ -62,6 +68,10 @@ When using `dory dev` on `localhost`, `127.0.0.1`, or `::1`, Dory skips the per-
 | `DORY_CHAT_MAX_CONCURRENT` | `2` | Simultaneous model calls across the server |
 | `DORY_CHAT_MAX_OUTPUT_TOKENS` | `1000` | Maximum model output tokens (up to 2000) |
 
-Each request has a 20-second provider timeout. A question can contain at most 600 characters, and at most six previous turns are accepted. The limits above apply **per Node process**; for multiple replicas, enforce shared limits at your reverse proxy or edge as well. Dory uses the connection IP, not an untrusted `X-Forwarded-For` header. If you put the server behind a reverse proxy, configure limits there using its verified client IP.
+Malformed JSON and invalid questions are rejected before time quotas are charged. The concurrency guard still applies while request bodies are being read.
+
+Each request has a 20-second provider timeout. A question can contain at most 600 characters, and at most six previous turns are accepted. The limits above apply **per Node process**; for multiple replicas, enforce shared limits at your reverse proxy or edge as well. Dory uses the connection IP by default and ignores untrusted `X-Forwarded-For` headers. If you put the server behind a reverse proxy, configure limits there using its verified client IP.
+
+When running behind trusted reverse proxies, set `DORY_CHAT_TRUSTED_PROXY_CIDRS` to their source CIDRs and `DORY_CHAT_PROXY_HOPS` to the number of addresses they append to `X-Forwarded-For`. Only requests received from those peers use the configured address counted from the right; client-supplied prefixes and headers from untrusted peers cannot change the quota identity. For Google's external Application Load Balancer, the appended pair is client IP then forwarding-rule IP, so use `2` hops. Never trust arbitrary proxy source ranges. See [Google's header semantics](https://docs.cloud.google.com/load-balancing/docs/https#x-forwarded-for_header).
 
 The server retrieves relevant MDX sections and gives only those excerpts to the model. It validates returned source IDs before showing an answer. Model output can still be imperfect, so keep examples and API facts reviewed and use `dory check` in CI.
