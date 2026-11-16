@@ -20,14 +20,14 @@ test('long titles wrap into bounded lines without cutting Unicode characters', (
   expect(wrapSocialText('😀'.repeat(12), 6, 2)).toEqual(['😀'.repeat(6), '😀'.repeat(6)]);
 });
 
-test('renders distinct 1200 by 630 PNGs with no system font or browser dependency', () => {
+test('renders distinct 1200 by 630 PNGs with no system font or browser dependency', async () => {
   const root = mkdtempSync(resolve(tmpdir(), 'dory-social-'));
   folders.push(root);
   const docsDir = resolve(root, 'docs');
   mkdirSync(docsDir);
   const options = { config: { name: 'Example & Docs' }, docsDir, outDir: root, description: 'A guide for your team.' };
-  const first = renderSocialPreview({ ...options, route: '/install', title: 'Installation' });
-  const second = renderSocialPreview({ ...options, route: '/start', title: 'Getting started <safely>' });
+  const first = await renderSocialPreview({ ...options, route: '/install', title: 'Installation' });
+  const second = await renderSocialPreview({ ...options, route: '/start', title: 'Getting started <safely>' });
   const png = readFileSync(resolve(root, first.slice(1)));
   expect(png.subarray(0, 8)).toEqual(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]));
   expect(png.readUInt32BE(16)).toBe(1200);
@@ -38,14 +38,12 @@ test('renders distinct 1200 by 630 PNGs with no system font or browser dependenc
 test('page overrides and shared-image opt-out produce correct base-prefixed metadata', async () => {
   const { prerender } = await import('./prerender');
   const { vi } = await import('vitest');
-  const { copyFileSync, writeFileSync } = await import('node:fs');
+  const { writeFileSync } = await import('node:fs');
   const root = mkdtempSync(resolve(tmpdir(), 'dory-social-metadata-'));
   folders.push(root);
   const dist = resolve(root, 'dist');
   mkdirSync(resolve(root, 'docs'), { recursive: true });
-  mkdirSync(resolve(root, 'src/assets/fonts'), { recursive: true });
   mkdirSync(dist);
-  copyFileSync(resolve('src/assets/fonts/HankenGrotesk.ttf'), resolve(root, 'src/assets/fonts/HankenGrotesk.ttf'));
   const config = { name: 'Example', url: 'https://docs.example.com', basePath: '/manual', image: '/shared.png', navigation: { tabs: [] } };
   const template = '<html lang="en"><head><title>Docs</title><meta name="description" content="" /><meta property="og:image" content="" /><meta name="twitter:image" content="" /><meta name="twitter:card" content="summary" /></head><body><div id="app"></div></body></html>';
   writeFileSync(resolve(dist, 'frontmatter.json'), JSON.stringify([
@@ -57,9 +55,9 @@ test('page overrides and shared-image opt-out produce correct base-prefixed meta
     for (const enabled of [true, false]) {
       writeFileSync(resolve(root, 'docs/dory.json'), JSON.stringify({ ...config, seo: { generateSocialImages: enabled } }));
       writeFileSync(resolve(dist, 'index.html'), template);
-      const hooks = prerender() as { configResolved(config: unknown): void; closeBundle(): void };
+      const hooks = prerender() as { configResolved(config: unknown): void; closeBundle(): Promise<void> };
       hooks.configResolved({ build: { outDir: dist } });
-      hooks.closeBundle();
+      await hooks.closeBundle();
       const start = readFileSync(resolve(dist, 'start/index.html'), 'utf8');
       const custom = readFileSync(resolve(dist, 'custom/index.html'), 'utf8');
       const image = enabled ? socialPreviewPath('/start') : '/shared.png';
@@ -68,4 +66,21 @@ test('page overrides and shared-image opt-out produce correct base-prefixed meta
       if (enabled) expect(readFileSync(resolve(dist, image.slice(1))).readUInt32BE(16)).toBe(1200);
     }
   } finally { cwd.mockRestore(); }
+});
+
+test('uses UX palette tokens, mode-specific branding and all bundled font families', async () => {
+  const { socialTheme, socialFonts, uxFontFamilies } = await import('./social-theme');
+  const { Resvg } = await import('@resvg/resvg-js');
+  expect(socialTheme({}).background).toBe('#faf5ec');
+  expect(socialTheme({ theme: { mode: 'dark' } }).background).toBe('#0e2240');
+  expect(socialTheme({ colors: { primary: '#123456', light: '#654321', dark: '#abcdef' }, theme: { mode: 'dark' } }).primary).toBe('#abcdef');
+  expect(uxFontFamilies.length).toBeGreaterThan(30);
+  for (const family of uxFontFamilies) {
+    const fonts = await socialFonts({ fonts: { family, heading: { family } } }, () => undefined);
+    const sample = `<svg xmlns="http://www.w3.org/2000/svg" width="500" height="100"><text y="60" font-size="40" font-family="${fonts.heading}">Documentation</text></svg>`;
+    // Load the requested family's file alone. A different loaded font cannot
+    // hide a missing or corrupt font behind fallback rendering.
+    const renderer = new Resvg(sample, { font: { loadSystemFonts: false, fontFiles: [fonts.files[0]], defaultFontFamily: fonts.heading } });
+    expect(renderer.toString(), family).toContain('<path');
+  }
 });

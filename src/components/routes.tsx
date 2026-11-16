@@ -12,7 +12,7 @@ export default function Routes() {
   const pathname = usePathname();
   const [, navigate] = useLocation();
   const scope = contentScope(docsConfig as DoryConfig, pathname);
-  const isScopeRoot = pathname === '/' || (Boolean(scope.prefix) && pathname === scope.prefix);
+  const isScopeRoot = !ALL_PAGES[pathname] && (pathname === '/' || (Boolean(scope.prefix) && pathname === scope.prefix));
 
   // Redirect root to the first page so the URL reflects the actual content
   useEffect(() => {

@@ -20,6 +20,8 @@ import { Loading } from '../components/loading';
 import { useIsEmbedded } from '../components/hooks';
 import { ErrorBoundary } from '../components/error-boundary';
 import { contentScope } from '../utils/content-scope';
+import { buildPageMetadata, type SeoPage } from '../utils/seo';
+import { applyPageMetadata } from '../utils/seo-client';
 
 const config = docsConfig as DoryConfig;
 
@@ -51,7 +53,7 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   const [loading, setLoading] = useState(!isFrontmatterReady());
   const rawPathname = usePathname();
-  const pathname = rawPathname === '/' ? ALL_NAVIGATION[0]?.groups[0]?.pages[0]?.href ?? '/' : rawPathname;
+  const pathname = rawPathname === '/' && !ALL_PAGES['/'] ? ALL_NAVIGATION[0]?.groups[0]?.pages[0]?.href ?? '/' : rawPathname;
   const isEmbedded = useIsEmbedded();
   const parentOrigin = useRef<string | null>(typeof window === 'undefined' ? null : embedParentOrigin());
   const embeddedReady = useRef(false);
@@ -112,64 +114,17 @@ export default function Layout({ children }: LayoutProps) {
     return { group: group?.title, title: page?.title, page };
   }, [pathname, loading]);
 
-  // Update document title and meta tags when page changes
   useEffect(() => {
-    if (page?.title) {
-      // Mirror the build-time SSR title template (config.seo.titleTemplate, e.g. "%s — Site")
-      const titleTemplate = (config as { seo?: { titleTemplate?: string } }).seo?.titleTemplate;
-      document.title = titleTemplate ? titleTemplate.replace('%s', page.title) : page.title;
-
-      // Update Open Graph title
-      const ogTitle = document.querySelector('meta[property="og:title"]');
-      if (ogTitle) {
-        ogTitle.setAttribute('content', page.title);
-      }
-
-      // Update Twitter title
-      const twitterTitle = document.querySelector('meta[name="twitter:title"]');
-      if (twitterTitle) {
-        twitterTitle.setAttribute('content', page.title);
-      }
+    if (loading) return;
+    const current = (page as SeoPage | undefined) || { path: pathname, title: 'Page not found', description: 'The page you are looking for does not exist.', robots: 'noindex, nofollow' };
+    const metadata = buildPageMetadata(config, current, completeFrontMatter as SeoPage[], current._dorySocialImage);
+    if (!page) {
+      metadata.canonical = '';
+      delete metadata.meta['og:url'];
+      metadata.schema = { '@context': 'https://schema.org', '@type': 'WebPage', name: metadata.title };
     }
-
-    if (page?.description) {
-      // Update standard meta description
-      const metaDescription = document.querySelector('meta[name="description"]');
-      if (metaDescription) {
-        metaDescription.setAttribute('content', page.description);
-      }
-
-      // Update Open Graph description
-      const ogDescription = document.querySelector('meta[property="og:description"]');
-      if (ogDescription) {
-        ogDescription.setAttribute('content', page.description);
-      }
-
-      // Update Twitter description
-      const twitterDescription = document.querySelector('meta[name="twitter:description"]');
-      if (twitterDescription) {
-        twitterDescription.setAttribute('content', page.description);
-      }
-    }
-
-    // Update canonical URL
-    const ogUrl = document.querySelector('meta[property="og:url"]');
-    if (ogUrl) {
-      ogUrl.setAttribute('content', window.location.href);
-    }
-
-    // Add/update canonical link
-    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
-    if (!canonical) {
-      canonical = document.createElement('link');
-      canonical.setAttribute('rel', 'canonical');
-      document.head.appendChild(canonical);
-    }
-    canonical.setAttribute('href', `${window.location.origin}${window.location.pathname}`);
-
-    // JSON-LD structured data is emitted at build time (prerender) — crawlers consume
-    // that version, so it is intentionally not rewritten on client-side navigation.
-  }, [page]);
+    applyPageMetadata(metadata);
+  }, [page, pathname, loading]);
 
   const isLandingPage = useMemo(() => {
     const firstTab = getNavigationForPath(pathname)[0];

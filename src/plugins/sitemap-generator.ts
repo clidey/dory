@@ -1,4 +1,5 @@
 import type { Plugin } from 'vite';
+import { isNoindex } from '../utils/seo.ts';
 import { readFileSync, existsSync } from 'fs';
 import { resolve } from 'path';
 import {
@@ -45,20 +46,14 @@ export function sitemapGenerator(): Plugin {
         let sitemap = '<?xml version="1.0" encoding="UTF-8"?>\n';
         sitemap += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
 
-        // Root URL first
-        sitemap += '  <url>\n';
-        sitemap += `    <loc>${escapeHtml(`${baseUrl}/`)}</loc>\n`;
-        sitemap += '    <priority>1.0</priority>\n';
-        sitemap += '  </url>\n';
-
-        let count = 1;
+        // / is an alias of the first nav page unless an index.mdx exists.
+        let count = 0;
         for (const filePath of Object.values(mdxFilesMap).sort()) {
           const routePath = pathFromFilename(filePath, docsDir);
-          if (routePath === '/') continue;
 
           const { data } = parseFrontmatter(readFileSync(filePath, 'utf-8'));
           // Exclude pages marked noindex in frontmatter
-          if (typeof data.robots === 'string' && data.robots.includes('noindex')) continue;
+          if (isNoindex(data.robots)) continue;
 
           const lastmod = toIsoDate(data.lastUpdated);
 

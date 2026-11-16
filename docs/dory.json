@@ -49,6 +49,7 @@
               "configuration/dory-json",
               "configuration/navigation",
               "configuration/theming",
+              "configuration/seo",
               "configuration/fonts",
               "configuration/analytics",
               "configuration/chat",

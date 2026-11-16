@@ -109,7 +109,7 @@ export interface DoryAnalytics {
 }
 
 export interface DorySeo {
-  /** Applied to page titles, e.g. "%s — WhoDB"; %s is the page title. Default: no template. */
+  /** Applied to page titles; %s is the page title. Default: "%s — <site name>". */
   titleTemplate?: string;
   keywords?: string[];
   author?: string;
@@ -117,6 +117,8 @@ export interface DorySeo {
   ogImage?: string;
   /** Generate a branded PNG for each page at build time. Default: true. */
   generateSocialImages?: boolean;
+  /** Preview palette. Defaults to the site's theme mode, or light for system. */
+  socialImageTheme?: 'light' | 'dark';
   twitterCard?: 'summary' | 'summary_large_image';
   /** e.g. "en_US" */
   locale?: string;

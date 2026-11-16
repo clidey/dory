@@ -280,4 +280,8 @@ To use a shared site image instead of generating page images:
 }
 ```
 
-Generated files live in the build output under `_dory/social/`; they do not need to be committed. Generation uses a bundled Hanken Grotesk font and requires no browser or network connection. Local TTF or OTF heading fonts can be configured through `fonts.heading.source`. Remote logos and font URLs are not fetched during image generation.
+Generated files live in the build output under `_dory/social/`; they do not need to be committed. Generation reads the palette tokens and font files from `@clidey/ux` and requires no browser or network connection. Set `fonts.family`, `fonts.heading.family`, and `fonts.mono.family` to use any family in UX's font catalog. Local TTF, OTF, and WOFF2 files are supported through the corresponding `source` fields. Remote logos and fonts are not fetched; unavailable font families use the UX defaults.
+
+Cards use the site's `theme.mode` and mode-specific logo and brand color. System mode produces light cards. Set `seo.socialImageTheme` to `"light"` or `"dark"` to choose a fixed preview palette. Colors configured in `dory.json` take precedence; arbitrary custom CSS does not affect generated images.
+
+See [SEO](/configuration/seo) for canonical URLs, indexing, structured data, and the build audit.

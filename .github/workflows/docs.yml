@@ -80,6 +80,8 @@ jobs:
       - run: pnpm test
       - run: node --import tsx --test bin/dependency-overlay.test.mts bin/preview-static.test.mts
       - run: pnpm run build
+      - name: Check SEO navigation and social previews
+        run: pnpm run test:seo
       - name: Check component preview layout and interactions
         run: node scripts/verify-component-examples.mjs
       - name: Save component review screenshots on failure

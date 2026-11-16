@@ -1,0 +1,93 @@
+---
+title: 'SEO'
+description: 'Configure canonical URLs, indexing, structured data, and brand-matched social preview images for every Dory documentation page.'
+---
+
+# SEO
+
+Dory builds every documentation page as HTML with its content, metadata, and structured data already present. Search crawlers and link preview services do not need to execute JavaScript to read them.
+
+## Set your public URL
+
+Use your public origin and configure the deployment path separately:
+
+```json
+{
+  "name": "Acme Docs",
+  "url": "https://example.com",
+  "basePath": "/docs",
+  "seo": {
+    "titleTemplate": "%s — Acme Docs",
+    "author": "Acme"
+  }
+}
+```
+
+An installation page at `/getting-started/installation` receives the canonical URL `https://example.com/docs/getting-started/installation`. Open Graph metadata, structured data, and the sitemap use that same URL. Without `url`, Dory omits canonical URLs and the sitemap instead of guessing your domain.
+
+By default, titles include the site name. Set `seo.titleTemplate` to customize them, or use `"%s"` for the page title alone.
+
+When there is no `index.mdx`, the root URL displays the first navigation page and points its canonical to that page. The sitemap lists the canonical route once. Add `index.mdx` to publish a separate homepage.
+
+## Describe each page
+
+Give each page a distinct title and description that accurately describe its content:
+
+```yaml
+---
+title: Installation
+description: Install Acme, connect your first data source, and verify your setup.
+lastUpdated: 2026-11-16
+---
+```
+
+Dory uses these values for search descriptions, Open Graph and Twitter cards, and structured data. If a description is missing, it uses a short excerpt of the page text. Set `lastUpdated` only when the content changes; it supplies the sitemap's modification date and the article's `dateModified`.
+
+The structured data graph connects the organization, website, page, technical article, and breadcrumbs. Dory links only published ancestor pages in breadcrumbs. Translated pages receive language tags and alternate links to existing, indexable translations of the same documentation version.
+
+## Match social previews to your brand
+
+Each page gets its own 1200 × 630 PNG with its title, description, site name, and local logo. The image uses the UX palette and the body, heading, and monospace families selected in `dory.json`. Every font family bundled in `@clidey/ux` is available without an external font request.
+
+```json
+{
+  "fonts": {
+    "family": "DM Sans",
+    "heading": { "family": "Newsreader" },
+    "mono": { "family": "IBM Plex Mono" }
+  },
+  "theme": { "mode": "dark" },
+  "seo": { "socialImageTheme": "dark" }
+}
+```
+
+The preview follows the configured light or dark mode; system mode produces light images. `seo.socialImageTheme` can fix the image palette independently. Your `colors` overrides and the corresponding light or dark logo take precedence. CSS-only styling and remote font or logo URLs are not loaded by the image renderer; use local assets for exact branding.
+
+Override a page's image and alternative text in frontmatter:
+
+```yaml
+image: /images/installation.png
+imageAlt: Acme setup showing a successful connection
+```
+
+To use a shared image, set `seo.generateSocialImages` to `false` and provide `seo.ogImage` or the top-level `image`. Dory does not invent dimensions for custom images. Generated images include their dimensions, MIME type, and alternative text in social metadata.
+
+## Control indexing
+
+For a staging site, set `seo.noindex` to `true`. Dory marks every page as non-indexable and skips sitemap generation. The site-wide setting takes precedence over page frontmatter.
+
+To exclude one page, add:
+
+```yaml
+robots: noindex, follow
+```
+
+Non-indexable pages are omitted from the sitemap. The generated 404 page is also non-indexable. Extra crawler rules can be appended with `seo.robotsTxt`.
+
+## Verify the built site
+
+Every build audits the generated HTML for page titles and descriptions, canonical and social metadata agreement, image files and dimensions, structured data, static content, and sitemap parity. Missing assets or inconsistent technical metadata fail the build; duplicate titles and descriptions produce content suggestions.
+
+In Dory's own repository, rerun the audit with `pnpm run check:seo` after building. To inspect the output, start a local preview and check both a direct page visit and navigation between pages.
+
+Publishing these signals helps crawlers understand your documentation. Useful, accurate content and links from relevant sites still determine how well pages perform in search. See [Google's developer guidance](https://developers.google.com/search/docs/fundamentals/get-started-developers) and the [Open Graph protocol](https://ogp.me/) for the underlying conventions.

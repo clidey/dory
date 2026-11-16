@@ -26,9 +26,12 @@ export function generateFrontmatterJson(docsDir: string): Array<Record<string, a
   const pushEntry = (fileKey: string) => {
     const filePath = mdxFilesMap[fileKey];
     const rawContent = fs.readFileSync(filePath, 'utf-8');
-    const { data } = parseFrontmatter(rawContent);
+    const { data, content } = parseFrontmatter(rawContent);
+    const text = stripMdxToText(content).replace(/\s+/g, ' ').trim();
+    const description = text.length <= 155 ? text : `${text.slice(0, 155).replace(/\s+\S*$/, '')}…`;
     frontmatterArray.push({
       ...data,
+      description: data.description || description,
       path: pathFromFilename(filePath, docsDir),
     });
   };

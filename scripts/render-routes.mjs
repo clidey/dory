@@ -98,7 +98,7 @@ for (const page of frontmatter) {
 try {
   const rootHtmlPath = resolve(distDir, 'index.html');
   if (existsSync(rootHtmlPath) && frontmatter.length > 0) {
-    const firstRoute = frontmatter[0].path;
+    const firstRoute = frontmatter.find(page => page.path === '/')?.path || frontmatter[0].path;
     if (firstRoute) {
       const ssrHtml = await render(firstRoute, frontmatter);
       if (ssrHtml) {
