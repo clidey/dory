@@ -21,18 +21,39 @@ async function fixture() {
   mkdirSync(join(dist, 'assets'), { recursive: true });
   writeFileSync(join(dist, 'index.html'), 'Public index');
   const serve = createPreviewStatic(dist);
-  const server = createServer((req, res) => serve(req, res));
+  const responseCompletions = new Map<string, () => void>();
+  let requestId = 0;
+  const server = createServer((req, res) => {
+    const id = String(req.headers['x-test-request-id']);
+    res.once('finish', () => {
+      responseCompletions.get(id)?.();
+      responseCompletions.delete(id);
+    });
+    serve(req, res);
+  });
   fixtures.push({ root, server });
   await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve));
   const address = server.address();
   assert.ok(address && typeof address === 'object');
   const request = (path: string, method = 'GET', headers: Record<string, string> = {}) => new Promise<{ status: number; body: string; length?: string; headers: IncomingHttpHeaders }>((resolve, reject) => {
-    const req = get({ hostname: '127.0.0.1', port: address.port, path, method, headers }, res => {
+    const id = String(++requestId);
+    const serverFinished = new Promise<void>(done => responseCompletions.set(id, done));
+    const req = get({ hostname: '127.0.0.1', port: address.port, path, method, headers: { ...headers, 'x-test-request-id': id } }, res => {
       let body = '';
       res.on('data', chunk => body += chunk);
-      res.on('end', () => resolve({ status: res.statusCode!, body, length: res.headers['content-length'], headers: res.headers }));
+      res.on('error', reject);
+      res.on('end', async () => {
+        // Content-Length can finish the client before the server's file stream
+        // reaches EOF. Rewriting that file now can append bytes to the previous
+        // response and corrupt a reused HTTP connection. Wait for both ends.
+        await serverFinished;
+        resolve({ status: res.statusCode!, body, length: res.headers['content-length'], headers: res.headers });
+      });
     });
-    req.on('error', reject);
+    req.on('error', error => {
+      responseCompletions.delete(id);
+      reject(error);
+    });
   });
   return { root, dist, request };
 }
