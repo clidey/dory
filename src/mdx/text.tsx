@@ -1,4 +1,4 @@
-import { cn } from "@clidey/ux"
+import { cn, Dialog, DialogContent, DialogTitle, DialogTrigger } from "@clidey/ux"
 import { withBase } from '../utils/base-path';
 import classNames from "classnames"
 import { useState } from "preact/hooks"
@@ -77,31 +77,24 @@ export function Anchor({ children, href }: { children: preact.ComponentChildren,
   return <a href={withBase(href)} className="text-[var(--primary)] underline decoration-[color-mix(in_oklch,var(--primary)_40%,transparent)] underline-offset-4 hover:decoration-[var(--primary)]">{children}</a>
 }
 
-export function Image({ src, alt }: { src: string, alt: string }) {
+export function Image({ src, alt, ...props }: Omit<preact.ComponentProps<'img'>, 'src' | 'alt' | 'role'> & { src: string, alt: string }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const resolvedSrc = withBase(src);
 
   return (
-    <>
-      <img 
-        src={resolvedSrc} 
-        alt={alt} 
-        className="w-full h-auto cursor-zoom-in rounded-lg border border-[var(--border)]"
-        onClick={() => setIsExpanded(true)}
-      />
-      {alt && <span className="mt-1.5 block text-xs text-muted-foreground">{alt}</span>}
-      {isExpanded && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center"
-          onClick={() => setIsExpanded(false)}
-        >
-          <img 
-            src={resolvedSrc} 
-            alt={alt} 
-            className="max-h-[90vh] max-w-[90vw] object-contain"
-          />
-        </div>
-      )}
-    </>
+    <Dialog open={isExpanded} onOpenChange={setIsExpanded}>
+      <DialogTrigger asChild>
+        <button type="button" className="block w-full border-0 bg-transparent p-0 text-left"
+          aria-label={`Enlarge image${alt ? `: ${alt}` : ''}`}>
+          <img {...props} src={resolvedSrc} alt={alt} decoding="async"
+            className={cn("w-full h-auto cursor-zoom-in rounded-lg border border-[var(--border)]", props.className)} />
+        </button>
+      </DialogTrigger>
+      {alt && <span aria-hidden="true" className="mt-1.5 block text-xs text-muted-foreground">{alt}</span>}
+      <DialogContent className="max-w-[95vw] p-4">
+        <DialogTitle className="sr-only">{alt || 'Image preview'}</DialogTitle>
+        <img src={resolvedSrc} alt={alt} decoding="async" className="max-h-[85vh] w-full object-contain" />
+      </DialogContent>
+    </Dialog>
   );
 }

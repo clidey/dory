@@ -5,16 +5,25 @@ import type { DoryConfig } from '../types/config';
 import { addToSearchIndex } from './search-index';
 import { withBase } from '../utils/base-path';
 import { contentScope } from '../utils/content-scope';
+import { createPageLoader } from './page-loader';
 
 const config = docsConfig as DoryConfig;
 
-// Eager-load all page modules so they're available synchronously.
-// This eliminates the async loading spinner in Routes and enables
-// proper hydrate() — the first render matches the SSR DOM.
+// Keep the route manifest small; fetch only the page being viewed.
 export const ALL_PAGES = Object.fromEntries(
-  Object.entries(import.meta.glob<{ default: ComponentType; }>('../../docs/**/*.mdx', { eager: true }))
-    .map(([path, mod]) => [pathFromFilename(path), mod])
+  Object.entries(import.meta.glob<{ default: ComponentType }>('../../docs/**/*.mdx'))
+    .map(([path, loader]) => [pathFromFilename(path), loader])
 );
+export const pageModules = createPageLoader(ALL_PAGES);
+
+/** Resolve the same root alias for initial hydration and client navigation. */
+export function resolvePagePath(pathname: string): string {
+  const scope = contentScope(config, pathname);
+  const isRoot = !ALL_PAGES[pathname] && (pathname === '/' || Boolean(scope.prefix) && pathname === scope.prefix);
+  if (!isRoot) return pathname;
+  const rendered = typeof window !== 'undefined' && pathname === '/' ? window.__DORY_ROUTE__ : undefined;
+  return rendered || getNavigationForPath(pathname)[0]?.groups[0]?.pages[0]?.href || pathname;
+}
 export const ALL_OPENAPI = Object.fromEntries(
   Object.entries(import.meta.glob<{ default: string }>('../../docs/**/openapi.json', { query: 'raw', eager: true }))
     .map(([path, loader]) => [pathFromFilename(path), loader])
@@ -86,8 +95,6 @@ if (typeof window !== 'undefined' && window.__DORY_FRONTMATTER__) {
         updateNavigationTitle(fm.path, fm.title);
     }
     delete window.__DORY_FRONTMATTER__;
-    // Build search index in the background after the page has fully rendered
-    setTimeout(() => void ensureSearchContent(), 2000);
 }
 
 // Preload frontmatter from JSON file (fallback when no inline data)
@@ -105,10 +112,6 @@ export async function preloadFrontmatter() {
                 for (const fm of preloadedFrontMatter) {
                     updateNavigationTitle(fm.path, fm.title);
                 }
-
-                // Build search index in the background after the page has fully rendered.
-                // Delay avoids competing with the route chunk for network connections.
-                setTimeout(() => void ensureSearchContent(), 2000);
             }
         }
     } catch (error) {
@@ -118,7 +121,7 @@ export async function preloadFrontmatter() {
 
 let searchContentPromise: Promise<void> | undefined;
 
-// Start immediately when search is used; otherwise load in the background.
+// Download and index content only when search is opened.
 export function ensureSearchContent(): Promise<void> {
     searchContentPromise ??= addPreloadedContentToSearch();
     return searchContentPromise;

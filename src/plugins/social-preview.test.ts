@@ -64,6 +64,13 @@ test('page overrides and shared-image opt-out produce correct base-prefixed meta
       expect(start).toContain(`content="https://docs.example.com/manual${image}"`);
       expect(custom).toContain('content="https://docs.example.com/manual/art/custom.png"');
       if (enabled) expect(readFileSync(resolve(dist, image.slice(1))).readUInt32BE(16)).toBe(1200);
+      const notFound = readFileSync(resolve(dist, '404.html'), 'utf8');
+      const notFoundImage = enabled ? socialPreviewPath('/404') : '/shared.png';
+      expect(notFound).toContain(`property="og:image" content="https://docs.example.com/manual${notFoundImage}"`);
+      expect(notFound).toContain(`property="og:image:secure_url" content="https://docs.example.com/manual${notFoundImage}"`);
+      expect(notFound).toContain('name="robots" content="noindex, nofollow"');
+      expect(notFound).not.toContain('rel="canonical"');
+      if (enabled) expect(readFileSync(resolve(dist, notFoundImage.slice(1))).readUInt32BE(20)).toBe(630);
     }
   } finally { cwd.mockRestore(); }
 });

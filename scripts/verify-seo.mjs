@@ -47,6 +47,23 @@ try {
     assert.ok(after.schemas[0]['@graph'].some(node => node['@type'] === 'WebPage' && node.url === canonical(target.path)));
     await page.evaluate(() => document.fonts.ready);
     await page.screenshot({ path: resolve(output, `docs-${mode}.png`), fullPage: false });
+    await page.goto(new URL('missing-social-preview-check', base).href);
+    await page.waitForFunction(() => document.querySelector('meta[property="og:image"]')?.content.endsWith('/_dory/social/not-found.png'));
+    const notFound = await page.evaluate(() => ({
+      image: document.querySelector('meta[property="og:image"]')?.content,
+      secureImage: document.querySelector('meta[property="og:image:secure_url"]')?.content,
+      twitterImage: document.querySelector('meta[name="twitter:image"]')?.content,
+      robots: document.querySelector('meta[name="robots"]')?.content,
+      canonical: document.querySelector('link[rel="canonical"]')?.href,
+    }));
+    assert.equal(notFound.image, canonical('/_dory/social/not-found.png'));
+    assert.equal(notFound.image, notFound.secureImage);
+    assert.equal(notFound.image, notFound.twitterImage);
+    assert.match(notFound.robots, /noindex/);
+    assert.equal(notFound.canonical, undefined);
+    const imageResponse = await context.request.get(new URL(new URL(notFound.image).pathname, base).href);
+    assert.equal(imageResponse.status(), 200);
+    assert.equal((await imageResponse.body()).readUInt32BE(16), 1200);
     assert.deepEqual(errors, []);
     await context.close();
     await renderSocialPreview({ route: '/', title: 'Documentation that feels like your product.', description: 'Fast, searchable MDX docs. Your fonts. Your colors. Your brand.', config: { ...config, seo: { ...config.seo, socialImageTheme: mode } }, docsDir: resolve(root, 'docs'), outDir: resolve(output, mode) });

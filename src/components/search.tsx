@@ -451,7 +451,7 @@ function SearchDialog({
               </div>
               {chat.messages.length > 0 && <button type="button" onClick={chat.reset} className="rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-[var(--accent)]">+ New</button>}
               <button type="button" onClick={showSearch} className="rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-[var(--accent)]">Search</button>
-              <span className="rounded-lg bg-[var(--brand-primary)] px-3 py-2 text-sm font-semibold text-white">Ask Dory</span>
+              <span className="rounded-lg bg-[var(--brand-primary)] px-3 py-2 text-sm font-semibold text-[var(--primary-foreground)]">Ask Dory</span>
             </div>
             <ChatAssistant chat={chat} onNavigate={() => { onNavigate(); setOpen(false) }} onSearch={showSearch} />
           </>}

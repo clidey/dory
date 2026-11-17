@@ -269,7 +269,7 @@ export function TryItPanel({ open, onOpenChange, method, path, servers, paramete
               {error ? (
                 <p className="p-4 font-mono text-sm text-[var(--destructive)]">{error}</p>
               ) : response ? (
-                <div className="overflow-x-auto p-4 font-mono text-[12.5px] leading-[1.7]">
+                <div tabIndex={0} role="group" aria-label="Code example" className="overflow-x-auto p-4 font-mono text-[12.5px] leading-[1.7]">
                   <Fence language="json">{response.body}</Fence>
                 </div>
               ) : (

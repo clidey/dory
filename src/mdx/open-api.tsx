@@ -197,7 +197,7 @@ function describeDefault(schema: Schema, description?: string): string | undefin
 function SectionTitle({ children, note }: { children: string; note?: string }) {
   return (
     <div className="mt-10 mb-1">
-      <h3 className="dory-h3 font-heading">{children}</h3>
+      <h2 className="dory-h3 font-heading">{children}</h2>
       {note && <p className="mt-0.5 font-mono text-xs text-muted-foreground">{note}</p>}
     </div>
   )
@@ -298,7 +298,7 @@ function ResponseTabs({ responses, components }: { responses: PathMethod['respon
         </div>
       }
     >
-      <div className="overflow-x-auto py-3 pl-4 pr-12 font-mono text-[12.5px] leading-[1.7]">
+      <div tabIndex={0} role="group" aria-label="Code example" className="overflow-x-auto py-3 pl-4 pr-12 font-mono text-[12.5px] leading-[1.7]">
         <Fence language="json">{code}</Fence>
       </div>
     </CodeFrame>
@@ -455,7 +455,7 @@ export function OpenAPI({ openAPIJson, method: selectedMethod, path: selectedPat
           <span className="font-semibold text-foreground">{selectedPath}</span>
         </span>
         <CopyUrl value={fullUrl} />
-        <Button onClick={() => setShowPlayground(true)} className="flex items-center gap-1.5 bg-[var(--primary)] text-white hover:bg-[var(--primary)]/90">
+        <Button onClick={() => setShowPlayground(true)} className="flex items-center gap-1.5 bg-[var(--primary)] text-[var(--primary-foreground)] hover:bg-[var(--primary)]/90">
           <CatalogIcon name="play" className="h-3 w-3 fill-current" />
           Try it
         </Button>

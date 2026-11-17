@@ -124,7 +124,7 @@ export const Source = ({ url, branch = "main", paths }: SourceProps) => {
                     >
                         <CatalogIcon name="file" aria-hidden="true" className="h-3.5 w-3.5 text-muted-foreground" />
                         {path}
-                        {range && <span className="text-muted-foreground">{range}</span>}
+                        {range && <span className="text-inherit">{range}</span>}
                     </button>
                 ))}
             </div>
@@ -139,7 +139,7 @@ export const Source = ({ url, branch = "main", paths }: SourceProps) => {
                         href={sourceUrl(url, branch, current.path, current.range)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-[var(--primary)] hover:underline"
+                        className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-[var(--dory-primary-readable)] hover:underline"
                     >
                         {openLabel}
                         <CatalogIcon name="external" aria-hidden="true" className="h-3 w-3" />
@@ -147,7 +147,7 @@ export const Source = ({ url, branch = "main", paths }: SourceProps) => {
                 </div>
                 {ready ? (
                     <>
-                        <div className="overflow-x-auto py-3 pl-4 pr-12 font-mono text-[12.5px] leading-[1.7]">
+                        <div tabIndex={0} role="group" aria-label="Code example" className="overflow-x-auto py-3 pl-4 pr-12 font-mono text-[12.5px] leading-[1.7]">
                             <Fence language={languageOf(current.path)} startLine={excerpt.startLine}>{excerpt.code}</Fence>
                         </div>
                         {!current.range && excerpt.total > previewLines && (

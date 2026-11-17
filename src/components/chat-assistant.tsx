@@ -149,7 +149,7 @@ export function ChatAssistant({ chat, onNavigate, onSearch, siteName = site.name
       <label htmlFor="dory-chat-question" className="sr-only">Your documentation question</label>
       <div className="flex items-end gap-2 rounded-xl border border-[var(--border)] bg-[var(--background)] px-3 py-2 focus-within:border-[var(--brand-primary)]">
         <textarea id="dory-chat-question" ref={input} value={chat.draft} onInput={event => chat.setDraft(event.currentTarget.value)} onKeyDown={event => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); chat.ask(); } else if (event.key === 'Tab' && !event.shiftKey) { event.preventDefault(); onSearch(); } }} rows={1} maxLength={600} placeholder={chat.messages.length ? 'Ask a follow-up' : `Ask Dory anything about ${siteName}`} className="max-h-28 min-h-10 flex-1 resize-none bg-transparent px-2 py-2 text-sm outline-none" />
-        <button type="button" disabled={chat.busy || chat.draft.trim().length < 3} onClick={() => void chat.ask()} className="rounded-lg bg-[var(--brand-primary)] px-3 py-2 text-sm font-semibold text-white disabled:opacity-40" aria-label="Send question">↑</button>
+        <button type="button" disabled={chat.busy || chat.draft.trim().length < 3} onClick={() => void chat.ask()} className="rounded-lg bg-[var(--brand-primary)] px-3 py-2 text-sm font-semibold text-[var(--primary-foreground)] disabled:opacity-40" aria-label="Send question">↑</button>
       </div>
       {chat.messages.length > 0 && <p className="mt-2 text-center text-[11px] text-muted-foreground">Sources are linked when the docs support an answer. Check important details on the page.</p>}
     </form>

@@ -1,3 +1,5 @@
+import { fontPreloads } from './src/plugins/font-preloads.ts';
+import { uxPureFactories } from './src/plugins/ux-tree-shaking.ts';
 import { defineConfig } from 'vite';
 import preact from '@preact/preset-vite';
 import mdx from '@mdx-js/rollup';
@@ -22,7 +24,7 @@ import { globalStylesPlugin } from './src/plugins/global-styles.ts';
 export default defineConfig(({ command }) => ({
   // Serve and build under `basePath` from dory.json (asset URLs, import.meta.env.BASE_URL).
   base: `${getBasePath(readDoryConfig())}/`,
-  plugins: [
+  plugins: [uxPureFactories(), fontPreloads(),
     // SINGLE SOURCE OF TRUTH: All MDX preprocessing happens in src/mdx/processor.ts
     htmlFilesMiddleware(), // Must be first to intercept HTML file requests
     chatDevServer(),
@@ -57,6 +59,9 @@ export default defineConfig(({ command }) => ({
   publicDir: false, // Don't use a public directory since we need to import from docs
   build: {
     rollupOptions: {
+      treeshake: {
+        moduleSideEffects: id => !id.replaceAll('\\', '/').endsWith('/@clidey/ux/dist/index.js'),
+      },
       output: {
         // Vite 8 (Rolldown) only supports the function form of manualChunks
         manualChunks(id: string) {
@@ -64,7 +69,6 @@ export default defineConfig(({ command }) => ({
           if (/node_modules\/preact($|\/)/.test(id)) return 'vendor-preact';
           if (id.includes('node_modules/@clidey/ux') || id.includes('node_modules/@headlessui/react')) return 'vendor-ui';
           if (id.includes('node_modules/katex')) return 'katex';
-          if (id.includes('node_modules/flexsearch')) return 'flexsearch';
         }
       }
     }

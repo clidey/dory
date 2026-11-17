@@ -264,6 +264,8 @@ const commands = {
         console.warn(`Embed build failed: ${error instanceof Error ? error.message : String(error)}`);
       }
 
+      execFileSync(process.execPath, [resolve(workspace, 'scripts', 'compress-static.mjs')], { cwd: workspace, stdio: 'inherit' });
+
       const userDistDir = resolve(userRoot, 'dist');
       rmSync(userDistDir, { recursive: true, force: true });
       cpSync(distDir, userDistDir, { recursive: true });

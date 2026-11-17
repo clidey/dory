@@ -1,12 +1,20 @@
 import { useEffect, useMemo } from 'preact/hooks';
 import { Route, Router, useLocation } from 'wouter-preact';
 import { usePathname } from './hooks';
-import { ALL_PAGES, getNavigationForPath, pathFromFilename } from './store';
+import { ALL_PAGES, getNavigationForPath, pageModules, resolvePagePath } from './store';
+import { lazy, Suspense } from 'preact/compat';
+import { Loading } from './loading';
 import docsConfig from '../../docs/dory.json' with { type: 'json' };
 import type { DoryConfig } from '../types/config';
 import { contentScope } from '../utils/content-scope';
 import { NotFoundPage } from '@clidey/ux';
 
+// Stable identities avoid remounting loaded pages on unrelated renders.
+const lazyPages = Object.fromEntries(Object.keys(ALL_PAGES).map(path => [path, lazy(async () => {
+  const module = await pageModules.load(path);
+  if (!module) throw new Error(`Page not found: ${path}`);
+  return module;
+})]));
 
 export default function Routes() {
   const pathname = usePathname();
@@ -23,19 +31,12 @@ export default function Routes() {
   }, [pathname]);
 
   const route = useMemo(() => {
-    let targetPath = pathname;
-    if (isScopeRoot) {
-      const ssrRoute = typeof window !== 'undefined' ? window.__DORY_ROUTE__ : undefined;
-      targetPath = (pathname === '/' ? ssrRoute : undefined) || getNavigationForPath(pathname)[0]?.groups[0]?.pages[0]?.href || pathname;
-    }
-
-    const entry = Object.entries(ALL_PAGES).find(([path]) => path === targetPath);
-    if (!entry) return null;
-
-    const [path, mod] = entry;
+    const targetPath = resolvePagePath(pathname);
+    if (!ALL_PAGES[targetPath]) return null;
     return {
-      path: isScopeRoot ? pathname : pathFromFilename(path),
-      component: (mod as any).default,
+      path: pathname,
+      key: targetPath,
+      component: pageModules.get(targetPath)?.default ?? lazyPages[targetPath],
     };
   }, [pathname]);
 
@@ -52,7 +53,9 @@ export default function Routes() {
 
   return (
     <Router>
-      {route && <Route key={route.path} path={route.path} component={route.component} />}
+      <Suspense fallback={<Loading showText />}>
+        {route && <Route key={route.key} path={route.path}>{() => <route.component />}</Route>}
+      </Suspense>
     </Router>
   );
 }

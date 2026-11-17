@@ -249,7 +249,7 @@ export function WebSocketPanel({
           onClick={connected ? disconnect : connect}
           disabled={connectionState === 'connecting'}
           className={classNames('ml-auto rounded-md px-4 py-1.5 text-sm font-semibold transition disabled:opacity-60', {
-            'bg-[var(--primary)] text-white hover:opacity-90': !connected,
+            'bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90': !connected,
             'border border-[var(--border)] bg-muted text-foreground hover:bg-card': connected,
           })}
         >

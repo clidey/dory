@@ -49,6 +49,11 @@ export function createPreviewStatic(distDir: string) {
       res.end();
       return;
     }
+    // Vite fingerprints these filenames; HTML and unversioned docs still revalidate.
+    if (/^\/assets\/[^/]+-[\w-]{8}\.(?:js|css|woff2)(?:\.(?:br|gz))?$/.test(uri)) {
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    }
+    res.setHeader('Vary', 'Accept-Encoding');
     serve(req, res, () => {
       res.statusCode = 404;
       res.setHeader('Content-Type', 'text/html; charset=utf-8');

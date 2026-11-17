@@ -20,7 +20,7 @@ import { Loading } from '../components/loading';
 import { useIsEmbedded } from '../components/hooks';
 import { ErrorBoundary } from '../components/error-boundary';
 import { contentScope } from '../utils/content-scope';
-import { buildPageMetadata, type SeoPage } from '../utils/seo';
+import { buildPageMetadata, notFoundSocialImage, type SeoPage } from '../utils/seo';
 import { applyPageMetadata } from '../utils/seo-client';
 
 const config = docsConfig as DoryConfig;
@@ -117,7 +117,8 @@ export default function Layout({ children }: LayoutProps) {
   useEffect(() => {
     if (loading) return;
     const current = (page as SeoPage | undefined) || { path: pathname, title: 'Page not found', description: 'The page you are looking for does not exist.', robots: 'noindex, nofollow' };
-    const metadata = buildPageMetadata(config, current, completeFrontMatter as SeoPage[], current._dorySocialImage);
+    const image = !page && config.seo?.generateSocialImages !== false ? notFoundSocialImage : current._dorySocialImage;
+    const metadata = buildPageMetadata(config, current, completeFrontMatter as SeoPage[], image);
     if (!page) {
       metadata.canonical = '';
       delete metadata.meta['og:url'];

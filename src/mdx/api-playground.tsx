@@ -178,10 +178,10 @@ export const HeadersTab = ({ requestConfig, setRequestConfig }: HeadersTabProps)
                 placeholder="Header value"
                 className="flex-1 text-sm"
               />
-              <Button onClick={() => saveHeader(idx)}>
+              <Button aria-label="Save header" onClick={() => saveHeader(idx)}>
                 <CatalogIcon name="check" className="w-4 h-4" />
               </Button>
-              <Button onClick={() => cancelEdit(idx)}>
+              <Button aria-label="Cancel editing header" onClick={() => cancelEdit(idx)}>
                 <CatalogIcon name="close" className="w-4 h-4" />
               </Button>
             </>
@@ -189,10 +189,10 @@ export const HeadersTab = ({ requestConfig, setRequestConfig }: HeadersTabProps)
             <>
               <span className="text-sm  w-32 truncate">{hdr.key}</span>
               <span className="text-sm  flex-1 truncate">{hdr.value}</span>
-              <Button onClick={() => editHeader(idx)}>
+              <Button aria-label="Edit header" onClick={() => editHeader(idx)}>
                 <CatalogIcon name="edit" className="w-4 h-4" />
               </Button>
-              <Button onClick={() => removeHeader(idx)} className="text-red-400">
+              <Button aria-label="Remove header" onClick={() => removeHeader(idx)} variant="outline" className="text-red-700 dark:text-red-300">
                 <CatalogIcon name="trash" className="w-4 h-4" />
               </Button>
             </>
@@ -286,10 +286,10 @@ export const ParamsTab = ({ queryParams, setQueryParams }: ParamsTabProps) => {
             <>
               <Input value={p.name} onChange={e => updateParam(i, 'name', (e.target as HTMLInputElement).value)} placeholder="Param name" className="w-32 text-sm" />
               <Input value={p.value} onChange={e => updateParam(i, 'value', (e.target as HTMLInputElement).value)} placeholder="Param value" className="flex-1 text-sm" />
-              <Button onClick={() => saveParam(i)}>
+              <Button aria-label="Save parameter" onClick={() => saveParam(i)}>
                 <CatalogIcon name="check" className="w-4 h-4" />
               </Button>
-              <Button onClick={() => cancelEdit(i)}>
+              <Button aria-label="Cancel editing parameter" onClick={() => cancelEdit(i)}>
                 <CatalogIcon name="close" className="w-4 h-4" />
               </Button>
             </>
@@ -297,10 +297,10 @@ export const ParamsTab = ({ queryParams, setQueryParams }: ParamsTabProps) => {
             <>
               <span className="w-32 truncate text-sm">{p.name}</span>
               <span className="flex-1 truncate text-sm">{p.value}</span>
-              <Button onClick={() => editParam(i)}>
+              <Button aria-label="Edit parameter" onClick={() => editParam(i)}>
                 <CatalogIcon name="edit" className="w-4 h-4" />
               </Button>
-              <Button onClick={() => removeParam(i)} className="text-red-400">
+              <Button aria-label="Remove parameter" onClick={() => removeParam(i)} variant="outline" className="text-red-700 dark:text-red-300">
                 <CatalogIcon name="trash" className="w-4 h-4" />
               </Button>
             </>

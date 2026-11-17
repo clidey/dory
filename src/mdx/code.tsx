@@ -168,8 +168,8 @@ export function FenceHeader({ language, code, meta }: FenceProps) {
       <p className="mr-auto truncate font-mono text-xs font-medium text-foreground">{title}</p>
       {diff && (
         <span className="font-mono text-xs">
-          <span className="text-green-700 dark:text-green-400">+{additions}</span>{' '}
-          <span className="text-[var(--destructive)]">-{deletions}</span>
+          <span className="text-green-800 dark:text-green-300">+{additions}</span>{' '}
+          <span className="text-red-700 dark:text-red-300">-{deletions}</span>
         </span>
       )}
       {showPill && <LanguagePill>{diff ? 'diff' : language}</LanguagePill>}
@@ -190,7 +190,7 @@ export function CodeFrame({ header, code, children }: { header?: preact.Componen
 
 /** Padded, horizontally scrollable code area inside a CodeFrame. */
 export function CodeBody({ children }: { children: preact.ComponentChildren }) {
-  return <div className="overflow-x-auto bg-card py-3 pl-4 pr-12 font-mono text-[12.5px] leading-[1.7]">{children}</div>
+  return <div tabIndex={0} role="group" aria-label="Code example" className="overflow-x-auto bg-card py-3 pl-4 pr-12 font-mono text-[12.5px] leading-[1.7]">{children}</div>
 }
 
 function CodePanelHeader({ tag, label }: { tag?: string; label?: string }) {

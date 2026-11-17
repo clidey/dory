@@ -13,7 +13,7 @@ const icons = {
 const typeStyles = {
   note: { box: 'bg-muted border-[var(--border)]', badge: 'bg-card border border-[var(--border)] text-foreground rounded-md' },
   warning: { box: 'bg-background border-[var(--highlight)]', badge: 'bg-[var(--highlight)] text-[var(--highlight-foreground)] rounded-[5px]' },
-  info: { box: 'bg-accent border-transparent', badge: 'bg-[var(--primary)] text-white rounded-[5px]' },
+  info: { box: 'bg-accent border-transparent', badge: 'bg-[var(--primary)] text-[var(--primary-foreground)] rounded-[5px]' },
   tip: { box: 'bg-[var(--success-muted)] border-transparent', badge: 'border border-foreground/70 text-foreground rounded-md' },
   check: { box: 'bg-background border-[var(--border)]', badge: 'bg-[var(--success-muted)] text-foreground rounded-[5px]' },
 }

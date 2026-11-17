@@ -11,7 +11,7 @@ import { loadColors } from './utils/colors'
 import { loadTheme } from './utils/theme'
 import { Toaster } from '@clidey/ux'
 import { ThemeProvider } from '@clidey/ux'
-import { preloadFrontmatter } from './components/store'
+import { preloadFrontmatter, pageModules, resolvePagePath } from './components/store'
 import docsConfig from '../docs/dory.json' with { type: 'json' };
 import type { DoryConfig } from './types/config';
 import { BASE_PATH, withBase } from './utils/base-path';
@@ -53,13 +53,18 @@ const tree = (
     </ThemeProvider>
 )
 
-// If SSR content exists, hydrate (attach JS to existing DOM).
-// Otherwise, render from scratch (dev mode, non-SSR pages).
-if (canHydrate) {
-    hydrate(tree, appRoot)
-} else {
-    // A static host may serve the prerendered index.html for an unknown URL.
-    // Its first-page markup cannot hydrate into the 404 view.
-    if (hasSSRContent) appRoot.replaceChildren()
-    render(tree, appRoot)
-}
+// Keep prerendered content visible while the current page module downloads.
+// Hydrate synchronously from the cache once it is ready, preserving SSR markup.
+const localPath = currentPath === BASE_PATH ? '/' : currentPath.slice(BASE_PATH.length) || '/';
+void pageModules.load(resolvePagePath(localPath)).catch(() => undefined).then(() => {
+    // If SSR content exists, hydrate (attach JS to existing DOM).
+    // Otherwise, render from scratch (dev mode, non-SSR pages).
+    if (canHydrate) {
+        hydrate(tree, appRoot)
+    } else {
+        // A static host may serve the prerendered index.html for an unknown URL.
+        // Its first-page markup cannot hydrate into the 404 view.
+        if (hasSSRContent) appRoot.replaceChildren()
+        render(tree, appRoot)
+    }
+});

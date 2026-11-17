@@ -2,6 +2,8 @@ import type { DoryConfig } from '../types/config.ts';
 import { normalizeBasePath, joinBasePath } from './base-path.ts';
 import { contentScope, scopedPath } from './content-scope.ts';
 
+export const notFoundSocialImage = '/_dory/social/not-found.png';
+
 export interface PageMetadata {
   title: string;
   lang: string;
@@ -71,7 +73,7 @@ export function buildPageMetadata(config: Partial<DoryConfig>, page: SeoPage, pa
     ...(config.twitter ? { 'twitter:site': config.twitter, 'twitter:creator': config.twitter } : {}),
     ...(modified ? { 'article:modified_time': modified } : {}),
     ...(published ? { 'article:published_time': published } : {}),
-    ...(image ? { 'og:image': image, 'og:image:alt': imageAlt, 'twitter:image': image, 'twitter:image:alt': imageAlt } : {}),
+    ...(image ? { 'og:image': image, ...(image.startsWith('https://') ? { 'og:image:secure_url': image } : {}), 'og:image:alt': imageAlt, 'twitter:image': image, 'twitter:image:alt': imageAlt } : {}),
     ...(generated ? { 'og:image:type': 'image/png', 'og:image:width': '1200', 'og:image:height': '630' } : {}),
   };
   const alternates: PageMetadata['alternates'] = [];

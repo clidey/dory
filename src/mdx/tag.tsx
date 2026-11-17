@@ -2,7 +2,7 @@ import classNames from 'classnames'
 
 const customColorClasses = {
   emerald: 'bg-[var(--success-muted)] text-foreground border-transparent',
-  sky: 'bg-accent text-[var(--primary)] border-transparent',
+  sky: 'bg-accent text-[var(--dory-primary-readable)] border-transparent',
   amber: 'bg-transparent text-[var(--brand-readable,#B65401)] border-current',
   rose: 'bg-transparent text-red-700 dark:text-red-400 border-current',
   zinc: 'bg-transparent text-muted-foreground border-border',

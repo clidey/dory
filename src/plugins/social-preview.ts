@@ -4,9 +4,11 @@ import { dirname, extname, isAbsolute, relative, resolve } from 'node:path';
 import { Resvg } from '@resvg/resvg-js';
 import type { DoryConfig } from '../types/config.ts';
 import { escapeHtml } from './shared.ts';
+import { notFoundSocialImage } from '../utils/seo.ts';
 import { socialFonts, socialTheme } from './social-theme.ts';
 
 export function socialPreviewPath(route: string): string {
+  if (route === '/404') return notFoundSocialImage;
   return route === '/' ? '/_dory/social/home.png' : `/_dory/social/page-${createHash('sha256').update(route).digest('hex').slice(0, 20)}.png`;
 }
 

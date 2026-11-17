@@ -44,7 +44,11 @@ export function checkSeo(outDir, config) {
       check(!/<div id="app"><\/div>/.test(body), page.path, 'empty static app');
     }
     const image = meta.find(entry => entry.property === 'og:image')?.content;
+    if (config.seo?.generateSocialImages !== false || config.seo?.ogImage || config.image || page.image || page.ogImage) {
+      check(Boolean(image), page.path, 'missing social preview image');
+    }
     if (image) {
+      if (image.startsWith('https://')) check(one('og:image:secure_url') === image, page.path, 'secure social image URL differs');
       check(image === one('twitter:image'), page.path, 'social image URLs differ');
       one('og:image:alt'); one('twitter:image:alt');
       if (site) check(/^https?:\/\//.test(image), page.path, 'social image is not absolute');

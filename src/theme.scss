@@ -5,6 +5,7 @@
 
     // UX brand.css owns the default palette. Dory keeps this alias for docs UI.
     --brand-primary: var(--primary);
+    --dory-primary-readable: color-mix(in srgb, var(--primary) 70%, var(--foreground));
 
     // Font families
     --font-body: 'Hanken Grotesk', sans-serif;
@@ -26,6 +27,14 @@ html, body, #app {
     background-color: var(--background);
     color: var(--foreground);
     font-family: var(--font-body);
+}
+
+// A brand accent can fail contrast against tinted callout surfaces.
+// Underlining keeps these links recognizable without relying on color.
+.dory-callout a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: .2em;
 }
 
 // === DEFAULT STYLES ===
@@ -894,4 +903,10 @@ article .dory-h2 .dory-anchor {
     font-size: 1.0625rem;
     font-weight: 600;
     color: var(--foreground);
+}
+
+// Token colors must also pass against highlighted, added and deleted code lines.
+.dory-code {
+    --syntax-keyword: var(--dory-primary-readable);
+    --syntax-string: color-mix(in srgb, var(--brand-readable) 75%, var(--foreground));
 }

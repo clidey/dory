@@ -1,6 +1,7 @@
 import { afterEach, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { createServer, get, type Server } from 'node:http';
+import { createServer, get, type Server, type IncomingHttpHeaders } from 'node:http';
+import { gzipSync, brotliCompressSync } from 'node:zlib';
 import { mkdtempSync, mkdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -25,11 +26,11 @@ async function fixture() {
   await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve));
   const address = server.address();
   assert.ok(address && typeof address === 'object');
-  const request = (path: string, method = 'GET') => new Promise<{ status: number; body: string; length?: string }>((resolve, reject) => {
-    const req = get({ hostname: '127.0.0.1', port: address.port, path, method }, res => {
+  const request = (path: string, method = 'GET', headers: Record<string, string> = {}) => new Promise<{ status: number; body: string; length?: string; headers: IncomingHttpHeaders }>((resolve, reject) => {
+    const req = get({ hostname: '127.0.0.1', port: address.port, path, method, headers }, res => {
       let body = '';
       res.on('data', chunk => body += chunk);
-      res.on('end', () => resolve({ status: res.statusCode!, body, length: res.headers['content-length'] }));
+      res.on('end', () => resolve({ status: res.statusCode!, body, length: res.headers['content-length'], headers: res.headers }));
     });
     req.on('error', reject);
   });
@@ -40,9 +41,15 @@ test('serves rebuilt files with fresh content and size', async () => {
   const { dist, request } = await fixture();
   const file = join(dist, 'assets', 'app.js');
   writeFileSync(file, 'first');
-  assert.deepEqual(await request('/assets/app.js'), { status: 200, body: 'first', length: '5' });
+  const first = await request('/assets/app.js');
+  assert.equal(first.status, 200);
+  assert.equal(first.body, 'first');
+  assert.equal(first.length, '5');
   writeFileSync(file, 'updated and longer');
-  assert.deepEqual(await request('/assets/app.js'), { status: 200, body: 'updated and longer', length: '18' });
+  const updated = await request('/assets/app.js');
+  assert.equal(updated.status, 200);
+  assert.equal(updated.body, 'updated and longer');
+  assert.equal(updated.length, '18');
 });
 
 test('rejects dotfiles, nested hidden files, encoded dots and traversal', async () => {
@@ -112,4 +119,31 @@ test('supports public unicode and extensionless routes without changing request 
   assert.equal((await request('/guide?search=example')).body, 'Public guide');
   assert.equal((await request('/assets/caf%C3%A9.txt')).body, 'Public unicode');
   assert.equal((await request('/index.html', 'HEAD')).body, '');
+});
+
+test('negotiates compressed assets while caching only fingerprinted files', async () => {
+  const { dist, request } = await fixture();
+  const name = '/assets/page-Ab12Cd34.js';
+  const source = 'export const documentation = "Fast and readable";'.repeat(100);
+  writeFileSync(join(dist, name), source);
+  writeFileSync(join(dist, name + '.gz'), gzipSync(source));
+  writeFileSync(join(dist, name + '.br'), brotliCompressSync(source));
+  const plain = await request(name);
+  assert.equal(plain.body, source);
+  assert.equal(plain.headers['content-encoding'], undefined);
+  assert.equal(plain.headers['cache-control'], 'public, max-age=31536000, immutable');
+  for (const encoding of ['gzip', 'br']) {
+    const response = await request(name, 'GET', { 'accept-encoding': encoding });
+    assert.equal(response.headers['content-encoding'], encoding);
+    assert.match(response.headers['content-type']!, /javascript/);
+    assert.equal(response.headers.vary, 'Accept-Encoding');
+    assert.ok(Number(response.length) < source.length);
+    assert.equal((await request(name, 'HEAD', { 'accept-encoding': encoding })).body, '');
+    const cached = await request(name, 'GET', { 'accept-encoding': encoding, 'if-none-match': response.headers.etag! });
+    assert.equal(cached.status, 304);
+    assert.equal(cached.headers.vary, 'Accept-Encoding');
+    assert.equal(cached.headers['cache-control'], plain.headers['cache-control']);
+  }
+  assert.equal((await request('/')).headers['cache-control'], 'no-cache');
+  assert.equal((await request('/assets/missing-Ab12Cd34.js')).headers['cache-control'], 'no-store');
 });

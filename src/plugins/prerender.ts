@@ -38,7 +38,11 @@ export function prerender(): Plugin {
       }
       // Share the generated image path; the browser uses the same metadata builder.
       writeFileSync(frontmatterPath, JSON.stringify(pages));
-      const notFound = buildPageMetadata(site, { path: '/404', title: 'Page not found', description: 'The page you are looking for does not exist.', robots: 'noindex, nofollow' });
+      const notFoundPage = { path: '/404', title: 'Page not found', description: 'The page you are looking for does not exist.', robots: 'noindex, nofollow' };
+      const notFoundImage = site.seo?.generateSocialImages !== false
+        ? await renderSocialPreview({ route: '/404', title: notFoundPage.title, description: notFoundPage.description, config: site, docsDir, outDir })
+        : '';
+      const notFound = buildPageMetadata(site, notFoundPage, [], notFoundImage);
       notFound.canonical = '';
       delete notFound.meta['og:url'];
       notFound.schema = { '@context': 'https://schema.org', '@type': 'WebPage', name: notFound.title };

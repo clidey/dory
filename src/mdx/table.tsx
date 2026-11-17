@@ -1,7 +1,7 @@
 import type { JSX } from 'preact/jsx-runtime';
 
 export const Table = (props: JSX.IntrinsicElements['table']) => (
-  <div className="dory-table my-5 overflow-x-auto rounded-lg border border-[var(--border)] bg-card">
+  <div tabIndex={0} role="group" aria-label="Scrollable table" className="dory-table my-5 overflow-x-auto rounded-lg border border-[var(--border)] bg-card">
     <table className="w-full border-collapse text-left" {...props} />
   </div>
 );

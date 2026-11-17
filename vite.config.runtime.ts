@@ -1,10 +1,11 @@
+import { uxPureFactories } from './src/plugins/ux-tree-shaking.ts';
 import { defineConfig } from 'vite';
 import preact from '@preact/preset-vite';
 import tailwindcss from '@tailwindcss/vite';
 
 /** Standalone Dory MDX viewer shipped as static assets inside host applications. */
 export default defineConfig({
-  plugins: [preact(), tailwindcss()],
+  plugins: [uxPureFactories(),preact(), tailwindcss()],
   publicDir: false,
   define: { 'process.env.NODE_ENV': JSON.stringify('production') },
   resolve: {

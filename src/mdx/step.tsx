@@ -4,17 +4,17 @@ import { Children } from "preact/compat"
 export function Steps({ children }: { children: preact.ComponentChildren }) {
   const steps = Children.toArray(children) as preact.ComponentChildren[];
   return (
-    <nav aria-label="Progress" className="my-6">
+    <ol aria-label="Steps" className="my-6 list-none p-0">
       {steps.map((step, stepIdx) => {
         const stepElement = Children.toArray(step)[0] as preact.JSX.Element;
         const isLast = stepIdx === steps.length - 1;
         return (
-          <div key={stepIdx} className={classNames('relative flex gap-3.5', { 'pb-6': !isLast })}>
+          <li key={stepIdx} className={classNames('relative flex gap-3.5', { 'pb-6': !isLast })}>
             {!isLast && <div aria-hidden="true" className="absolute left-[13.5px] top-9 bottom-1 w-px bg-[var(--border)]" />}
             <span className={classNames(
               'relative z-10 flex size-7 shrink-0 items-center justify-center rounded-md border text-xs font-semibold',
               stepIdx === 0
-                ? 'border-transparent bg-[var(--primary)] text-white'
+                ? 'border-transparent bg-[var(--primary)] text-[var(--primary-foreground)]'
                 : 'border-[var(--border)] bg-muted text-foreground',
             )}>
               {stepIdx + 1}
@@ -25,10 +25,10 @@ export function Steps({ children }: { children: preact.ComponentChildren }) {
                 {stepElement.props.children}
               </div>
             </div>
-          </div>
+          </li>
         )
       })}
-    </nav>
+    </ol>
   )
 }
 
