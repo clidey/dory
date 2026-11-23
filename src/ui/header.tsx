@@ -5,7 +5,7 @@ import { usePathname } from '../components/hooks';
 import docsConfig from '../../docs/dory.json' with { type: 'json' };
 import type { DoryConfig } from '../types/config';
 import { MobileSearch, Search } from '../components/search';
-import { getNavigationForPath } from '../components/store';
+import { getNavigationForPath, resolvePagePath } from '../components/store';
 import { MobileNavigation } from './mobile-navigation';
 import { ModeToggle } from '@clidey/ux';
 import { useIsEmbedded } from '../components/hooks';
@@ -24,6 +24,7 @@ const isThemeForced = config.theme?.mode === 'dark' || config.theme?.mode === 'l
 export function Header({ ssr = false }: { ssr?: boolean }) {
   const pathname = usePathname();
   const navigation = getNavigationForPath(pathname);
+  const effectivePath = resolvePagePath(pathname);
   const isEmbedded = useIsEmbedded();
   const logo = useMemo(() => config.logo?.light ? assetUrl(config.logo.light) : '', []);
   const renderLink = (href: string, className: string, children: ComponentChildren) =>
@@ -31,7 +32,7 @@ export function Header({ ssr = false }: { ssr?: boolean }) {
 
   return (
     <DocsHeaderView name={config.name} logo={logo} homeHref={navigation[0]?.groups[0]?.pages[0]?.href ?? '/'}
-      tabs={navigation.map(tab => ({ title: tab.title, href: tab.groups[0].pages[0].href, active: tab.groups.some(group => group.pages.some(page => page.href === pathname)) }))}
+      tabs={navigation.map(tab => ({ title: tab.title, href: tab.groups.flatMap(group => group.pages)[0].href, active: tab.groups.some(group => group.pages.some(page => page.href === effectivePath)) }))}
       renderLink={renderLink}
       actions={!ssr && (
           <>

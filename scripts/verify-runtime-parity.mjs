@@ -58,6 +58,55 @@ function visualMetrics() {
 }
 
 const differences = [];
+async function verifyTabNavigation(full, embed, theme) {
+  const pageName = entry => typeof entry === 'string' ? entry : entry.page;
+  const sidebarLinks = page => page.locator('.dory-sidebar:visible .dory-sidebar-link');
+  const checkSidebar = async (tab, route) => {
+    const routes = tab.groups.flatMap(group => group.pages.map(pageName));
+    const expected = routes.map(path => `${basePath}/${path}`);
+    const titles = routes.map(path => readFileSync(join(docsRoot, `${path}.mdx`), 'utf8').match(/^title:\s*['"]?(.+?)['"]?\s*$/m)?.[1]);
+    await full.waitForURL(`**${basePath}/${route}`);
+    await full.locator('.dory-sidebar:visible [aria-current="page"]').waitFor();
+    await embed.locator('.dory-sidebar:visible [aria-current="page"]').filter({ hasText: titles[routes.indexOf(route)] }).waitFor();
+    equal(`${theme} ${tab.tab} sidebar routes`, expected.join('|'), (await sidebarLinks(full).evaluateAll(links => links.map(link => link.getAttribute('href')))).join('|'));
+    equal(`${theme} ${tab.tab} embedded sidebar`, titles.join('|'), (await sidebarLinks(embed).locator('.truncate').allTextContents()).join('|'));
+    equal(`${theme} ${tab.tab} active header`, await full.locator('.dory-topbar-tab.active').textContent(), await embed.locator('.dory-topbar-tab.active').textContent());
+  };
+  for (const tab of config.navigation.tabs) {
+    const route = pageName(tab.groups.flatMap(group => group.pages)[0]);
+    console.log(`Checking ${theme} desktop navigation: ${tab.tab}`);
+    await full.locator('.dory-topbar-tab').filter({ hasText: tab.tab }).click();
+    await embed.locator('.dory-topbar-tab').filter({ hasText: tab.tab }).click();
+    await checkSidebar(tab, route);
+    // Loading a nested page directly must select its owning tab too.
+    const nested = pageName(tab.groups.flatMap(group => group.pages).at(-1));
+    await full.goto(`${origin}${basePath}/${nested}`, { waitUntil: 'networkidle' });
+    const index = tab.groups.flatMap(group => group.pages).length - 1;
+    await sidebarLinks(embed).nth(index).click();
+    await checkSidebar(tab, nested);
+  }
+  await full.setViewportSize({ width: 390, height: 844 });
+  await embed.setViewportSize({ width: 390, height: 844 });
+  for (const tab of config.navigation.tabs) {
+    const route = pageName(tab.groups.flatMap(group => group.pages)[0]);
+    console.log(`Checking ${theme} mobile navigation: ${tab.tab}`);
+    await full.getByRole('button', { name: 'Toggle navigation', exact: true }).click();
+    await embed.getByRole('button', { name: 'Toggle navigation', exact: true }).click();
+    await full.getByRole('combobox', { name: 'Documentation section' }).selectOption({ label: tab.tab });
+    await embed.getByRole('combobox', { name: 'Documentation section' }).selectOption({ label: tab.tab });
+    await full.getByRole('combobox', { name: 'Documentation section' }).waitFor({ state: 'hidden' });
+    await embed.getByRole('combobox', { name: 'Documentation section' }).waitFor({ state: 'hidden' });
+    await full.getByRole('button', { name: 'Toggle navigation', exact: true }).click();
+    await embed.getByRole('button', { name: 'Toggle navigation', exact: true }).click();
+    await checkSidebar(tab, route);
+    await full.getByRole('button', { name: 'Close', exact: true }).click();
+    await embed.getByRole('button', { name: 'Close', exact: true }).click();
+    await full.getByRole('combobox', { name: 'Documentation section' }).waitFor({ state: 'hidden' });
+    await embed.getByRole('combobox', { name: 'Documentation section' }).waitFor({ state: 'hidden' });
+  }
+  await full.setViewportSize({ width: 2048, height: 1200 });
+  await embed.setViewportSize({ width: 2048, height: 1200 });
+}
 function equal(label, expected, actual) {
   if (expected !== actual) differences.push(`${label}: full site ${JSON.stringify(expected)}, embed ${JSON.stringify(actual)}`);
 }
@@ -101,6 +150,7 @@ try {
   browser = await chromium.launch({ channel: 'chrome', headless: true });
   for (const theme of ['light', 'dark']) {
     const full = await browser.newPage({ viewport: { width: 2048, height: 1200 } });
+    await full.addInitScript(theme => localStorage.setItem('@clidey/dory/theme', theme), theme);
     await full.goto(`${origin}${basePath}/${pagePath}`, { waitUntil: 'networkidle' });
     if (theme === 'dark') await full.locator('html').evaluate(element => { element.classList.remove('light'); element.classList.add('dark'); });
     await full.evaluate(() => document.fonts.ready);
@@ -118,6 +168,13 @@ try {
     if (differences.length || process.env.DORY_PARITY_SCREENSHOTS === '1') {
       await full.screenshot({ path: `/tmp/dory-parity-full-${theme}.png` });
       await embed.screenshot({ path: `/tmp/dory-parity-embed-${theme}.png` });
+    }
+    try {
+      await verifyTabNavigation(full, embed, theme);
+    } catch (error) {
+      await full.screenshot({ path: `/tmp/dory-parity-full-${theme}.png` });
+      await embed.screenshot({ path: `/tmp/dory-parity-embed-${theme}.png` });
+      throw error;
     }
     await embed.evaluate(({ files, config, theme }) => {
       window.postMessage({ __dory_docs: true, type: 'load', files, path: 'docs/components/accordion.mdx', theme, locale: 'en_US', config }, '*');

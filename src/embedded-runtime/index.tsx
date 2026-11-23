@@ -442,6 +442,8 @@ function Shell({ page, source, module }: { page: string; source: string; module:
     return () => { window.removeEventListener('message', onMessage); window.clearTimeout(clearMessage); };
   }, [page]);
   const tabs = navigationTabs();
+  const activeTab = tabs.find(tab => tab.groups.some(group => group.pages.some(item => item.path === page))) ?? tabs[0];
+  const headerTabs = tabs.map(tab => ({ title: tab.title, href: tab.groups.flatMap(group => group.pages)[0]?.path ?? page, active: tab === activeTab }));
   const allPages = tabs.flatMap(tab => tab.groups.flatMap(group => group.pages));
   const siteName = site.name ?? labels.documentation;
   const logo = activeTheme === 'dark' ? site.logo?.dark ?? site.logo?.light : site.logo?.light ?? site.logo?.dark;
@@ -463,12 +465,14 @@ function Shell({ page, source, module }: { page: string; source: string; module:
     <Button variant="outline" size="icon" className="relative flex size-6 border-white/15 bg-white/5 p-4 text-white hover:bg-white/10 lg:hidden" aria-label="Toggle navigation" onClick={() => setMobileOpen(true)}><CatalogIcon name="menu" className="w-8 stroke-white" /></Button>
   </>;
   const header = <DocsHeaderView name={siteName} logo={logo} homeHref={allPages[0]?.path ?? page}
-    tabs={tabs.map(tab => ({ title: tab.title, href: tab.groups[0]?.pages[0]?.path ?? page, active: tab.groups.some(group => group.pages.some(item => item.path === page)) }))}
+    tabs={headerTabs}
     renderLink={(href, className, children) => <button key={href} type="button" onClick={() => void showPage(href)} className={`${className} text-left`}>{children}</button>}
     actions={headerActions} docsLabel={labels.docsBadge} sectionsLabel={labels.sections}
     homeClassName="flex w-60 min-w-0 shrink-0 items-center gap-2.5 px-4 max-sm:w-auto max-sm:max-w-[65%]" embedded />;
   const sidebar = <DocsNavigationView
-    groups={tabs.flatMap(tab => tab.groups).map(group => ({ title: group.title, pages: group.pages.map(item => ({ href: item.path, title: item.title, badge: item.badge })) }))}
+    groups={(activeTab?.groups ?? []).map(group => ({ title: group.title, pages: group.pages.map(item => ({ href: item.path, title: item.title, badge: item.badge })) }))}
+    tabs={headerTabs}
+    onTabChange={href => { setMobileOpen(false); void showPage(href); }}
     activeHref={page} renderPageLink={(item, className, active, children) => <button type="button" aria-current={active ? 'page' : undefined} onClick={() => void showPage(item.href)} className={`${className} w-full text-left`}>{children}</button>}
     versionLabel={site.version} versionCaption={labels.version} ariaLabel={labels.documentation} />;
   const prompt = encodeURIComponent(`Please read the documentation for ${title} and answer my questions about it.`);

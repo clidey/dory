@@ -3,6 +3,7 @@ import type { ComponentChildren } from 'preact';
 import { useEffect, useRef } from 'preact/hooks';
 import { Badge } from '@clidey/ux';
 import { DORY_REPO_URL, DoryMark } from './dory-mark';
+import type { HeaderTab } from './docs-header-view';
 
 export type NavigationPage = { href: string; title: string; badge?: string; method?: string };
 export type NavigationGroup = { title: string; pages: NavigationPage[] };
@@ -21,10 +22,12 @@ const methodTone: Record<string, string> = {
 type PageLinkRenderer = (page: NavigationPage, className: string, active: boolean, children: ComponentChildren) => ComponentChildren;
 
 /** The navigation tree shared by static Dory sites and runtime-loaded documentation. */
-export function DocsNavigationView({ groups, activeHref, renderPageLink, versionLabel, versionSelect, languageSelect, ariaLabel = 'Documentation', versionCaption = 'Version', footerLabel = 'Built with Dory' }: {
+export function DocsNavigationView({ groups, activeHref, renderPageLink, tabs, onTabChange, versionLabel, versionSelect, languageSelect, ariaLabel = 'Documentation', versionCaption = 'Version', footerLabel = 'Built with Dory' }: {
   groups: NavigationGroup[];
   activeHref: string;
   renderPageLink: PageLinkRenderer;
+  tabs?: HeaderTab[];
+  onTabChange?: (href: string) => void;
   versionLabel?: string;
   versionSelect?: ComponentChildren;
   languageSelect?: ComponentChildren;
@@ -45,6 +48,14 @@ export function DocsNavigationView({ groups, activeHref, renderPageLink, version
   }, [activeHref]);
 
   return <nav ref={navRef} className="dory-sidebar flex min-h-full flex-col gap-6 text-[13px]" aria-label={ariaLabel}>
+    {tabs && tabs.length > 1 && onTabChange && <select
+      aria-label="Documentation section"
+      value={tabs.find(tab => tab.active)?.href}
+      onChange={event => onTabChange(event.currentTarget.value)}
+      className="w-full rounded-lg border border-white/10 bg-[var(--sidebar)] px-3 py-2.5 text-sm text-white md:hidden"
+    >
+      {tabs.map(tab => <option key={tab.href} value={tab.href}>{tab.title}</option>)}
+    </select>}
     {versionLabel && <div className="relative flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-3 py-2.5">
       <div><p className="dory-mono-label">{versionCaption}</p><p className="mt-0.5 text-sm font-semibold text-white">{versionLabel}</p></div>
       {versionSelect}

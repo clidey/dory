@@ -1,12 +1,12 @@
 import { CatalogIcon } from '@clidey/ux'
 import type { ComponentChildren } from 'preact';
 
-import { Link } from 'wouter-preact';
+import { Link, useLocation } from 'wouter-preact';
 import docsConfig from '../../docs/dory.json' with { type: 'json' };
 import type { DoryConfig } from '../types/config';
 import { DocsNavigationView, type NavigationPage } from '../ui/docs-navigation-view';
 import { usePathname } from './hooks';
-import { ALL_PAGES, completeFrontMatter, getNavigationForPath } from './store';
+import { ALL_PAGES, completeFrontMatter, getNavigationForPath, resolvePagePath } from './store';
 import { contentScope, scopedPath } from '../utils/content-scope';
 import { withBase } from '../utils/base-path';
 
@@ -32,6 +32,7 @@ function pageLabel(href: string, title: string, frontmatter: Frontmatter[]): { m
 /** Static-site adapter for Dory's shared documentation navigation. */
 export function Navigation({ frontmatter = completeFrontMatter }: { frontmatter?: Frontmatter[] }) {
   const pathname = usePathname();
+  const [, navigate] = useLocation();
   const scope = contentScope(config, pathname);
   const navigation = getNavigationForPath(pathname);
   const switchTo = (locale: string, version: string) => {
@@ -39,10 +40,10 @@ export function Navigation({ frontmatter = completeFrontMatter }: { frontmatter?
     if (ALL_PAGES[candidate]) return candidate;
     return getNavigationForPath(candidate)[0]?.groups[0]?.pages[0]?.href ?? '/';
   };
-  const effectivePath = pathname === '/'
-    ? navigation[0]?.groups[0]?.pages[0]?.href ?? '/'
-    : pathname;
-  const groups = navigation.flatMap(tab => tab.groups).map(group => ({
+  const effectivePath = resolvePagePath(pathname);
+  const activeTab = navigation.find(tab => tab.groups.some(group => group.pages.some(page => page.href === effectivePath))) ?? navigation[0];
+  const tabs = navigation.map(tab => ({ title: tab.title, href: tab.groups.flatMap(group => group.pages)[0].href, active: tab === activeTab }));
+  const groups = (activeTab?.groups ?? []).map(group => ({
     title: group.title,
     pages: group.pages.map(page => {
       const translatedTitle = frontmatter.find(entry => entry.path === page.href)?.title ?? page.title;
@@ -85,5 +86,6 @@ export function Navigation({ frontmatter = completeFrontMatter }: { frontmatter?
     <Link href={page.href} aria-current={active ? 'page' : undefined} className={className}>{children}</Link>;
 
   return <DocsNavigationView groups={groups} activeHref={effectivePath} renderPageLink={renderPageLink}
+    tabs={tabs} onTabChange={navigate}
     versionLabel={versionLabel} versionSelect={versionSelect} languageSelect={languageSelect} />;
 }
