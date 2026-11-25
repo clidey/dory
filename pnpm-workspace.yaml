@@ -33,4 +33,4 @@ trustPolicy: no-downgrade
 
 overrides:
   reselect: 5.2.0
-  react-redux: 9.3.0
+  react-redux: 9.3.1
