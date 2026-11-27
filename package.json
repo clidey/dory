@@ -91,7 +91,7 @@
     "rehype-slug": "6.0.0",
     "remark-gfm": "4.0.1",
     "remark-parse": "11.0.0",
-    "sass-embedded": "1.107.0",
+    "sass-embedded": "1.108.2",
     "sirv": "3.0.2",
     "tailwindcss": "4.3.5",
     "tsx": "4.23.15",
