@@ -257,10 +257,10 @@ importers:
         version: 4.2.0
       preact:
         specifier: 11.1.0
-        version: 11.1.0(preact-render-to-string@6.8.2)
+        version: 11.1.0(preact-render-to-string@6.8.3)
       preact-render-to-string:
-        specifier: 6.8.2
-        version: 6.8.2(preact@11.1.0)
+        specifier: 6.8.3
+        version: 6.8.3(preact@11.1.0)
       prism-react-renderer:
         specifier: 2.4.1
         version: 2.4.1(react@19.3.1)
@@ -3211,8 +3211,8 @@ packages:
   potpack@2.1.0:
     resolution: {integrity: sha512-pcaShQc1Shq0y+E7GqJqvZj8DTthWV1KeHGdi0Z6IAin2Oi3JnLCOfwnCo84qc+HAp52wT9nK9H7FAJp5a44GQ==}
 
-  preact-render-to-string@6.8.2:
-    resolution: {integrity: sha512-Hdx7cKD3AMYgt795TdddBpUbuGEFoL/VeA6s7VrBt9Gjt0r6rCy5wMp5xkDjQ9cbKj62frHsEx1x8yV6EjoOpg==}
+  preact-render-to-string@6.8.3:
+    resolution: {integrity: sha512-yg04edGH7f5yfBUV4uyL2brzPB3e26AimLO5WNfUtwoCv8LBJ7Z+dElG8P5v+o8UqMUM6kZhnn4I/HEXNyP0ZQ==}
     peerDependencies:
       preact: '>=10 || >= 11.0.0-0'
 
@@ -4453,7 +4453,7 @@ snapshots:
   '@mdx-js/preact@3.1.1(preact@11.1.0)':
     dependencies:
       '@types/mdx': 2.0.14
-      preact: 11.1.0(preact-render-to-string@6.8.2)
+      preact: 11.1.0(preact-render-to-string@6.8.3)
 
   '@mdx-js/rollup@3.1.1(rollup@4.64.7)(supports-color@8.1.1)':
     dependencies:
@@ -4573,7 +4573,7 @@ snapshots:
 
   '@prefresh/core@1.5.11(preact@11.1.0)':
     dependencies:
-      preact: 11.1.0(preact-render-to-string@6.8.2)
+      preact: 11.1.0(preact-render-to-string@6.8.3)
 
   '@prefresh/utils@1.2.1': {}
 
@@ -4584,7 +4584,7 @@ snapshots:
       '@prefresh/core': 1.5.11(preact@11.1.0)
       '@prefresh/utils': 1.2.1
       '@rollup/pluginutils': 4.2.1
-      preact: 11.1.0(preact-render-to-string@6.8.2)
+      preact: 11.1.0(preact-render-to-string@6.8.3)
       vite: 8.3.5(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(sass-embedded@1.107.0)(sass@1.107.0)(tsx@4.23.15)
     transitivePeerDependencies:
       - supports-color
@@ -6960,13 +6960,13 @@ snapshots:
 
   potpack@2.1.0: {}
 
-  preact-render-to-string@6.8.2(preact@11.1.0):
+  preact-render-to-string@6.8.3(preact@11.1.0):
     dependencies:
-      preact: 11.1.0(preact-render-to-string@6.8.2)
+      preact: 11.1.0(preact-render-to-string@6.8.3)
 
-  preact@11.1.0(preact-render-to-string@6.8.2):
+  preact@11.1.0(preact-render-to-string@6.8.3):
     optionalDependencies:
-      preact-render-to-string: 6.8.2(preact@11.1.0)
+      preact-render-to-string: 6.8.3(preact@11.1.0)
 
   prism-react-renderer@2.4.1(react@19.3.1):
     dependencies:
@@ -7697,7 +7697,7 @@ snapshots:
 
   wouter-preact@3.13.0(preact@11.1.0):
     dependencies:
-      preact: 11.1.0(preact-render-to-string@6.8.2)
+      preact: 11.1.0(preact-render-to-string@6.8.3)
       regexparam: 3.0.0
 
   yallist@3.1.1: {}
