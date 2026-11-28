@@ -173,7 +173,7 @@ function ensureEmbeddedSearchIndex(): Promise<void> {
         bytes += content.length;
         if (bytes > 10_000_000) return;
         const body = content.replace(/^---\s*\n[\s\S]*?\n---\s*\n?/, '');
-        await index.add(path, { title }, `${title}\n${stripMdxToText(body)}`);
+        await index.add(path, { title }, stripMdxToText(body));
       } catch {
         // One unavailable page must not prevent searching the remaining docs.
       }

@@ -9,7 +9,9 @@ export function createSearchIndex() {
                 tokenize: 'full',
                 document: {
                     id: 'url',
-                    index: 'content',
+                    // The title is its own field so a page is found by its title
+                    // even when the body never repeats it.
+                    index: ['title', 'content'],
                     store: ['title', 'pageTitle'],
                 },
                 context: {
@@ -38,13 +40,22 @@ export function createSearchIndex() {
         },
         search(query: string, options = {}): Array<{ url: string; title: string; pageTitle: string }> {
             if (!searchIndex) return [];
-            const result = searchIndex.search(query, { ...options, enrich: true }) as any[];
-            if (result.length === 0) return [];
-            return result[0].result.map((item: any) => ({
-                url: item.id as string,
-                title: item.doc?.title || '',
-                pageTitle: item.doc?.pageTitle || '',
-            }));
+            const fields = searchIndex.search(query, { ...options, enrich: true }) as any[];
+            const limit = (options as { limit?: number }).limit;
+            const pages = new Map<string, { url: string; title: string; pageTitle: string }>();
+            // Pages whose title matches come first, then pages whose body matches.
+            for (const field of ['title', 'content']) {
+                for (const item of fields.find(entry => entry.field === field)?.result ?? []) {
+                    if (pages.has(item.id)) continue;
+                    pages.set(item.id, {
+                        url: item.id as string,
+                        title: item.doc?.title || '',
+                        pageTitle: item.doc?.pageTitle || '',
+                    });
+                }
+            }
+            const results = [...pages.values()];
+            return limit === undefined ? results : results.slice(0, limit);
         },
     };
 }

@@ -39,6 +39,9 @@ try {
   await search.fill('automation');
   await page.getByRole('option').filter({ hasText: /automation/i }).first().waitFor();
   assert(requests.some(url => /search-content\.json/.test(url)), 'Search must download content when used');
+  // This page's body never repeats its title, so only the title can match.
+  await search.fill('Contributing to Dory');
+  await page.getByRole('option').filter({ hasText: 'Contributing to Dory' }).first().waitFor();
   await page.keyboard.press('Escape');
   await page.goto(`${origin}${base}/components/images`, { waitUntil: 'networkidle' });
   const image = page.getByRole('button', { name: /Enlarge image/ }).first();
@@ -56,7 +59,7 @@ try {
   await noJS.goto(`${origin}${base}/getting-started/automation/index.html`);
   await noJS.getByRole('heading', { name: 'CLI and MCP automation', exact: true }).first().waitFor();
   await noJS.close();
-  console.log('Page splitting, hydration, navigation, on-demand search, image keyboard access, 404 and no-JavaScript content passed.');
+  console.log('Page splitting, hydration, navigation, on-demand search, search by page title, image keyboard access, 404 and no-JavaScript content passed.');
 } finally {
   await browser.close();
   await new Promise(resolve => server.httpServer.close(resolve));
